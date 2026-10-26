@@ -44,3 +44,24 @@ test('v3 fonts: Poppins and JetBrains Mono, no v2 display font', () => {
   assert.match(CSS, /--f-mono:"JetBrains Mono",/);
   assert.doesNotMatch(CSS, /Bungee|Plus Jakarta Sans/);
 });
+
+test('z-index: v3 z tokens emitted verbatim; extra layers never reuse a v3 name; styles.css uses only --z-* tokens', () => {
+  assert.deepEqual(T.z, DOC.z);
+  for (const [k, v] of Object.entries(T.z)) assert.match(CSS, new RegExp(`--z-${k}:${v};`));
+  for (const k of Object.keys(T.legacy.z)) assert.ok(!(k in T.z), `legacy.z.${k} collides with v3 z`);
+  const defs = [...CSS.matchAll(/^\s*--z-([a-z-]+):/gm)].map((m) => m[1]);
+  assert.equal(new Set(defs).size, defs.length, 'each --z-* defined once');
+  const z = { ...T.z, ...T.legacy.z };
+  assert.ok(z.track < z['light-layer'] && z['light-layer'] < z.centre && z.centre < z.tags && z.tags < z.hud && z.hud < z.toast && z.toast < z.tooltip && z.tooltip < z.scrim && z.scrim < z.dialog && z.dialog < z.celebration && z.celebration < z.screen, 'stacking order');
+  const styles = readFileSync(new URL('../../src/styles.css', import.meta.url), 'utf8');
+  const levels = [...styles.matchAll(/^([^{}\n]*)\{[^}]*z-index:\s*([^;}]+)/gm)].filter((m) => !/var\(--z-/.test(m[2]));
+  // numbers are allowed only inside a tile or history entry, which are their own stacking contexts
+  assert.deepEqual(levels.map((m) => m[1].trim()).filter((sel) => !/^\.(tile|he) /.test(sel)), []);
+});
+
+test('no purple v2 tints left in styles.css', () => {
+  const styles = readFileSync(new URL('../../src/styles.css', import.meta.url), 'utf8');
+  for (const c of ['#221C3E', '#2A2350', '#2E2752', '#3A2E40', '#2B2340', '#0F0C1E', '#241226', '#5A4F86', '#2A2342', '#3E3B50', '#8D8A99', '#4A3D45', 'rgba(10,8,21', 'rgba(19,16,36', 'rgba(28,23,52', 'rgba(47,40,82']) {
+    assert.ok(!styles.includes(c), c);
+  }
+});

@@ -1,26 +1,33 @@
-// v2 responsive layout (design-tokens-v2.json -> layout.breakpoints). Pure: viewport size -> region rectangles and
-// tile geometry. The track pitch is fitted to the available space and clamped to the token values (never larger).
+// Responsive layout. Pure: viewport size -> region rectangles and tile geometry. The track pitch is fitted to the
+// available space and clamped to the token values (never larger).
+// v3 frame (batch 2, tokens.md §4): a centred frame (max 1600x980, 16 px minimum page margin) holding the rail
+// (230 px + 1 px divider) and the game area, with a 40 px bottom bar across the full frame width. Tablet portrait
+// stacks game area, control dock and bottom bar inside the same frame.
 // SCOPE: desktop and tablet only. The mobile (< 600 px, 11x16 ring) layout is NOT built in this release: narrower
 // viewports fall back to the tablet-portrait layout (scaled down). See README.md.
 
+export const FRAME = { maxW: 1600, maxH: 980, margin: 16, rail: 230, divider: 1, bar: 40 };
+
+// Rail controls are still the v2 components (restyled in batch 3). Only their container changed: they now sit in the
+// 230 px v3 rail, so the button sizes are the ones that fit that width.
 const BPS = {
   'desktop-xl': {
-    s: 1, header: 64, px: 84, py: 80, g: 8, util: 48,
+    s: 1, px: 84, py: 80, g: 8,
     tile: { num: 17, bulb: 24, band: 21, bandF: 13, badge: 22, badgeF: 13 }, tag: { h: 22, f: 12.5, gx: 70, gy: 32 },
-    rail: { x: 24, y: 80, w: 440, gapX: 16, pad: 24, chip: 68, gapY: 22, fieldH: 132, actH: 52, actF: 15, mainH: 96, mainF: 34 },
+    rail: { pad: 16, chip: 68, gapY: 16, fieldH: 140, actH: 40, actF: 13, mainH: 64, mainF: 22 },
   },
   desktop: {
-    s: 0.8, header: 52, px: 53, py: 52, g: 5, util: 40,
+    s: 0.8, px: 53, py: 52, g: 5,
     tile: { num: 13, bulb: 15, band: 15, bandF: 10, badge: 16, badgeF: 10.5 }, tag: { h: 17, f: 10.5, gx: 54, gy: 24 },
-    rail: { x: 16, y: 64, w: 356, gapX: 12, pad: 16, chip: 54, gapY: 14, fieldH: 100, actH: 40, actF: 12, mainH: 72, mainF: 24 },
+    rail: { pad: 12, chip: 54, gapY: 12, fieldH: 78, actH: 32, actF: 12, mainH: 56, mainF: 20, compact: true },
   },
   'tablet-landscape': {
-    s: 0.8, header: 52, px: 44, py: 54, g: 4, util: 40,
+    s: 0.8, px: 44, py: 54, g: 4,
     tile: { num: 12, bulb: 15, band: 15, bandF: 9.5, badge: 16, badgeF: 10 }, tag: { h: 16, f: 10, gx: 50, gy: 22 },
-    rail: { x: 12, y: 62, w: 264, gapX: 10, pad: 12, chip: 40, gapY: 12, fieldH: 78, actH: 40, actF: 12, mainH: 64, mainF: 20, compact: true },
+    rail: { pad: 12, chip: 40, gapY: 12, fieldH: 78, actH: 32, actF: 12, mainH: 56, mainF: 20, compact: true },
   },
   'tablet-portrait': {
-    s: 0.85, header: 56, px: 45, py: 44, g: 4, util: 40,
+    s: 0.85, px: 45, py: 44, g: 4,
     tile: { num: 12, bulb: 14, band: 15, bandF: 9.5, badge: 16, badgeF: 10 }, tag: { h: 16, f: 10, gx: 50, gy: 22 },
     dock: { minH: 390, chip: 64, actH: 44, actF: 14, mainH: 76, mainF: 26, fieldH: 72 },
   },
@@ -49,37 +56,42 @@ export function computeLayout(W, H) {
   const bp = breakpointFor(W, H);
   const B = BPS[bp];
   const dockMode = bp === 'tablet-portrait';
-  const L = { bp, W, H, s: B.s, header: B.header, util: B.util, cols: COLS, rows: ROWS, dockMode };
+  const L = { bp, W, H, s: B.s, cols: COLS, rows: ROWS, dockMode };
+
+  const fw0 = Math.min(FRAME.maxW, W - 2 * FRAME.margin), fh0 = Math.min(FRAME.maxH, H - 2 * FRAME.margin);
+  const frame = { x: Math.round((W - fw0) / 2), y: Math.round((H - fh0) / 2), w: fw0, h: fh0 };
+  const bar = { x: frame.x, y: frame.y + frame.h - FRAME.bar, w: frame.w, h: FRAME.bar };
+  const bodyH = frame.h - FRAME.bar;
+  L.header = frame.y; // top edge of the playable area (tooltips and full dialogs stay below it)
 
   let stage, rail = null, dock = null, f;
   if (!dockMode) {
-    const r = B.rail;
-    rail = { ...r, x: r.x, y: r.y, w: r.w, h: H - r.y - r.x };
-    stage = { x: r.x + r.w + r.gapX, y: r.y, w: 0, h: H - r.y - r.x };
-    stage.w = W - stage.x - r.x;
+    rail = { ...B.rail, x: frame.x, y: frame.y, w: FRAME.rail, h: bodyH };
+    const gx = frame.x + FRAME.rail + FRAME.divider;
+    stage = { x: gx, y: frame.y, w: frame.x + frame.w - gx, h: bodyH };
     const fw = (stage.w - 24 + B.g) / (COLS * B.px);
-    const fh = (stage.h - B.util - 24 + B.g) / (ROWS * B.py);
+    const fh = (stage.h - 24 + B.g) / (ROWS * B.py);
     f = Math.max(0.3, Math.min(1, fw, fh));
   } else {
     const d = B.dock;
-    const fw = (W - 24 - 24 + B.g) / (COLS * B.px);
-    const fh = (H - B.header - 10 - 24 - B.util - 12 - 12 - d.minH + B.g) / (ROWS * B.py);
+    const fw = (frame.w - 24 + B.g) / (COLS * B.px);
+    const fh = (bodyH - 24 - 12 - d.minH + B.g) / (ROWS * B.py);
     f = Math.max(0.3, Math.min(1, fw, fh));
-    stage = { x: 12, y: B.header + 10, w: W - 24, h: 0 };
+    stage = { x: frame.x, y: frame.y, w: frame.w, h: 0 };
   }
 
   const px = B.px * f, py = B.py * f, g = Math.max(2, B.g * f);
   const tw = px - g, th = py - g;
   const trackW = COLS * px - g, trackH = ROWS * py - g;
-  if (dockMode) stage.h = trackH + 24 + B.util;
+  if (dockMode) stage.h = trackH + 24;
   const track = {
     x: stage.x + (stage.w - trackW) / 2,
-    y: stage.y + (dockMode ? 12 : Math.max(12, (stage.h - B.util - trackH) / 2)),
+    y: stage.y + (dockMode ? 12 : Math.max(12, (stage.h - trackH) / 2)),
     w: trackW, h: trackH,
   };
   if (dockMode) {
-    const y = stage.y + stage.h + 12;
-    dock = { ...B.dock, x: 12, y, w: W - 24, h: H - y - 12 };
+    const y = stage.y + stage.h;
+    dock = { ...B.dock, x: frame.x + 12, y, w: frame.w - 24, h: bar.y - y - 12 };
   }
   const tile = {
     w: tw, h: th,
@@ -100,7 +112,7 @@ export function computeLayout(W, H) {
     const [c, r, side] = cell(n);
     pos.push({ x: track.x + c * px, y: track.y + r * py, side });
   }
-  Object.assign(L, { f, px, py, g, tile, tag, stage, rail, dock, track, inner, pos });
+  Object.assign(L, { f, px, py, g, tile, tag, frame, bar, stage, rail, dock, track, inner, pos });
   return L;
 }
 

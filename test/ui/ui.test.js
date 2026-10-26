@@ -93,7 +93,7 @@ test('limit toasts: 10 per square, 200 per round, not enough credits (also annou
   await page.__done();
 });
 
-test('START locks squares and controls; Info/Settings locked (lock badge + line) through SPINNING..PAYOUT; double-click START -> one round', async () => {
+test('START locks squares and controls; bottom-bar Settings/Stats/Fairness locked (lock badge + reason) through SPINNING..PAYOUT; double-click START -> one round', async () => {
   const page = await fresh({ timeScale: 1 });
   await setup(page, { balance: 1000, bets: { 12: 1, 6: 1 }, chip: 1, history: [] });
   const b0 = (await state(page)).balance;
@@ -106,17 +106,17 @@ test('START locks squares and controls; Info/Settings locked (lock badge + line)
   assert.equal(s.balance, b0 - 2, 'deducted once');
   const locked = await page.evaluate(() => [...document.querySelectorAll('.tile')].every((e) => e.getAttribute('aria-disabled') === 'true'));
   assert.ok(locked, 'all squares locked');
-  for (const id of ['chip-1', 'btn-undo', 'btn-clear', 'btn-rebet', 'btn-start', 'icon-info', 'icon-settings', 'icon-help']) assert.equal(await attr(page, id, 'aria-disabled'), 'true', id);
+  for (const id of ['chip-1', 'btn-undo', 'btn-clear', 'btn-rebet', 'btn-start', 'icon-settings', 'icon-stats', 'icon-fair']) assert.equal(await attr(page, id, 'aria-disabled'), 'true', id);
   assert.equal(await attr(page, 'icon-sound', 'aria-disabled'), null, 'Sound stays live');
-  assert.equal(await page.evaluate(() => document.querySelectorAll('.ibtn .lk').length), 3, 'lock badges');
-  assert.match(await text(page, '#r-util'), /Info & Settings unlock when the round ends/);
+  assert.equal(await page.evaluate(() => document.querySelectorAll('#r-bar .ibtn .lk').length), 3, 'lock badges');
+  assert.match(await attr(page, 'icon-settings', 'aria-label'), /Settings: unlocks when the round ends/);
   assert.match(await text(page, '#r-centre'), /RUNNING…/);
   assert.match(await text(page, '#r-centre'), /Credits 1,000 − 2 bet = 998/);
   await clickId(page, 'sq-7');
   assert.deepEqual((await state(page)).round.bets, { 6: 1, 12: 1 });
   await waitPhase(page, 'GAMBLE_OFFER', 15000);
   assert.equal((await state(page)).history.length, 1, 'one round');
-  assert.match(await text(page, '#r-util'), /Info & Settings open again after you collect/);
+  assert.match(await attr(page, 'icon-stats', 'aria-label'), /Paytable and help: opens again after you collect/);
   assert.equal((await dispatch(page, { type: 'OPEN_INFO', tab: 'settings' })).ok, false);
   await clickId(page, 'btn-collect');
   assert.equal((await state(page)).phase, 'PAYOUT');
@@ -141,7 +141,7 @@ test('light run (normal motion) takes 4-6 s and lands on the stored stop', async
 });
 
 // ------------------------------------------------------------------ win, gamble, payout
-test('win -> gamble (R/W pick, G, Space on focused GAMBLE, Enter collect) -> payout copy, toast and header delta', async () => {
+test('win -> gamble (R/W pick, G, Space on focused GAMBLE, Enter collect) -> payout copy, toast and credits delta', async () => {
   const page = await fresh();
   await setup(page, { balance: 1000, bets: { 12: 5 }, chip: 5, history: [] });
   await playTo(page, 12);
@@ -186,7 +186,7 @@ test('win -> gamble (R/W pick, G, Space on focused GAMBLE, Enter collect) -> pay
   assert.equal((await state(page)).phase, 'PAYOUT');
   assert.match(await text(page, '#r-centre'), /\+1,920 COLLECTED/);
   assert.match(await text(page, '#r-centre'), /Added to your credits: 995 → 2,915/);
-  assert.match(await text(page, '#r-hdr'), /\+1,920/, 'header delta chip');
+  assert.match(await text(page, '#r-credits'), /\+1,920/, 'credits delta in the rail');
   assert.match(await toastText(page), /\+1,920 added to your credits/);
   await waitPhase(page, 'BETTING');
   const s = await state(page);
@@ -365,7 +365,7 @@ test('reduced motion: defaults from prefers-reduced-motion; light reaches the st
 
 test('Esc closes only the Info window (not the gamble dialog); Info tabs by arrows', async () => {
   const page = await fresh();
-  await clickId(page, 'icon-info');
+  await clickId(page, 'icon-stats');
   assert.equal((await state(page)).info, 'paytable');
   assert.match(await text(page, '#r-modal'), /≈95\.45%/);
   await page.keyboard.press('ArrowRight');
@@ -465,6 +465,105 @@ test('Start screen (flag on): PLAY is the first gesture, unlocks audio, then the
   await page.__done();
 });
 
+// ------------------------------------------------------------------ v3 frame and bottom bar (batch 2)
+test('frame: centred rounded frame, 230 px rail + 1 px divider, game area, 40 px bottom bar; v2 header removed', async () => {
+  for (const [w, h, fw, fh] of [[1920, 1080, 1600, 980], [1280, 720, 1248, 688]]) {
+    const page = await fresh({ width: w, height: h });
+    const g = await page.evaluate(() => {
+      const r = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect().toJSON() : null; };
+      const cs = (s) => getComputedStyle(document.querySelector(s));
+      return {
+        frame: r('.frame'), rail: r('.frame-rail'), bar: r('.bbar'), controls: r('#r-controls .rail'), credits: r('.credits'), stage: r('#r-stage'),
+        page: getComputedStyle(document.body).backgroundColor, frameBg: cs('.frame').backgroundColor, frameR: cs('.frame').borderTopLeftRadius,
+        railBg: cs('.frame-rail').backgroundColor, divider: `${cs('.frame-rail').borderRightWidth} ${cs('.frame-rail').borderRightColor}`, barBg: cs('.frame-bar').backgroundColor,
+        header: !!document.querySelector('#r-hdr, .header, .balance, .tagline'),
+      };
+    });
+    assert.deepEqual([g.frame.width, g.frame.height], [fw, fh]);
+    assert.deepEqual([g.frame.left, g.frame.top], [(w - fw) / 2, (h - fh) / 2], 'centred');
+    assert.equal(g.frameR, '8px');
+    assert.equal(g.page, 'rgb(15, 18, 22)', 'bg-page');
+    assert.equal(g.frameBg, 'rgb(26, 31, 38)', 'bg-frame');
+    assert.equal(g.railBg, 'rgb(28, 34, 42)', 'bg-rail');
+    assert.equal(g.divider, '1px rgb(42, 49, 58)', 'divider');
+    assert.equal(g.barBg, 'rgb(31, 38, 46)', 'bg-bottombar');
+    assert.equal(g.rail.width, 231, 'rail 230 + 1 px divider');
+    assert.deepEqual([g.controls.left, g.controls.width], [g.frame.left, 230], 'rail controls sit in the rail');
+    assert.equal(g.stage.left, g.frame.left + 231, 'game area right of the divider');
+    assert.deepEqual([g.bar.left, g.bar.width, g.bar.height, g.bar.bottom], [g.frame.left, fw, 40, g.frame.bottom]);
+    assert.ok(g.credits.left >= g.rail.left && g.credits.right <= g.rail.right && g.credits.top < g.controls.top + 40, 'credits at the top of the rail');
+    assert.equal(g.header, false, 'no v2 header bar or play-credits pill');
+    assert.match(await text(page, '#r-credits'), /Play credits\s*1,000/);
+    await page.__done();
+  }
+});
+
+test('bottom bar: sound, settings, stats left; title centre; fairness right; no star icon', async () => {
+  const page = await fresh();
+  const bar = await page.evaluate(() => {
+    const b = document.querySelector('.bbar');
+    const ids = (s) => [...b.querySelectorAll(`${s} [data-id]`)].map((e) => e.dataset.id);
+    return { left: ids('.bb-l'), right: ids('.bb-r'), centre: b.querySelector('.bb-c').textContent.replace(/\s+/g, ' ').trim(), all: b.querySelectorAll('button').length, html: b.innerHTML };
+  });
+  assert.deepEqual(bar.left, ['icon-sound', 'icon-settings', 'icon-stats']);
+  assert.deepEqual(bar.right, ['icon-fair']);
+  assert.equal(bar.all, 4);
+  assert.equal(bar.centre, 'Running Light · Play credits only · No real money value');
+  assert.doesNotMatch(bar.html, /star/i, 'no star icon');
+  await page.__done();
+});
+
+test('bottom bar actions: sound toggles mute, settings opens Settings, stats opens Paytable/Help, Esc returns focus', async () => {
+  const page = await fresh();
+  assert.equal((await state(page)).settings.mute, false);
+  await clickId(page, 'icon-sound');
+  assert.equal((await state(page)).settings.mute, true);
+  assert.equal(await attr(page, 'icon-sound', 'aria-checked'), 'false');
+  await clickId(page, 'icon-sound');
+  assert.equal((await state(page)).settings.mute, false);
+  await clickId(page, 'icon-settings');
+  assert.equal((await state(page)).info, 'settings');
+  await page.keyboard.press('Escape');
+  assert.equal((await state(page)).info, null);
+  assert.equal(await page.evaluate(() => document.activeElement.dataset.id), 'icon-settings');
+  await clickId(page, 'icon-stats');
+  assert.equal((await state(page)).info, 'paytable');
+  assert.match(await text(page, '#r-modal'), /≈95\.45%/);
+  await clickId(page, 'tab-help');
+  assert.equal((await state(page)).info, 'help');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.evaluate(() => document.activeElement.dataset.id), 'icon-stats');
+  await page.__done();
+});
+
+test('fairness panel: how results are decided (drawn first, 1/multiplier weights, RTP ~95.45%), no provably-fair claim; Esc/close', async () => {
+  const page = await fresh();
+  await clickId(page, 'icon-fair');
+  const m = await text(page, '#r-modal');
+  assert.match(m, /How results are decided/);
+  assert.match(m, /drawn and saved on this device before the light starts/);
+  assert.match(m, /1 ÷ what it pays: weights 80 \/ 20 \/ 4 \/ 2 \/ 1 of 2,093/);
+  assert.match(m, /RTP about 95\.45%/);
+  assert.match(m, /Double Run, 1 in 25/);
+  assert.doesNotMatch(await page.evaluate(() => document.body.innerHTML), /provabl/i);
+  assert.equal(await page.evaluate(() => document.activeElement.dataset.id), 'f-close');
+  assert.equal(await page.evaluate(() => document.getElementById('r-track').inert), true, 'board inert behind the panel');
+  await page.keyboard.press('3'); // game keys are ignored while the panel is open
+  assert.equal((await state(page)).chip, 1, 'chip key ignored');
+  assert.match(await text(page, '#r-modal'), /How results are decided/, 'still open');
+  await page.keyboard.press('Escape');
+  assert.equal(await text(page, '#r-modal'), '');
+  assert.equal(await page.evaluate(() => document.activeElement.dataset.id), 'icon-fair');
+  await clickId(page, 'icon-fair');
+  await clickId(page, 'f-close');
+  assert.equal(await text(page, '#r-modal'), '');
+  await setup(page, { balance: 1000, bets: { 12: 1 }, history: [] });
+  await playTo(page, 12);
+  await clickId(page, 'icon-fair'); // locked while a win is uncollected
+  assert.equal(await text(page, '#r-modal'), '');
+  await page.__done();
+});
+
 // ------------------------------------------------------------------ layout per breakpoint
 for (const [w, h, bp] of SIZES) {
   test(`layout ${w}x${h} -> ${bp}: 50 tiles on screen, no overlaps, controls visible, WIN tags clear of tiles`, async () => {
@@ -479,7 +578,7 @@ for (const [w, h, bp] of SIZES) {
       }
       const inView = tiles.every((t) => t.left >= 0 && t.top >= 0 && t.right <= innerWidth && t.bottom <= innerHeight);
       const start = r(document.querySelector('[data-id="btn-start"]'));
-      return { bp: document.getElementById('app').dataset.bp, n: tiles.length, overlaps, inView, startVisible: start.bottom <= innerHeight && start.right <= innerWidth && start.width > 0, scrollW: document.documentElement.scrollWidth, small: [...document.querySelectorAll('#r-controls *, #r-centre *, #r-util *, #r-track *')].filter((e) => [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && parseFloat(getComputedStyle(e).fontSize) < 9).map((e) => `${e.className}:${e.textContent.trim().slice(0, 12)}:${getComputedStyle(e).fontSize}`) };
+      return { bp: document.getElementById('app').dataset.bp, n: tiles.length, overlaps, inView, startVisible: start.bottom <= innerHeight && start.right <= innerWidth && start.width > 0, scrollW: document.documentElement.scrollWidth, small: [...document.querySelectorAll('#r-controls *, #r-centre *, #r-bar *, #r-credits *, #r-track *')].filter((e) => [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && parseFloat(getComputedStyle(e).fontSize) < 9).map((e) => `${e.className}:${e.textContent.trim().slice(0, 12)}:${getComputedStyle(e).fontSize}`) };
     });
     assert.equal(geo.bp, bp);
     assert.equal(geo.n, 50);

@@ -1,8 +1,8 @@
 // v2 view: pure functions from (engine state, UI state, derived context, layout) to HTML strings per region.
 // No outcome logic here: every number shown comes from the engine state (stored round) or simple display arithmetic.
-import { MULT, TIERS, COUNT_BY_TIER, WEIGHT_BY_TIER, TOTAL_WEIGHT, CHIPS, pRound, pStop, GAMBLE_CAP, MAX_GAMBLES, HISTORY_SHOWN } from '../engine/config.js';
+import { MULT, TIERS, COUNT_BY_TIER, WEIGHT_BY_TIER, TOTAL_WEIGHT, CHIPS, pRound, pStop, GAMBLE_CAP, MAX_GAMBLES, HISTORY_SHOWN, DOUBLE_RUN_ONE_IN } from '../engine/config.js';
 import { totalOf } from '../engine/bets.js';
-import { icon, star, logoMark, chipSvg } from './icons.js';
+import { icon, star, chipSvg, v3icon, v3mark } from './icons.js';
 import { cell } from './layout.js';
 import { winTagRect } from './layout.js';
 
@@ -60,16 +60,27 @@ function bunting(W, hh) {
 }
 export { bunting };
 
-export function header(s, ui, L) {
-  const hh = L.header;
-  const f = fs(L, 22, 16);
-  const bf = fs(L, 26, 18);
+// ------------------------------------------------------------------ page frame (v3 batch 2)
+/** Frame body, rail fill with its 1 px divider, and the bottom-bar fill. Static per layout (no per-state changes). */
+export function pageFrame(L) {
+  const f = L.frame, b = L.bar;
+  const rail = L.rail ? `<div class="frame-rail" style="left:${px(L.rail.x)};top:${px(L.rail.y)};width:${px(L.rail.w + 1)};height:${px(L.rail.h)}"></div>` : ''; // 230 rail + 1 px divider
+  return `<div class="frame" style="left:${px(f.x)};top:${px(f.y)};width:${px(f.w)};height:${px(f.h)}"></div>${rail}<div class="frame-bar" style="left:${px(b.x)};top:${px(b.y)};width:${px(b.w)};height:${px(b.h)}"></div>`;
+}
+
+/** Where the credits line sits: top of the rail (desktop) or of the left dock panel (tablet portrait). */
+export function creditsRect(L) {
+  if (L.rail) return { x: L.rail.x + L.rail.pad, y: L.rail.y + L.rail.pad, w: L.rail.w - 2 * L.rail.pad };
+  return { x: L.dock.x + 16, y: L.dock.y + 16, w: L.dock.w * 0.58 - 32 };
+}
+const CREDITS_H = 20;
+
+/** Play credits line (moved from the v2 header pill). Its own region so the balance count-up only repaints this line. */
+export function credits(s, ui, L) {
+  const r = creditsRect(L);
   const bal = ui.displayBalance == null ? s.balance : ui.displayBalance;
-  const delta = ui.delta ? `<span class="delta" style="font-size:${px(bf * 0.55)}">+${fmt(ui.delta)}</span>` : '';
-  return `${bunting(L.W, hh)}
-  <div class="logo" style="margin-left:${px(L.rail ? L.rail.x + 4 : 16)};font-size:${px(f)}">${logoMark()}<span class="word">Running <b>Light</b></span></div>
-  <div class="balance" aria-label="Play credits ${fmt(s.balance)}" style="height:${px(hh * 0.66)};font-size:${px(bf)}"><span class="k">Play credits</span><span class="pc" style="width:${px(bf * 0.9)};height:${px(bf * 0.9)};font-size:${px(bf * 0.42)}">CR</span><span class="v" data-role="balance">${fmt(bal)}</span>${delta}</div>
-  <div class="hdr-right" style="margin-right:${px(L.rail ? L.rail.x : 16)}">${L.W >= 1100 ? `<span class="tagline" style="font-size:${px(fs(L, 12, 10))};padding:${px(6 * L.s)} ${px(12 * L.s)}">Play credits only · No real money value</span>` : ''}</div>`;
+  const delta = ui.delta ? `<span class="delta">+${fmt(ui.delta)}</span>` : '';
+  return `<div class="credits" role="status" aria-label="Play credits ${fmt(s.balance)}" style="left:${px(r.x)};top:${px(r.y)};width:${px(r.w)};height:${px(CREDITS_H)}"><span class="k">Play credits</span><span class="v">${delta}<b data-role="balance">${fmt(bal)}</b></span></div>`;
 }
 
 // ------------------------------------------------------------------ controls (rail / dock)
@@ -120,26 +131,27 @@ function lastWinField(s, ui, c, h, compact) {
     ${compact ? '' : `<div class="note">${lw.note}</div>`}</div>`;
 }
 
-function actionRow(s, c, w, h, f, iconOnly) {
+function actionRow(s, c, w, h, f, iconOnly, textOnly = false) {
   const off = c.mode !== 'bet' || !c.canBet;
   const undoDis = off || !s.undo.length, clearDis = off || !c.total;
   const ghostsShown = c.ghosts;
   const rebetDis = off || !!c.rebetWhy || c.rebetSame;
-  const one = (id, ic, label, key, d, hi, title) => `<button class="btn sec hit${hi ? ' hi' : ''}" data-id="${id}" aria-label="${label} (key ${key})"${title ? ` title="${esc(title)}"` : ''}${dis(d)} style="width:${px((w - 16) / 3)};height:${px(h)};font-size:${px(f)}">${icon(ic)}${iconOnly ? '' : `<span>${label}</span>${kc(key)}`}</button>`;
+  const one = (id, ic, label, key, d, hi, title) => `<button class="btn sec hit${hi ? ' hi' : ''}" data-id="${id}" aria-label="${label} (key ${key})"${title ? ` title="${esc(title)}"` : ''}${dis(d)} style="width:${px((w - 16) / 3)};height:${px(h)};font-size:${px(f)}">${textOnly ? `<span>${label}</span>` : `${icon(ic)}${iconOnly ? '' : `<span>${label}</span>${kc(key)}`}`}</button>`;
   const lastT = s.lastBets ? totalOf(s.lastBets) : 0;
   return `<div class="row" style="gap:8px">${one('btn-undo', 'undo', 'Undo', 'Z', undoDis)}${one('btn-clear', 'clear', 'Clear', 'C', clearDis)}${one('btn-rebet', 'rebet', ghostsShown && !c.rebetWhy ? `Rebet ${lastT}` : 'Rebet', 'R', rebetDis, ghostsShown && !rebetDis, c.rebetWhy && s.lastBets ? c.rebetWhy : '')}</div>`;
 }
 
-function mainButtons(s, ui, c, w, h, f, dock) {
+function mainButtons(s, ui, c, w, h, f, dock, stacked = false) {
   const m = c.mode;
   const r = s.round;
   const st = (inner, d = true, cls = 'cta stack', ff = f) => `<button class="btn ${cls} hit" data-id="btn-start"${dis(d)} style="width:${px(w)};height:${px(h)};font-size:${px(ff)}">${inner}</button>`;
   if (m === 'offer') {
     const gw = c.gambleWhy;
     const gwText = gw === 'cap' ? 'Doubling would go over the 30,000 cap' : gw === 'max' ? 'No gambles left for this win' : '';
-    return `<div class="row" style="gap:10px">
-      <button class="btn cta stack hit" data-id="btn-collect" aria-label="Collect ${fmt(r.currentWin)} to credits (Enter)" style="width:${px((w - 10) * 0.55)};height:${px(h)};font-size:${px(f * 0.88)}"><span>Collect</span><span class="sub" style="font-size:.5em">${fmt(r.currentWin)} → credits${dock ? '' : ' · Enter'}</span></button>
-      <button class="btn gam stack hit" data-id="btn-gamble" aria-label="Gamble times 2, fair 50/50 (G)"${gwText ? ` title="${esc(gwText)}"` : ''}${dis(!!gw)} style="width:${px((w - 10) * 0.45)};height:${px(h)};font-size:${px(f * 0.6)}"><span>Gamble ×2</span><span class="sub" style="display:flex;gap:.45em;align-items:center;font-size:.62em">${gw ? esc(gwText) : `<span class="rw"><i style="background:var(--c-pick-red)"></i><i style="background:var(--c-pick-white)"></i></span>fair 50/50${dock ? '' : ' · G'}`}</span></button></div>`;
+    const cw = stacked ? w : (w - 10) * 0.55, gw2 = stacked ? w : (w - 10) * 0.45;
+    return `<div class="row" style="gap:10px${stacked ? ';flex-direction:column' : ''}">
+      <button class="btn cta stack hit" data-id="btn-collect" aria-label="Collect ${fmt(r.currentWin)} to credits (Enter)" style="width:${px(cw)};height:${px(h)};font-size:${px(f * 0.88)}"><span>Collect</span><span class="sub" style="font-size:.5em">${fmt(r.currentWin)} → credits${dock ? '' : ' · Enter'}</span></button>
+      <button class="btn gam stack hit" data-id="btn-gamble" aria-label="Gamble times 2, fair 50/50 (G)"${gwText ? ` title="${esc(gwText)}"` : ''}${dis(!!gw)} style="width:${px(gw2)};height:${px(h)};font-size:${px(f * (stacked ? 0.8 : 0.6))}"><span>Gamble ×2</span><span class="sub" style="display:flex;gap:.45em;align-items:center;font-size:.62em">${gw ? esc(gwText) : `<span class="rw"><i style="background:var(--c-pick-red)"></i><i style="background:var(--c-pick-white)"></i></span>fair 50/50${dock ? '' : ' · G'}`}</span></button></div>`;
   }
   if (m === 'locked') return st(`<span class="row1">${icon('lock')}${s.phase === 'DOUBLE_RUN' ? 'Double Run…' : 'Running…'}</span><span class="sub">controls locked</span>`);
   if (m === 'ingamble') return st(`<span class="row1">${icon('lock')}In gamble</span><span class="sub">finish or collect in the gamble window</span>`, true, 'cta stack', f * 0.9);
@@ -167,18 +179,19 @@ const disclaimer = (short) => `<div class="notice disclaimer">${icon('shield')}<
 
 export function controls(s, ui, c, L) {
   if (L.rail) {
+    // The 230 px v3 rail has no room for the v2 "Your bets" slip (the bets stay visible as badges on the board).
     const r = L.rail;
     const w = r.w - 2 * r.pad;
     const tl = !!r.compact;
     const chip = Math.min(r.chip, (w - 16) / 5);
-    return `<div class="panel rail" role="region" aria-label="Bet controls" style="left:${px(r.x)};top:${px(r.y)};width:${px(r.w)};height:${px(r.h)}">
+    return `<div class="rail" role="region" aria-label="Bet controls" style="left:${px(r.x)};top:${px(r.y)};width:${px(r.w)};height:${px(r.h)}">
+      <div style="height:${px(CREDITS_H)};flex:none"></div>
       <div class="sect-lbl"><span>Chip</span><span class="r muted">${c.mode === 'bet' ? `selected: ${s.chip}` : 'locked'}</span></div>
       <div style="margin-bottom:${px(tl ? 4 : 14 * L.s)}">${chipRow(s, c, chip, 4, true)}</div>
       ${totalBetField(s, c, L, tl ? 78 : r.fieldH, tl)}
-      ${actionRow(s, c, w, r.actH, fs(L, 15, 12), tl)}
-      ${mainButtons(s, ui, c, w, r.mainH, r.mainF, false)}
+      ${actionRow(s, c, w, r.actH, r.actF, false, true)}
+      ${mainButtons(s, ui, c, w, r.mainH, r.mainF, false, true)}
       ${lastWinField(s, ui, c, tl ? 78 : r.fieldH, tl)}
-      ${tl ? '' : betSlip(s, ui, c, L)}
       <div style="flex:1"></div>
       ${disclaimer(false)}</div>`;
   }
@@ -186,6 +199,7 @@ export function controls(s, ui, c, L) {
   const cw = d.w * 0.58, rw = d.w - cw - 12;
   const chip = Math.min(d.chip, (cw - 32 - 24) / 5);
   return `<div class="panel" role="region" aria-label="Bet controls" style="left:${px(d.x)};top:${px(d.y)};width:${px(cw)};height:${px(d.h)};padding:16px;display:flex;flex-direction:column;gap:14px;--s:${L.s}">
+      <div style="height:${px(CREDITS_H)};flex:none"></div>
       <div class="sect-lbl" style="font-size:11px"><span>Chip</span><span class="r muted">${c.mode === 'bet' ? `selected: ${s.chip}` : 'locked'}</span></div>
       ${chipRow(s, c, chip, 6, false)}
       ${totalBetField(s, c, L, d.fieldH, true)}
@@ -363,22 +377,21 @@ function historyRow(s, w, small, L) {
   return `<div style="width:100%"><div class="sect-lbl" style="font-size:${px(fs(L, 11, 10))};margin-bottom:${px(8 * L.s)}"><span>Last 10 rounds</span><span class="r">newest →</span></div><div class="hist" data-role="history" style="gap:${px(gap)};min-height:${px(eh)}">${line || `<span class="lo" style="font-size:${px(f)};font-weight:600;align-self:center">No rounds yet.</span>`}</div></div>`;
 }
 
-// ------------------------------------------------------------------ utility bar
-export function util(s, ui, c, L) {
-  const st = L.stage;
-  const y = st.y + st.h - L.util;
-  const sz = L.util - 12;
+// ------------------------------------------------------------------ bottom bar (v3 batch 2)
+/** 40 px bar across the frame: sound, settings, stats (paytable + help) left; title centre; fairness right. */
+export function bottomBar(s, ui, c, L) {
+  const b = L.bar;
   const locked = !['BETTING', 'INIT'].includes(s.phase);
   const off = !c.canInfo;
-  const ib = (id, ic, label, d, lk) => `<button class="ibtn hit${d ? '' : ' on'}" data-id="${id}" aria-label="${label}${lk ? ' (locked until the round ends)' : ''}"${dis(d)} style="width:${px(sz)};height:${px(sz)}">${icon(ic)}${lk ? `<span class="lk">${icon('lock')}</span>` : ''}</button>`;
-  const lockLine = locked ? (['locked', 'paused'].includes(c.mode) ? 'Info & Settings unlock when the round ends' : 'Info & Settings open again after you collect') : '';
-  const showHints = L.bp === 'desktop-xl' || L.bp === 'desktop';
-  const hints = !showHints ? '' : (c.mode === 'offer' ? [['Enter', 'Collect'], ['G', 'Gamble']] : c.mode === 'bet' ? [['1–5', 'chip'], ['Click/Enter', 'add'], ['Right-click', 'remove'], ['Space', 'start'], ['M', 'mute']] : [['M', 'mute']]).map(([k, v]) => `<span>${kc(k)}${v}</span>`).join('');
-  return `<div class="util" role="toolbar" aria-label="Sound and info" style="left:${px(st.x + 12)};top:${px(y)};width:${px(st.w - 24)};height:${px(L.util - 6)};font-size:${px(fs(L, 13, 11))}">
-    <button class="ibtn hit on" data-id="icon-sound" aria-label="${s.settings.mute ? 'Sound muted, press to turn on (M)' : 'Sound on, press to mute (M)'}" style="width:${px(sz)};height:${px(sz)}">${icon(s.settings.mute ? 'mute' : 'sound')}</button>
-    ${ib('icon-settings', 'gear', 'Settings', off, locked)}${ib('icon-info', 'table', 'Paytable', off, locked)}${ib('icon-help', 'help', 'How to play', off, locked)}
-    ${lockLine ? `<span class="lockline" style="font-size:${px(fs(L, 12, 11))}">${lockLine}</span>` : ''}
-    <span class="hints" style="font-size:${px(fs(L, 12, 11))}">${hints}</span></div>`;
+  const lockWhy = !locked ? '' : ['locked', 'paused'].includes(c.mode) ? 'unlocks when the round ends' : 'opens again after you collect';
+  const ib = (id, ic, label, d) => `<button class="ibtn hit${d ? '' : ' on'}" data-id="${id}" aria-label="${label}${lockWhy ? `: ${lockWhy}` : ''}"${lockWhy ? ` title="${label}: ${lockWhy}"` : ''}${dis(d)}>${ic}${lockWhy ? `<span class="lk">${icon('lock')}</span>` : ''}</button>`;
+  const mute = s.settings.mute;
+  const sound = `<button class="ibtn hit on" data-id="icon-sound" role="switch" aria-checked="${!mute}" aria-label="${mute ? 'Sound muted, press to turn on (M)' : 'Sound on, press to mute (M)'}">${icon(mute ? 'mute' : 'sound')}</button>`;
+  const tail = b.w >= 640 ? ' · Play credits only · No real money value' : ' · Play credits only';
+  return `<div class="bbar" role="toolbar" aria-label="Sound, settings and game info" style="left:${px(b.x)};top:${px(b.y)};width:${px(b.w)};height:${px(b.h)}">
+    <div class="bb-l">${sound}${ib('icon-settings', icon('gear'), 'Settings', off)}${ib('icon-stats', v3icon('stats'), 'Paytable and help', off)}</div>
+    <div class="bb-c">${v3mark()}<span><b>Running Light</b>${tail}</span></div>
+    <div class="bb-r">${ib('icon-fair', v3icon('scales'), 'How results are decided', off)}</div></div>`;
 }
 
 // ------------------------------------------------------------------ tooltip / long-press sheet
@@ -419,12 +432,12 @@ function frame(L, mw, mh, opts = {}) {
   if (L.dockMode) {
     const top = Math.max(L.header + 8, L.H - (opts.sheetH || mh));
     box = { x: 0, y: top, w: L.W, h: L.H - top, sheet: true };
-    scrim = `<div class="scrim" style="top:${px(L.header)}"></div>`;
+    scrim = '<div class="scrim"></div>';
   } else if (opts.full) {
     mw = Math.min(mw, L.W - 32);
     mh = Math.min(mh, L.H - L.header - 24);
     box = { x: (L.W - mw) / 2, y: L.header + (L.H - L.header - mh) / 2, w: mw, h: mh };
-    scrim = `<div class="scrim" style="top:${px(L.header)}"></div>`;
+    scrim = '<div class="scrim"></div>';
   } else {
     const st = L.stage;
     mw = Math.min(mw, st.w - 24);
@@ -568,6 +581,28 @@ export function infoModal(s, ui, L) {
   const bodyW = box.w - 2 * pad;
   h += `<div style="flex:1;overflow:auto" role="tabpanel">${tab === 'settings' ? settingsBody(s, ui, k) : tab === 'paytable' ? paytableBody(k, bodyW, L) : helpBody(k, L)}</div>`;
   h += `<div class="lo" style="font-size:12px;font-weight:600;text-align:center;margin-top:10px">Esc closes this window · Play credits only. No real money value.</div>`;
+  return `${h}</div></div>`;
+}
+
+/** Fairness panel (bottom-bar scales icon): how the engine decides results. Plain facts only; there is no seed
+ *  verification, so nothing here may suggest one. Numbers come from engine/config.js. */
+export function fairnessModal(L) {
+  const xl = L.bp === 'desktop-xl';
+  const { box, scrim } = frame(L, xl ? 640 : 560, xl ? 600 : 540, { full: true, sheetH: 560 });
+  const k = xl ? 1 : 0.85;
+  const f = 15 * k + 1;
+  let h = scrim + open(box, 28 * k, 'How results are decided');
+  h += `<div class="mhead" style="margin-bottom:${px(12 * k)}"><span class="mtitle" style="font-size:${px(24 * k)}">How results are decided</span><span class="x"><button class="ibtn hit on" data-id="f-close" aria-label="Close (Esc)" style="width:${px(36 * k)};height:${px(36 * k)}">${icon('x')}</button></span></div>`;
+  const weights = TIERS.map((t) => WEIGHT_BY_TIER[t]).join(' / ');
+  const item = (a, b) => `<li><b>${a}</b> <span class="muted">${b}</span></li>`;
+  h += `<ul class="facts" data-role="fairness" style="font-size:${px(f)};gap:${px(12 * k)}">
+    ${item('Drawn first.', 'When you press START, the result is drawn and saved on this device before the light starts. The animation only shows that saved result; reloading shows the same one.')}
+    ${item('Weighted by 1 ÷ multiplier.', `Each square’s chance is proportional to 1 ÷ what it pays: weights ${weights} of ${fmt(TOTAL_WEIGHT)} for ${TIERS.map((t) => `${t}x`).join(' / ')}. Higher pays are rarer.`)}
+    ${item(`Double Run, 1 in ${DOUBLE_RUN_ONE_IN}.`, 'Drawn in the same step. The second light never stops on the first square.')}
+    ${item('Gamble, 50/50.', 'Red or white is drawn when you press GAMBLE, before the flip animation.')}
+    ${item('RTP about 95.45%.', 'The theoretical long-run average return. Any session can be higher or lower.')}
+    ${item('Randomness.', 'Your browser’s built-in crypto random number generator, on this device. Nothing is sent anywhere.')}</ul>`;
+  h += '<div style="flex:1"></div><div class="lo" style="font-size:12px;font-weight:600;text-align:center;margin-top:10px">Esc closes this window · Play credits only. No real money value.</div>';
   return `${h}</div></div>`;
 }
 
