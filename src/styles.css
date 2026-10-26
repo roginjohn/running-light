@@ -1,12 +1,13 @@
-/* Running Light v2 ("Perya After Dark"). Colours, radii, shadows and fonts come from styles/tokens.css, which is
-   generated from src/data/design-tokens-v2.json. Layout sizes are CSS variables set per breakpoint by ui/layout.js. */
+/* Running Light v2 ("Perya After Dark") components on v3 tokens. Colours, radii, shadows and fonts come from
+   styles/tokens.css, which is generated from src/data/design-tokens-v3.json. Layout sizes are CSS variables set per
+   breakpoint by ui/layout.js. */
 @import './styles/tokens.css';
 
-/* Fonts: SIL OFL 1.1, bundled locally (licences in public/fonts/). */
-@font-face { font-family: 'Bungee'; font-weight: 400; font-display: block; src: url('./assets/fonts/bungee-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Plus Jakarta Sans'; font-weight: 500; font-display: block; src: url('./assets/fonts/plus-jakarta-sans-latin-500-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Plus Jakarta Sans'; font-weight: 600; font-display: block; src: url('./assets/fonts/plus-jakarta-sans-latin-600-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Plus Jakarta Sans'; font-weight: 700; font-display: block; src: url('./assets/fonts/plus-jakarta-sans-latin-700-normal.woff2') format('woff2'); }
+/* Fonts: SIL OFL 1.1, bundled locally (licences in public/fonts/). Poppins 600/700 + JetBrains Mono 600 (v3).
+   Plus Jakarta Sans 800 stays only for the numerals inside the v2 chip SVGs (assets/v2/chips) until batch 3. */
+@font-face { font-family: 'Poppins'; font-weight: 600; font-display: swap; src: url('./assets/fonts/poppins-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Poppins'; font-weight: 700; font-display: swap; src: url('./assets/fonts/poppins-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 600; font-display: swap; src: url('./assets/fonts/jetbrains-mono-latin-600-normal.woff2') format('woff2'); }
 @font-face { font-family: 'Plus Jakarta Sans'; font-weight: 800; font-display: block; src: url('./assets/fonts/plus-jakarta-sans-latin-800-normal.woff2') format('woff2'); }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

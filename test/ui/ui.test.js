@@ -540,9 +540,9 @@ test('narrow viewport (390x844) falls back to the tablet layout; below 320 wide 
   await page.__done();
 });
 
-test('no console errors, no failed or external requests, fonts loaded locally (Bungee + Plus Jakarta Sans)', async () => {
+test('no console errors, no failed or external requests, fonts loaded locally (Poppins + JetBrains Mono)', async () => {
   const page = await fresh();
-  const fonts = await page.evaluate(() => ['400 20px Bungee', "500 20px 'Plus Jakarta Sans'", "700 20px 'Plus Jakarta Sans'", "800 20px 'Plus Jakarta Sans'"].map((f) => document.fonts.check(f)));
+  const fonts = await page.evaluate(() => ['600 20px Poppins', '700 20px Poppins', "600 20px 'JetBrains Mono'", "800 20px 'Plus Jakarta Sans'"].map((f) => document.fonts.check(f)));
   assert.deepEqual(fonts, [true, true, true, true]);
   const external = await page.evaluate(() => performance.getEntriesByType('resource').map((r) => r.name).filter((n) => !n.startsWith(location.origin) && !n.startsWith('data:')));
   assert.deepEqual(external, [], 'no external requests');

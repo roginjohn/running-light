@@ -1,7 +1,7 @@
 // Entry point. Production: crypto RNG, localStorage (memory fallback). Test mode only when the test harness
 // defines window.__RL_TEST__ before load (never selectable from the game UI).
 import './styles.css';
-import tokens from './data/design-tokens-v2.json';
+import tokens from './data/design-tokens-v3.json';
 import { assertArrangement } from './engine/config.js';
 import { createGame } from './engine/game.js';
 import { createCryptoRng, createSeededRng } from './engine/rng.js';
@@ -54,10 +54,10 @@ function resetCorruptSettings(backend) {
 }
 
 async function boot() {
-  assertArrangement(tokens['board-arrangement']); // B1 startup assertion (v2 tokens vs config.js)
+  assertArrangement(tokens['board-arrangement']); // B1 startup assertion (v3 tokens vs config.js)
   try {
     await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 2500))]);
-    await Promise.all(['400 20px Bungee', "500 20px 'Plus Jakarta Sans'", "600 20px 'Plus Jakarta Sans'", "700 20px 'Plus Jakarta Sans'", "800 20px 'Plus Jakarta Sans'"].map((f) => document.fonts.load(f)));
+    await Promise.all(['600 20px Poppins', '700 20px Poppins', "600 20px 'JetBrains Mono'", "800 20px 'Plus Jakarta Sans'"].map((f) => document.fonts.load(f)));
   } catch { /* fonts are decorative; fall back silently */ }
   label = 'Loading sounds…';
   // T.noStorage simulates unavailable localStorage the same way detectBackend() falls back.

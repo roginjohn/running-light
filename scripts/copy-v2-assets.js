@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// One-off sync of the approved v2 design assets, fonts and tokens into the game (never edits design/).
+// One-off sync of the approved v2 design assets into the game (never edits design/). Tokens and the v3 fonts now
+// come from docs/design-v3 and scripts/copy-v3-fonts.js; Plus Jakarta Sans 800 stays for the v2 chip SVG numerals.
 // Usage: node scripts/copy-v2-assets.js
 import { copyFileSync, mkdirSync, readdirSync } from 'node:fs';
 import path from 'node:path';
@@ -19,11 +20,8 @@ for (const dir of ['chips', 'icons', 'ui', 'bulbs', 'gamble']) {
     if (f.endsWith('.svg')) copy(path.join(DESIGN, 'assets', dir, f), path.join(GAME, 'src/assets/v2', dir, f));
   }
 }
-copy(path.join(DESIGN, 'design-tokens-v2.json'), path.join(GAME, 'src/data/design-tokens-v2.json'));
-copy(path.join(FS, 'bungee/files/bungee-latin-400-normal.woff2'), path.join(GAME, 'src/assets/fonts/bungee-latin-400-normal.woff2'));
-for (const w of [500, 600, 700, 800]) {
+for (const w of [800]) {
   const f = `plus-jakarta-sans-latin-${w}-normal.woff2`;
   copy(path.join(FS, 'plus-jakarta-sans/files', f), path.join(GAME, 'src/assets/fonts', f));
 }
-copy(path.join(FS, 'bungee/LICENSE'), path.join(GAME, 'public/fonts/LICENSE-Bungee-OFL.txt'));
 copy(path.join(FS, 'plus-jakarta-sans/LICENSE'), path.join(GAME, 'public/fonts/LICENSE-PlusJakartaSans-OFL.txt'));
