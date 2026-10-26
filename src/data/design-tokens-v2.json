@@ -1,0 +1,873 @@
+{
+  "$schema": "running-light design tokens v2 (design only, not yet built)",
+  "version": "2.0.0-design",
+  "date": "2026-10-22",
+  "note": "Generated from _render/tokens.mjs. Values here drew every v2 mockup.",
+  "color": {
+    "bg-0": "#0A0815",
+    "bg-1": "#131024",
+    "bg-2": "#1C1734",
+    "bg-3": "#262044",
+    "bg-4": "#30285A",
+    "line": "#2F2852",
+    "line-hi": "#4A3F80",
+    "scrim": "rgba(6,4,14,0.78)",
+    "text-hi": "#F6F2FF",
+    "text-mid": "#C2B9E0",
+    "text-lo": "#9C93C2",
+    "text-disabled": "#6E6690",
+    "amber": "#FFB72B",
+    "amber-hi": "#FFD46B",
+    "amber-lo": "#E58F00",
+    "amber-ink": "#241400",
+    "mint": "#3BE3A3",
+    "mint-ink": "#04261A",
+    "coral": "#FF5D73",
+    "coral-ink": "#2A0610",
+    "cyan": "#5BE2FF",
+    "cyan-ink": "#03222C",
+    "focus": "#FFFFFF",
+    "bulb-off": "#3A3157",
+    "bulb-off-rim": "#4D4374",
+    "bulb-warm": "#FFC65C",
+    "bulb-warm-core": "#FFF6DE",
+    "bulb-cyan": "#7DEBFF",
+    "bulb-cyan-core": "#E9FCFF",
+    "pick-red": "#F0384F",
+    "pick-red-ink": "#FFFFFF",
+    "pick-white": "#F4EFE6",
+    "pick-white-ink": "#1C1734",
+    "chip-1": "#EDE8F7",
+    "chip-1-ink": "#1C1734",
+    "chip-5": "#FF5D73",
+    "chip-5-ink": "#2A0610",
+    "chip-10": "#46A6FF",
+    "chip-10-ink": "#06182B",
+    "chip-25": "#3BE3A3",
+    "chip-25-ink": "#04261A",
+    "chip-50": "#3A2470",
+    "chip-50-ink": "#FFFFFF"
+  },
+  "tier": {
+    "24": {
+      "fill": "#E8E1F7",
+      "ink": "#1C1734",
+      "edge": "#B9AEDA",
+      "name": "Pearl",
+      "icon": null,
+      "count": 21,
+      "weight": 80
+    },
+    "96": {
+      "fill": "#2ED3BE",
+      "ink": "#04221D",
+      "edge": "#1B9C8C",
+      "name": "Teal",
+      "icon": null,
+      "count": 19,
+      "weight": 20
+    },
+    "480": {
+      "fill": "#A98BFF",
+      "ink": "#160A33",
+      "edge": "#7656E0",
+      "name": "Violet",
+      "icon": null,
+      "count": 7,
+      "weight": 4
+    },
+    "960": {
+      "fill": "#FF5D73",
+      "ink": "#2A0610",
+      "edge": "#D23149",
+      "name": "Coral",
+      "icon": null,
+      "count": 2,
+      "weight": 2
+    },
+    "1920": {
+      "fill": "linear-gradient(180deg,#FFF0A8 0%,#F2C14E 55%,#D99A1E 100%)",
+      "solid": "#F2C14E",
+      "ink": "#241400",
+      "edge": "#B07A0C",
+      "name": "Gold",
+      "icon": "star",
+      "count": 1,
+      "weight": 1
+    }
+  },
+  "font": {
+    "display": {
+      "family": "'Bungee', 'Arial Black', sans-serif",
+      "file": "Bungee-Regular (Google Fonts / @fontsource/bungee)",
+      "license": "SIL OFL 1.1",
+      "use": "logo, START/COLLECT/GAMBLE, state headlines, multipliers, banners"
+    },
+    "ui": {
+      "family": "'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif",
+      "file": "PlusJakartaSans variable 200–800 (Google Fonts / @fontsource-variable/plus-jakarta-sans)",
+      "license": "SIL OFL 1.1",
+      "use": "all UI text and every number (font-variant-numeric: tabular-nums)"
+    }
+  },
+  "type": {
+    "hero": {
+      "font": "display",
+      "size": 64,
+      "lh": 1,
+      "ls": 0,
+      "min": 34
+    },
+    "headline": {
+      "font": "display",
+      "size": 44,
+      "lh": 1.05,
+      "ls": 0,
+      "min": 24
+    },
+    "title": {
+      "font": "display",
+      "size": 26,
+      "lh": 1.1,
+      "ls": 0,
+      "min": 18
+    },
+    "cta": {
+      "font": "display",
+      "size": 30,
+      "lh": 1,
+      "ls": 0.5,
+      "min": 20
+    },
+    "balance": {
+      "font": "ui",
+      "size": 26,
+      "weight": 800,
+      "lh": 1,
+      "ls": 0,
+      "min": 16,
+      "tnum": true
+    },
+    "value-xl": {
+      "font": "ui",
+      "size": 40,
+      "weight": 800,
+      "lh": 1,
+      "ls": 0,
+      "min": 22,
+      "tnum": true
+    },
+    "value": {
+      "font": "ui",
+      "size": 24,
+      "weight": 800,
+      "lh": 1,
+      "ls": 0,
+      "min": 16,
+      "tnum": true
+    },
+    "body": {
+      "font": "ui",
+      "size": 16,
+      "weight": 500,
+      "lh": 1.45,
+      "ls": 0,
+      "min": 14
+    },
+    "body-strong": {
+      "font": "ui",
+      "size": 16,
+      "weight": 700,
+      "lh": 1.4,
+      "ls": 0,
+      "min": 14
+    },
+    "label": {
+      "font": "ui",
+      "size": 12,
+      "weight": 700,
+      "lh": 1.2,
+      "ls": 1.2,
+      "upper": true,
+      "min": 11
+    },
+    "caption": {
+      "font": "ui",
+      "size": 13,
+      "weight": 600,
+      "lh": 1.35,
+      "ls": 0,
+      "min": 11
+    },
+    "tile-num": {
+      "font": "ui",
+      "size": 15,
+      "weight": 800,
+      "lh": 1,
+      "ls": 0,
+      "min": 10,
+      "tnum": true
+    },
+    "tile-tier": {
+      "font": "display",
+      "size": 12,
+      "lh": 1,
+      "ls": 0,
+      "min": 9
+    },
+    "badge": {
+      "font": "ui",
+      "size": 12,
+      "weight": 800,
+      "lh": 1,
+      "ls": 0,
+      "min": 10,
+      "tnum": true
+    },
+    "key": {
+      "font": "ui",
+      "size": 11,
+      "weight": 700,
+      "lh": 1,
+      "ls": 0.3,
+      "min": 10
+    }
+  },
+  "space": {
+    "0": 0,
+    "1": 4,
+    "2": 8,
+    "3": 12,
+    "4": 16,
+    "5": 20,
+    "6": 24,
+    "8": 32,
+    "10": 40,
+    "12": 48,
+    "16": 64
+  },
+  "radius": {
+    "xs": 4,
+    "sm": 6,
+    "tile": 10,
+    "md": 10,
+    "lg": 14,
+    "xl": 18,
+    "sheet": 22,
+    "pill": 999
+  },
+  "border": {
+    "hair": 1,
+    "field": 1,
+    "focus": 2,
+    "focus-gap": 2,
+    "selected": 2,
+    "winner": 3
+  },
+  "shadow": {
+    "panel": "0 1px 0 rgba(255,255,255,0.04) inset, 0 12px 32px rgba(0,0,0,0.45)",
+    "raised": "0 1px 0 rgba(255,255,255,0.06) inset, 0 4px 12px rgba(0,0,0,0.35)",
+    "cta": "0 -3px 0 rgba(0,0,0,0.22) inset, 0 8px 24px rgba(255,183,43,0.28)",
+    "modal": "0 24px 64px rgba(0,0,0,0.6)",
+    "focus": "0 0 0 2px #0A0815, 0 0 0 4px #FFFFFF",
+    "glow-warm": "0 0 18px 6px rgba(255,198,92,0.55)",
+    "glow-warm-trail1": "0 0 12px 3px rgba(255,198,92,0.35)",
+    "glow-warm-trail2": "0 0 8px 2px rgba(255,198,92,0.18)",
+    "glow-cyan": "0 0 18px 6px rgba(91,226,255,0.55)",
+    "glow-win": "0 0 0 3px #3BE3A3, 0 0 28px 6px rgba(59,227,163,0.35)"
+  },
+  "z": {
+    "background": 0,
+    "stage": 10,
+    "tiles": 20,
+    "light": 30,
+    "tags": 35,
+    "centre": 25,
+    "hud": 60,
+    "toast": 70,
+    "tooltip": 80,
+    "scrim": 90,
+    "modal": 100,
+    "celebration": 110,
+    "hud-over-scrim": 120,
+    "error": 200
+  },
+  "motion": {
+    "press": {
+      "ms": 80,
+      "scale": 0.97,
+      "easing": "cubic-bezier(0.3,0,0.7,1)"
+    },
+    "hover": {
+      "ms": 120,
+      "easing": "ease-out"
+    },
+    "chip-select": {
+      "ms": 140,
+      "lift": 4,
+      "easing": "cubic-bezier(0.2,0.8,0.2,1)"
+    },
+    "bet-badge-pop": {
+      "ms": 160,
+      "from": 0.6,
+      "easing": "cubic-bezier(0.34,1.56,0.64,1)"
+    },
+    "light-accelerate": {
+      "ms": 600,
+      "easing": "cubic-bezier(0.55,0,1,0.45)"
+    },
+    "light-cruise": {
+      "squaresPerSecond": 18,
+      "easing": "linear"
+    },
+    "light-decelerate": {
+      "ms": "1500-2200",
+      "easing": "cubic-bezier(0.2,0.6,0.35,1)"
+    },
+    "light-total": {
+      "ms": "4000-6000",
+      "laps": "1-2",
+      "note": "APPROVED: 4–6 s at ~18 squares/s cruise = 1–2 laps"
+    },
+    "trail": {
+      "bulbs": 2,
+      "opacity": [
+        1,
+        0.55,
+        0.25
+      ],
+      "fadeMs": 160
+    },
+    "double-run-banner": {
+      "inMs": 600,
+      "holdMs": 400,
+      "outMs": 300,
+      "easing": "cubic-bezier(0.34,1.56,0.64,1)"
+    },
+    "second-light": {
+      "ms": "2000-3000",
+      "laps": "<1"
+    },
+    "win-tag-in": {
+      "ms": 220,
+      "easing": "cubic-bezier(0.34,1.56,0.64,1)"
+    },
+    "win-countup": {
+      "maxMs": 1500,
+      "easing": "cubic-bezier(0.25,1,0.5,1)",
+      "skippable": true
+    },
+    "win-small": {
+      "pulseMs": 600,
+      "repeat": 2
+    },
+    "win-big": {
+      "marqueeStepMs": 110,
+      "ms": 2500,
+      "particlesMax": 40
+    },
+    "win-jackpot": {
+      "maxMs": 4000,
+      "skippable": true
+    },
+    "loss-fade": {
+      "ms": 500,
+      "easing": "ease-out"
+    },
+    "gamble-pick": {
+      "ms": 140,
+      "easing": "ease-out"
+    },
+    "gamble-flip": {
+      "ms": 1200,
+      "alternateMs": 120,
+      "settleMs": 300
+    },
+    "tile-lock": {
+      "ms": 150,
+      "easing": "ease-out"
+    },
+    "modal-in": {
+      "ms": 220,
+      "easing": "cubic-bezier(0.2,0.8,0.2,1)"
+    },
+    "sheet-in": {
+      "ms": 260,
+      "easing": "cubic-bezier(0.2,0.8,0.2,1)"
+    },
+    "toast": {
+      "inMs": 160,
+      "holdMs": 2200,
+      "outMs": 240
+    },
+    "loading-bulbs": {
+      "stepMs": 90,
+      "note": "ring of 12 bulbs lights in sequence; reduced motion: static ring + bar only"
+    },
+    "reduced-motion-light": {
+      "ms": 800,
+      "steps": 3,
+      "easing": "steps(3)"
+    }
+  },
+  "layout": {
+    "breakpoints": {
+      "desktop-xl": {
+        "match": "width >= 1600",
+        "ref": "1920x1080",
+        "s": 1,
+        "header": 64,
+        "rail": 440,
+        "pad": 24,
+        "gap": 16,
+        "utility": 48,
+        "track": "16x11",
+        "pitch": "84 x 80",
+        "tile": "76 x 72"
+      },
+      "desktop": {
+        "match": "1200 <= width < 1600",
+        "ref": "1280x720",
+        "s": 0.8,
+        "header": 52,
+        "rail": 356,
+        "pad": 16,
+        "gap": 12,
+        "utility": 40,
+        "track": "16x11",
+        "pitch": "53 x 52",
+        "tile": "48 x 47"
+      },
+      "tablet-landscape": {
+        "match": "900 <= width < 1200 (landscape)",
+        "ref": "1024x768",
+        "s": 0.8,
+        "header": 52,
+        "rail": 264,
+        "pad": 12,
+        "gap": 12,
+        "utility": 40,
+        "track": "16x11",
+        "pitch": "44 x 54",
+        "tile": "40 x 50 (tall tiles use the spare height)"
+      },
+      "tablet-portrait": {
+        "match": "600 <= width < 900, portrait",
+        "ref": "768x1024",
+        "s": 0.85,
+        "header": 56,
+        "rail": "bottom dock (2 panels)",
+        "pad": 12,
+        "gap": 12,
+        "utility": 40,
+        "track": "16x11",
+        "pitch": "45 x 44",
+        "tile": "41 x 40"
+      },
+      "mobile": {
+        "match": "width < 600 (portrait)",
+        "ref": "390x844",
+        "s": 0.8,
+        "header": 52,
+        "rail": "bottom dock",
+        "pad": 6,
+        "gap": 6,
+        "utility": 0,
+        "track": "11x16 portrait ring (11 top, 14 right, 11 bottom, 14 left)",
+        "pitch": "34.5 x 34",
+        "tile": "31.5 x 31"
+      }
+    },
+    "minimum": "320x568 (mobile) — below that, and for phones in landscape under 480 px tall, show the \"Rotate / enlarge\" screen"
+  },
+  "tile-state": {
+    "idle": "bg-2 face, bulb off, tier band at the bottom",
+    "hover": "bg-3 face, 1px line-hi edge, tooltip after 300 ms (desktop) / long-press 400 ms (touch)",
+    "focus": "idle + focus ring (2px bg-0 gap, 2px white)",
+    "bet": "amber bet badge (pill) top-right INSIDE the tile, value 1–10",
+    "ghost": "dashed text-lo outline badge with last-round value; hidden as soon as ANY live bet is placed (approved)",
+    "lit": "bulb warm + glow-warm, face brightens to #2B2340, amber 2px edge",
+    "trail1": "bulb 55% + glow-warm-trail1",
+    "trail2": "bulb 25% + glow-warm-trail2",
+    "win": "lit + mint 3px ring + WIN tag pointing INWARD (toward the centre panel) — never over the bulb, frame or badge",
+    "lit2": "second light: bulb cyan + glow-cyan, cyan 2px edge",
+    "win2": "lit2 + cyan 3px ring + \"WIN 2\" inward tag",
+    "dim": "non-winning tiles after a win: 50% bg-0 veil; bet badge stays above the veil",
+    "locked": "while the light runs: 25% bg-0 veil + 1px lock glyph in the number row; lit/trail tiles render above the veil at full brightness",
+    "disabled": "generic: 40% veil + hatch (not used on the board in v2)"
+  },
+  "limits": {
+    "chips": [
+      1,
+      5,
+      10,
+      25,
+      50
+    ],
+    "perSquare": [
+      1,
+      10
+    ],
+    "perRound": [
+      1,
+      200
+    ],
+    "start": 1000,
+    "refill": 1000,
+    "gambleMax": 3,
+    "gambleCap": 30000,
+    "doubleRunOneIn": 25
+  },
+  "board-arrangement": {
+    "1": "24x",
+    "2": "96x",
+    "3": "480x",
+    "4": "24x",
+    "5": "96x",
+    "6": "24x",
+    "7": "96x",
+    "8": "1920x",
+    "9": "24x",
+    "10": "96x",
+    "11": "24x",
+    "12": "96x",
+    "13": "480x",
+    "14": "24x",
+    "15": "96x",
+    "16": "24x",
+    "17": "96x",
+    "18": "480x",
+    "19": "24x",
+    "20": "96x",
+    "21": "960x",
+    "22": "24x",
+    "23": "96x",
+    "24": "24x",
+    "25": "96x",
+    "26": "24x",
+    "27": "96x",
+    "28": "24x",
+    "29": "480x",
+    "30": "96x",
+    "31": "24x",
+    "32": "96x",
+    "33": "24x",
+    "34": "480x",
+    "35": "96x",
+    "36": "24x",
+    "37": "96x",
+    "38": "24x",
+    "39": "96x",
+    "40": "480x",
+    "41": "24x",
+    "42": "96x",
+    "43": "24x",
+    "44": "96x",
+    "45": "24x",
+    "46": "960x",
+    "47": "96x",
+    "48": "24x",
+    "49": "480x",
+    "50": "24x"
+  },
+  "board-arrangement-check": {
+    "counts": {
+      "24": 21,
+      "96": 19,
+      "480": 7,
+      "960": 2,
+      "1920": 1
+    },
+    "totalWeight": 2093
+  },
+  "contrast": [
+    {
+      "name": "text-hi on bg-0",
+      "fg": "#F6F2FF",
+      "bg": "#0A0815",
+      "kind": "body",
+      "ratio": 18.01,
+      "pass": true
+    },
+    {
+      "name": "text-hi on bg-1",
+      "fg": "#F6F2FF",
+      "bg": "#131024",
+      "kind": "body",
+      "ratio": 16.91,
+      "pass": true
+    },
+    {
+      "name": "text-mid on bg-1",
+      "fg": "#C2B9E0",
+      "bg": "#131024",
+      "kind": "body",
+      "ratio": 10.03,
+      "pass": true
+    },
+    {
+      "name": "text-mid on bg-2",
+      "fg": "#C2B9E0",
+      "bg": "#1C1734",
+      "kind": "body",
+      "ratio": 9.26,
+      "pass": true
+    },
+    {
+      "name": "text-lo on bg-1 (captions, labels)",
+      "fg": "#9C93C2",
+      "bg": "#131024",
+      "kind": "body",
+      "ratio": 6.53,
+      "pass": true
+    },
+    {
+      "name": "text-lo on bg-2",
+      "fg": "#9C93C2",
+      "bg": "#1C1734",
+      "kind": "body",
+      "ratio": 6.03,
+      "pass": true
+    },
+    {
+      "name": "tile number text-hi on tile face bg-2",
+      "fg": "#F6F2FF",
+      "bg": "#1C1734",
+      "kind": "body",
+      "ratio": 15.61,
+      "pass": true
+    },
+    {
+      "name": "tile number on lit face #2B2340",
+      "fg": "#F6F2FF",
+      "bg": "#2B2340",
+      "kind": "body",
+      "ratio": 13.45,
+      "pass": true
+    },
+    {
+      "name": "amber value on bg-1",
+      "fg": "#FFB72B",
+      "bg": "#131024",
+      "kind": "large",
+      "ratio": 10.7,
+      "pass": true
+    },
+    {
+      "name": "mint win value on bg-1",
+      "fg": "#3BE3A3",
+      "bg": "#131024",
+      "kind": "body",
+      "ratio": 11.27,
+      "pass": true
+    },
+    {
+      "name": "cyan Double Run text on bg-1",
+      "fg": "#5BE2FF",
+      "bg": "#131024",
+      "kind": "body",
+      "ratio": 12.21,
+      "pass": true
+    },
+    {
+      "name": "coral toast text on bg-1",
+      "fg": "#FF5D73",
+      "bg": "#131024",
+      "kind": "body",
+      "ratio": 6.27,
+      "pass": true
+    },
+    {
+      "name": "START amber-ink on amber",
+      "fg": "#241400",
+      "bg": "#FFB72B",
+      "kind": "body",
+      "ratio": 10.26,
+      "pass": true
+    },
+    {
+      "name": "START amber-ink on amber-lo (bottom of gradient)",
+      "fg": "#241400",
+      "bg": "#E58F00",
+      "kind": "body",
+      "ratio": 7.03,
+      "pass": true
+    },
+    {
+      "name": "bet badge amber-ink on amber",
+      "fg": "#241400",
+      "bg": "#FFB72B",
+      "kind": "body",
+      "ratio": 10.26,
+      "pass": true
+    },
+    {
+      "name": "WIN tag mint-ink on mint",
+      "fg": "#04261A",
+      "bg": "#3BE3A3",
+      "kind": "body",
+      "ratio": 9.79,
+      "pass": true
+    },
+    {
+      "name": "WIN 2 tag cyan-ink on cyan",
+      "fg": "#03222C",
+      "bg": "#5BE2FF",
+      "kind": "body",
+      "ratio": 10.85,
+      "pass": true
+    },
+    {
+      "name": "tier 24x ink on fill",
+      "fg": "#1C1734",
+      "bg": "#E8E1F7",
+      "kind": "body",
+      "ratio": 13.54,
+      "pass": true
+    },
+    {
+      "name": "tier 96x ink on fill",
+      "fg": "#04221D",
+      "bg": "#2ED3BE",
+      "kind": "body",
+      "ratio": 8.93,
+      "pass": true
+    },
+    {
+      "name": "tier 480x ink on fill",
+      "fg": "#160A33",
+      "bg": "#A98BFF",
+      "kind": "body",
+      "ratio": 6.95,
+      "pass": true
+    },
+    {
+      "name": "tier 960x ink on fill",
+      "fg": "#2A0610",
+      "bg": "#FF5D73",
+      "kind": "body",
+      "ratio": 6.24,
+      "pass": true
+    },
+    {
+      "name": "tier 1920x ink on gold (mid stop)",
+      "fg": "#241400",
+      "bg": "#F2C14E",
+      "kind": "body",
+      "ratio": 10.65,
+      "pass": true
+    },
+    {
+      "name": "tier 1920x ink on gold (dark stop #D99A1E)",
+      "fg": "#241400",
+      "bg": "#D99A1E",
+      "kind": "body",
+      "ratio": 7.31,
+      "pass": true
+    },
+    {
+      "name": "chip 1 numeral",
+      "fg": "#1C1734",
+      "bg": "#EDE8F7",
+      "kind": "large",
+      "ratio": 14.32,
+      "pass": true
+    },
+    {
+      "name": "chip 5 numeral",
+      "fg": "#2A0610",
+      "bg": "#FF5D73",
+      "kind": "large",
+      "ratio": 6.24,
+      "pass": true
+    },
+    {
+      "name": "chip 10 numeral",
+      "fg": "#06182B",
+      "bg": "#46A6FF",
+      "kind": "large",
+      "ratio": 6.95,
+      "pass": true
+    },
+    {
+      "name": "chip 25 numeral",
+      "fg": "#04261A",
+      "bg": "#3BE3A3",
+      "kind": "large",
+      "ratio": 9.79,
+      "pass": true
+    },
+    {
+      "name": "chip 50 numeral",
+      "fg": "#FFFFFF",
+      "bg": "#3A2470",
+      "kind": "large",
+      "ratio": 12.6,
+      "pass": true
+    },
+    {
+      "name": "gamble RED card label (white on red)",
+      "fg": "#FFFFFF",
+      "bg": "#F0384F",
+      "kind": "large",
+      "ratio": 3.9,
+      "pass": true
+    },
+    {
+      "name": "gamble WHITE card label",
+      "fg": "#1C1734",
+      "bg": "#F4EFE6",
+      "kind": "large",
+      "ratio": 15.01,
+      "pass": true
+    },
+    {
+      "name": "secondary button text-hi on bg-2",
+      "fg": "#F6F2FF",
+      "bg": "#1C1734",
+      "kind": "body",
+      "ratio": 15.61,
+      "pass": true
+    },
+    {
+      "name": "focus ring white vs bg-0 (non-text)",
+      "fg": "#FFFFFF",
+      "bg": "#0A0815",
+      "kind": "non-text",
+      "ratio": 19.84,
+      "pass": true
+    },
+    {
+      "name": "focus ring white vs bg-2 (non-text)",
+      "fg": "#FFFFFF",
+      "bg": "#1C1734",
+      "kind": "non-text",
+      "ratio": 17.19,
+      "pass": true
+    },
+    {
+      "name": "amber lit edge vs bg-1 (non-text)",
+      "fg": "#FFB72B",
+      "bg": "#131024",
+      "kind": "non-text",
+      "ratio": 10.7,
+      "pass": true
+    },
+    {
+      "name": "bulb-off rim vs tile face (decorative, exempt)",
+      "fg": "#4D4374",
+      "bg": "#1C1734",
+      "kind": "exempt",
+      "ratio": 1.94,
+      "pass": true
+    },
+    {
+      "name": "disabled text on bg-2 (exempt)",
+      "fg": "#6E6690",
+      "bg": "#1C1734",
+      "kind": "exempt",
+      "ratio": 3.25,
+      "pass": true
+    }
+  ]
+}
