@@ -110,8 +110,8 @@ test('START locks squares and controls; bottom-bar Settings/Stats/Fairness locke
   assert.equal(await attr(page, 'icon-sound', 'aria-disabled'), null, 'Sound stays live');
   assert.equal(await page.evaluate(() => document.querySelectorAll('#r-bar .ibtn .lk').length), 3, 'lock badges');
   assert.match(await attr(page, 'icon-settings', 'aria-label'), /Settings: unlocks when the round ends/);
-  assert.match(await text(page, '#r-centre'), /RUNNING…/);
-  assert.match(await text(page, '#r-centre'), /Credits 1,000 − 2 bet = 998/);
+  assert.match(await text(page, '#r-centre'), /RUNNING…/i);
+  assert.match(await text(page, '#r-centre'), /Credits 1,000 − 2 bet = 998/i);
   await clickId(page, 'sq-7');
   assert.deepEqual((await state(page)).round.bets, { 6: 1, 12: 1 });
   await waitPhase(page, 'GAMBLE_OFFER', 15000);
@@ -146,8 +146,8 @@ test('win -> gamble (R/W pick, G, Space on focused GAMBLE, Enter collect) -> pay
   await setup(page, { balance: 1000, bets: { 12: 5 }, chip: 5, history: [] });
   await playTo(page, 12);
   assert.equal(await page.evaluate(() => document.activeElement.dataset.id), 'btn-collect', 'Collect is the initial focus');
-  assert.match(await text(page, '#r-centre'), /YOU WIN 480/);
-  assert.match(await text(page, '#r-centre'), /#12 · 5 × 96 = 480/);
+  assert.match(await text(page, '#r-centre'), /YOU WIN 480/i);
+  assert.match(await text(page, '#r-centre'), /#12 · 5 × 96 = 480/i);
   assert.match(await text(page, '#r-controls'), /Uncollected/);
   await page.keyboard.press('g');
   await waitPhase(page, 'GAMBLE');
@@ -184,8 +184,8 @@ test('win -> gamble (R/W pick, G, Space on focused GAMBLE, Enter collect) -> pay
   await page.evaluate(() => { window.__rl.app.ui.toast = null; });
   await page.keyboard.press('Enter'); // Collect
   assert.equal((await state(page)).phase, 'PAYOUT');
-  assert.match(await text(page, '#r-centre'), /\+1,920 COLLECTED/);
-  assert.match(await text(page, '#r-centre'), /Added to your credits: 995 → 2,915/);
+  assert.match(await text(page, '#r-centre'), /\+1,920 COLLECTED/i);
+  assert.match(await text(page, '#r-centre'), /Added to your credits: 995 → 2,915/i);
   assert.match(await text(page, '#r-credits'), /\+1,920/, 'credits delta in the rail');
   assert.match(await toastText(page), /\+1,920 added to your credits/);
   await waitPhase(page, 'BETTING');
@@ -211,7 +211,7 @@ test('gamble loss: loss result view in the dialog, credits unchanged, auto-conti
   assert.match(m, /Your credits stay at 995\. Nothing else was taken\./);
   assert.match(m, /continues by itself in 3 s/);
   assert.match(await text(page, '#r-controls'), /gamble lost/);
-  assert.match(await text(page, '#r-centre'), /Gamble lost/);
+  assert.match(await text(page, '#r-centre'), /Gamble lost/i);
   assert.equal((await state(page)).balance, 995);
   await waitPhase(page, 'BETTING', 6000);
   const dt = Date.now() - t0;
@@ -237,7 +237,7 @@ test('Double Run: mid copy (DOUBLE RUN!, first stop, This round so far) and one 
   await dispatch(page, { type: 'START' });
   await waitPhase(page, 'DOUBLE_RUN', 15000);
   const c = await text(page, '#r-centre');
-  assert.match(c, /DOUBLE RUN!/);
+  assert.match(c, /Double Run!/);
   assert.match(c, /A second light is running\. #24 stays lit, and the second light can’t stop on it\./);
   assert.match(c, /First stop: #24 · 5 × 24 = 120/);
   assert.match(c, /Double Run on/);
@@ -247,13 +247,14 @@ test('Double Run: mid copy (DOUBLE RUN!, first stop, This round so far) and one 
   assert.match(r, /Double Run…/);
   await waitPhase(page, 'GAMBLE_OFFER', 15000);
   await settle(page);
-  assert.match(await text(page, '#r-centre'), /YOU WIN 1,080/);
-  assert.match(await text(page, '#r-centre'), /Two squares won this round\./);
+  assert.match(await text(page, '#r-centre'), /YOU WIN 1,080/i);
+  assert.match(await text(page, '#r-centre'), /Two squares won this round\./i);
   assert.equal(await page.evaluate(() => document.querySelectorAll('.wtag.m').length), 1);
   assert.equal(await page.evaluate(() => document.querySelectorAll('.wtag.c').length), 1);
-  const dbl = await page.evaluate(() => [...document.querySelectorAll('.he.dr')].map((e) => e.textContent));
-  assert.equal(dbl.length, 1, 'one double-width entry');
-  assert.match(dbl[0], /DOUBLE.*#24.*#13/);
+  // top row "Last results": one Double Run pill with both multipliers
+  const dbl = await page.evaluate(() => [...document.querySelectorAll('#r-top [data-role="history"] .tp.kdr')].map((e) => e.textContent));
+  assert.deepEqual(dbl, ['24x · 480x'], 'one Double Run entry');
+  assert.match(await page.evaluate(() => document.querySelector('#r-top [data-role="history"]').getAttribute('aria-label')), /#24 24x and #13 480x/);
   await page.__done();
 });
 
@@ -262,8 +263,8 @@ test('loss keeps bets; after Collect ghost badges appear, hide on the first live
   await setup(page, { balance: 1000, bets: { 12: 5, 3: 1 }, chip: 5, history: [] });
   await playTo(page, 27, null, 'BETTING');
   assert.deepEqual(await bets(page), { 3: 1, 12: 5 }, 'bets kept after a loss');
-  assert.match(await text(page, '#r-centre'), /NO WIN THIS TIME/);
-  assert.match(await text(page, '#r-centre'), /The light stopped on #27 \(96x\)\. Your bets are still on the board\./);
+  assert.match(await text(page, '#r-centre'), /NO WIN THIS TIME/i);
+  assert.match(await text(page, '#r-centre'), /The light stopped on #27 \(96x\)\. Your bets are still on the board\./i);
   assert.match(await text(page, '#r-controls'), /no win this round/);
   await playTo(page, 12);
   await page.keyboard.press('Enter');
@@ -271,7 +272,7 @@ test('loss keeps bets; after Collect ghost badges appear, hide on the first live
   await settle(page);
   assert.deepEqual(await bets(page), {});
   assert.equal(await ghostCount(page), 2, 'two dashed ghost badges');
-  assert.match(await text(page, '#r-centre'), /Press Rebet to place all 6 again/);
+  assert.match(await text(page, '#r-centre'), /Press Rebet to place all 6 again/i);
   assert.match(await text(page, '#r-controls'), /Rebet 6/);
   await clickId(page, 'sq-40'); // first live bet hides every ghost
   assert.equal(await ghostCount(page), 0, 'ghosts hidden on the first live bet');
@@ -322,7 +323,7 @@ test('corrupt round key -> ERROR dialog -> Reload resets only that key', async (
   assert.equal((await state(page)).phase, 'ERROR');
   assert.match(await text(page, '#r-modal'), /Something went wrong/);
   assert.match(await text(page, '#r-modal'), /E-CORRUPT-ROUND/);
-  assert.match(await text(page, '#r-centre'), /PAUSED/);
+  assert.match(await text(page, '#r-centre'), /PAUSED/i);
   assert.equal(await page.evaluate(() => document.activeElement.dataset.id), 'm-reload');
   await page.keyboard.press('Enter');
   const s = await state(page);
@@ -634,14 +635,15 @@ test('x2 doubles every square, clamped to 10 per square, 200 per round and the b
   await page.__done();
 });
 
-test('last bets: each round shows its TOTAL bet, newest first', async () => {
+test('last bets (top row, right of "Last results"): each round shows its TOTAL bet, newest first; none in the rail', async () => {
   const page = await fresh();
-  assert.match(await railText(page, 'last-bets'), /None yet/);
+  assert.match(await text(page, '#r-top [data-role="last-bets"]'), /Last bets:\s*None yet/);
+  assert.equal(await page.evaluate(() => document.querySelector('#r-controls [data-role="last-bets"]')), null, 'moved out of the rail');
   await setup(page, { balance: 1000, bets: { 12: 5, 3: 1 }, chip: 1, history: [] });
   await playTo(page, 27, null, 'BETTING'); // loss: bets stay on the board
   await clickId(page, 'btn-double');
   await playTo(page, 27, null, 'BETTING');
-  const lbs = await page.evaluate(() => [...document.querySelectorAll('#r-controls [data-role="last-bets"] .lb')].map((e) => [e.textContent, e.classList.contains('new')]));
+  const lbs = await page.evaluate(() => [...document.querySelectorAll('#r-top [data-role="last-bets"] .lb')].map((e) => [e.textContent, e.classList.contains('new')]));
   assert.deepEqual(lbs, [['12', true], ['6', false]]);
   assert.match(await page.evaluate(() => document.querySelector('[data-role="last-bets"]').getAttribute('aria-label')), /newest first: 12, 6/);
   await page.__done();
@@ -672,6 +674,146 @@ test('rail look (1920): flat token colours, blue Start, green Collect with dark 
   assert.equal(win.gamble, 'rgb(13, 110, 253)');
   assert.match(await text(page, '[data-id="btn-collect"]'), /Collect 480/);
   assert.match(await text(page, '[data-id="btn-gamble"]'), /Fair 50\/50 · 3 of 3 left/);
+  await page.__done();
+});
+
+// ------------------------------------------------------------------ v3 track and centre display (batch 4)
+/** In-page probe: records every DOM mutation in the game regions (one batch per MutationObserver callback, i.e.
+ *  per animation frame) with the lit square and the big number at that moment, and counts layout reads
+ *  (getBoundingClientRect, offset*, client*, scroll*, getComputedStyle, ...) while it is on. */
+async function installRunProbe(page) {
+  await page.evaluate(() => {
+    const P = window.__probe = { on: false, reads: {}, batches: [] };
+    const count = (name) => { if (P.on) P.reads[name] = (P.reads[name] || 0) + 1; };
+    for (const m of ['getBoundingClientRect', 'getClientRects', 'scrollIntoView']) {
+      const orig = Element.prototype[m];
+      Element.prototype[m] = function (...a) { count(m); return orig.apply(this, a); };
+    }
+    for (const p of ['offsetWidth', 'offsetHeight', 'offsetTop', 'offsetLeft', 'clientWidth', 'clientHeight', 'clientTop', 'clientLeft', 'scrollWidth', 'scrollHeight', 'scrollTop', 'scrollLeft', 'innerText']) {
+      const proto = p in HTMLElement.prototype && Object.getOwnPropertyDescriptor(HTMLElement.prototype, p) ? HTMLElement.prototype : Element.prototype;
+      const d = Object.getOwnPropertyDescriptor(proto, p);
+      Object.defineProperty(proto, p, { ...d, get() { count(p); return d.get.call(this); } });
+    }
+    const gcs = window.getComputedStyle;
+    window.getComputedStyle = (...a) => { count('getComputedStyle'); return gcs(...a); };
+    const what = (n) => (n.nodeType === 3 ? n.parentElement : n);
+    const mo = new MutationObserver((recs) => {
+      if (!P.on) return;
+      const lit = document.querySelector('#r-track .tile.lit, #r-track .tile.lit2');
+      P.batches.push({
+        lit: lit ? lit.dataset.id : null, litMult: lit ? lit.querySelector('.m').textContent : null,
+        big: document.querySelector('[data-role="big"]').textContent,
+        recs: recs.map((r) => {
+          const el = what(r.target);
+          return { type: r.type, attr: r.attributeName, region: el.closest('[id^="r-"]').id, tile: el.classList.contains('tile') ? el.dataset.id : null, role: el.dataset.role || null, cls: el.className };
+        }),
+      });
+    });
+    for (const id of ['r-track', 'r-centre', 'r-top', 'r-tags', 'r-controls', 'r-frame', 'r-bar']) mo.observe(document.getElementById(id), { subtree: true, attributes: true, childList: true, characterData: true });
+  });
+}
+
+test('centre: the big mono number is the multiplier (00.00x idle; the square under the light while running; then the stop)', async () => {
+  const page = await fresh({ timeScale: 1 });
+  await setup(page, { balance: 1000, bets: { 30: 1, 8: 1 }, history: [] });
+  const idle = await page.evaluate(() => {
+    const b = document.querySelector('#r-centre .big');
+    const cs = getComputedStyle(b);
+    return { text: b.textContent, font: cs.fontFamily, size: cs.fontSize, color: cs.color, contain: cs.contain };
+  });
+  assert.equal(idle.text, '00.00x');
+  assert.match(idle.font, /^"JetBrains Mono"/);
+  assert.deepEqual([idle.size, idle.color, idle.contain], ['88px', 'rgb(106, 116, 128)', 'strict'], 'big-number 88 px, #6a7480, contained');
+  assert.match((await text(page, '#r-centre')).replace(/\s+/g, ' '), /Betting open ?Double Run · 1 in 25 ?00\.00x ?Place your bets ?Pick a chip, tap squares, then press Start\. ?24x ?21 squares.*1920x ?1 square/);
+  await installRunProbe(page);
+  await force(page, 30);
+  await page.evaluate(() => { window.__probe.on = true; });
+  await dispatch(page, { type: 'START' });
+  await waitPhase(page, ['RESOLVING', 'GAMBLE_OFFER']);
+  const P = await page.evaluate(() => { window.__probe.on = false; return window.__probe; });
+  const running = P.batches.filter((b) => b.lit);
+  assert.ok(running.length > 30, `sampled ${running.length} frames`);
+  for (const b of running) assert.equal(`${b.big}x`, `${b.litMult.replace('x', '').padStart(2, '0')}.00x`, `${b.lit}: big ${b.big} vs ${b.litMult}`);
+  assert.match(await text(page, '#r-centre'), /Running|You win/);
+  await settle(page);
+  assert.equal(await text(page, '#r-centre .big'), '96.00x', 'stopped on #30 (96x)');
+  await page.__done();
+});
+
+test('light run: each step changes only tile classes (<= 4 tiles) and the big number text; no layout reads; flat lit / trail look', async () => {
+  const page = await fresh({ timeScale: 1 });
+  await setup(page, { balance: 1000, bets: { 12: 1, 30: 2 }, history: [] });
+  await installRunProbe(page);
+  await force(page, 30);
+  await page.evaluate(() => { window.__probe.on = true; });
+  await dispatch(page, { type: 'START' });
+  // mid-run look: lit = tile-lit fill with dark text, trail = white ::before overlay by opacity, no glow, no veil
+  await page.waitForFunction(() => document.querySelector('#r-track .tile.trail2'), { timeout: 5000 });
+  const look = await page.evaluate(() => {
+    window.__probe.on = false; // our own getComputedStyle calls below are not the app's
+    const cs = (sel, pseudo) => getComputedStyle(document.querySelector(sel), pseudo);
+    const lit = cs('#r-track .tile.lit');
+    const out = {
+      lit: [lit.backgroundColor, lit.color, lit.boxShadow], litM: cs('#r-track .tile.lit .m').color,
+      t1: cs('#r-track .tile.trail1', '::before').opacity,
+      t2: [cs('#r-track .tile.trail2', '::before').transitionProperty, cs('#r-track .tile.trail2', '::before').transitionDuration],
+      veils: document.querySelectorAll('#r-track .veil, #r-track .lock').length,
+      shadows: [...document.querySelectorAll('#r-track .tile')].filter((t) => getComputedStyle(t).boxShadow !== 'none' || getComputedStyle(t).filter !== 'none').length,
+    };
+    window.__probe.on = true;
+    return out;
+  });
+  assert.deepEqual(look.lit, ['rgb(233, 238, 243)', 'rgb(15, 18, 22)', 'none'], 'lit: #e9eef3, dark text, no glow');
+  assert.equal(look.litM, 'rgb(15, 18, 22)');
+  assert.equal(look.t1, '0.34', 'trail step 1: white overlay at .34, instant');
+  assert.deepEqual(look.t2, ['opacity', '0.12s'], 'trail step 2 fades by opacity only, 120 ms');
+  assert.equal(look.veils, 0, 'no lock veil while running');
+  assert.equal(look.shadows, 0);
+  await waitPhase(page, ['RESOLVING', 'GAMBLE_OFFER']);
+  const P = await page.evaluate(() => { window.__probe.on = false; return window.__probe; });
+  // only the frames of the light run itself (START's one-off rail/centre re-render comes before the first lit frame)
+  const first = P.batches.findIndex((b) => b.lit);
+  const run = P.batches.slice(first);
+  assert.ok(run.length > 30);
+  const recs = run.flatMap((b) => b.recs);
+  const bad = recs.filter((r) => !((r.region === 'r-track' && r.type === 'attributes' && r.attr === 'class' && r.tile) || (r.region === 'r-centre' && r.role === 'big' && r.type === 'childList')));
+  assert.deepEqual(bad.slice(0, 5), [], 'a light step only swaps tile classes and the big number text');
+  const perFrame = run.map((b) => new Set(b.recs.filter((r) => r.tile).map((r) => r.tile)).size);
+  assert.ok(Math.max(...perFrame) <= 6, `tiles changed per frame: max ${Math.max(...perFrame)}`);
+  assert.ok(perFrame.filter((n) => n > 4).length <= 2, `frames over 4 tiles: ${perFrame.filter((n) => n > 4).length} (only when one 60 Hz frame covers two squares)`);
+  assert.ok(Math.max(...run.map((b) => b.recs.filter((r) => r.role === 'big').length)) <= 1, 'big number written at most once per frame');
+  assert.deepEqual(P.reads, {}, 'no layout reads while the light runs');
+  // the landing square: lit + land on the stored stop
+  const landed = await page.evaluate(() => [...document.querySelectorAll('#r-track .tile.land')].map((e) => e.dataset.id));
+  assert.ok(landed.length <= 1 && (landed.length === 0 || landed[0] === 'sq-30'), `landing ${landed}`);
+  await page.__done();
+});
+
+test('top row: "Last results:" newest first (tier colours, newest outlined) and "Last bets:" right; tiles flat with tier colours and blue bet badges', async () => {
+  const page = await fresh();
+  await setup(page, { balance: 1000, bets: { 8: 1, 21: 2, 3: 2 }, history: [1, 2, 3, 8] });
+  const top = await page.evaluate(() => {
+    const t = document.querySelector('#r-top .toprow');
+    const res = [...t.querySelectorAll('[data-role="history"] .tp')].map((e) => [e.textContent, e.classList.contains('new')]);
+    const r = (s) => document.querySelector(s).getBoundingClientRect();
+    return { res, lr: r('#r-top [data-role="history"]').left < r('#r-top [data-role="last-bets"]').left, above: r('#r-top .toprow').bottom <= r('[data-id="sq-1"]').top };
+  });
+  assert.deepEqual(top.res, [['1920x', true], ['480x', false], ['96x', false], ['24x', false]]);
+  assert.ok(top.lr && top.above, 'results left, bets right, above the track');
+  const tiles = await page.evaluate(() => {
+    const cs = (s) => getComputedStyle(document.querySelector(s));
+    return {
+      t1920: [cs('[data-id="sq-8"]').backgroundColor, cs('[data-id="sq-8"] .m').color], t960: cs('[data-id="sq-21"] .m').color, t24: cs('[data-id="sq-1"] .m').color,
+      t96: cs('[data-id="sq-2"] .m').color, badge: [cs('[data-id="sq-21"] .bet').backgroundColor, cs('[data-id="sq-21"] .bet').color, cs('[data-id="sq-21"] .bet').height],
+      num: cs('[data-id="sq-1"] .num').display, size: document.querySelector('[data-id="sq-1"]').getBoundingClientRect().width,
+    };
+  });
+  assert.deepEqual(tiles.t1920, ['rgb(20, 41, 74)', 'rgb(255, 255, 255)'], '1920x: navy tile, white label');
+  assert.equal(tiles.t960, 'rgb(110, 168, 254)');
+  assert.equal(tiles.t24, 'rgb(138, 148, 160)');
+  assert.equal(tiles.t96, 'rgb(195, 202, 210)');
+  assert.deepEqual(tiles.badge, ['rgb(13, 110, 253)', 'rgb(255, 255, 255)', '18px'], 'bet badge: accent-blue, 18 px');
+  assert.deepEqual([tiles.num, tiles.size], ['block', 64], '64 px tiles with square numbers at 1920x1080');
   await page.__done();
 });
 

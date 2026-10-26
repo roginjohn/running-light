@@ -15,6 +15,7 @@
     "test:ui": "node --test --test-concurrency=1 --test-reporter=spec test/ui/ui.test.js",
     "screenshots": "node test/ui/screenshots-v2.js",
     "screenshots:v3": "node test/ui/screenshots-v3.js",
+    "perf:trace": "node test/ui/perf-trace.js",
     "tokens": "node scripts/gen-tokens.js",
     "predev": "node scripts/gen-tokens.js",
     "prebuild": "node scripts/gen-tokens.js"
