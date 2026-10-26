@@ -1,6 +1,6 @@
-// v2 icons, chips and star: the exported SVGs from design/redesign-v2/assets (copied to src/assets/v2),
+// v2 icons and star: the exported SVGs from design/redesign-v2/assets (copied to src/assets/v2),
 // inlined at build time (no runtime requests). Icons are recoloured to `currentColor`.
-const raw = import.meta.glob('../assets/v2/{icons,chips,ui}/*.svg', { query: '?raw', import: 'default', eager: true });
+const raw = import.meta.glob('../assets/v2/{icons,ui}/*.svg', { query: '?raw', import: 'default', eager: true });
 
 const byName = {};
 for (const [p, svg] of Object.entries(raw)) byName[p.split('/').pop().replace('.svg', '')] = svg;
@@ -14,7 +14,14 @@ export function icon(name, cls = '') {
   return `<span class="ic${cls ? ` ${cls}` : ''}" aria-hidden="true">${cc(svg)}</span>`;
 }
 export const star = () => `<span class="ic" aria-hidden="true">${cc(byName['star-1920'])}</span>`;
-export const chipSvg = (v) => byName[`chip-${v}`].replace('<svg ', '<svg aria-hidden="true" ');
+
+// v3 flat poker chip (batch 3): chip-<v> fill, 8 white edge stripes, the value in Poppins 700 as HTML text so it uses
+// the bundled UI font. Colours come from CSS (.chip.c<v>), so the markup is the same for every state.
+const CHIP_R = 14.5, CHIP_C = 2 * Math.PI * CHIP_R, CHIP_DASH = 3.6;
+export function chipFace(v) {
+  const gap = CHIP_C / 8 - CHIP_DASH;
+  return `<svg viewBox="0 0 34 34" aria-hidden="true"><circle class="face" cx="17" cy="17" r="17"/><circle class="edge" cx="17" cy="17" r="${CHIP_R}" fill="none" stroke-width="3" stroke-dasharray="${CHIP_DASH} ${gap.toFixed(3)}" stroke-dashoffset="${CHIP_DASH / 2}" transform="rotate(-90 17 17)"/></svg><span class="cv" aria-hidden="true">${v}</span>`;
+}
 
 // v3 outline icons (18 px in 32 px hit boxes, currentColor). Drawn for v3: stats bars, fairness scales, and the
 // Running Light mark (a ring of 8 squares around an empty centre, the first one lit).

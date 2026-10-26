@@ -106,7 +106,7 @@ test('START locks squares and controls; bottom-bar Settings/Stats/Fairness locke
   assert.equal(s.balance, b0 - 2, 'deducted once');
   const locked = await page.evaluate(() => [...document.querySelectorAll('.tile')].every((e) => e.getAttribute('aria-disabled') === 'true'));
   assert.ok(locked, 'all squares locked');
-  for (const id of ['chip-1', 'btn-undo', 'btn-clear', 'btn-rebet', 'btn-start', 'icon-settings', 'icon-stats', 'icon-fair']) assert.equal(await attr(page, id, 'aria-disabled'), 'true', id);
+  for (const id of ['chip-1', 'btn-half', 'btn-double', 'btn-undo', 'btn-clear', 'btn-rebet', 'btn-start', 'icon-settings', 'icon-stats', 'icon-fair']) assert.equal(await attr(page, id, 'aria-disabled'), 'true', id);
   assert.equal(await attr(page, 'icon-sound', 'aria-disabled'), null, 'Sound stays live');
   assert.equal(await page.evaluate(() => document.querySelectorAll('#r-bar .ibtn .lk').length), 3, 'lock badges');
   assert.match(await attr(page, 'icon-settings', 'aria-label'), /Settings: unlocks when the round ends/);
@@ -493,7 +493,7 @@ test('frame: centred rounded frame, 230 px rail + 1 px divider, game area, 40 px
     assert.deepEqual([g.bar.left, g.bar.width, g.bar.height, g.bar.bottom], [g.frame.left, fw, 40, g.frame.bottom]);
     assert.ok(g.credits.left >= g.rail.left && g.credits.right <= g.rail.right && g.credits.top < g.controls.top + 40, 'credits at the top of the rail');
     assert.equal(g.header, false, 'no v2 header bar or play-credits pill');
-    assert.match(await text(page, '#r-credits'), /Play credits\s*1,000/);
+    assert.match(await text(page, '#r-credits'), /Credits\s*1,000/);
     await page.__done();
   }
 });
@@ -561,6 +561,117 @@ test('fairness panel: how results are decided (drawn first, 1/multiplier weights
   await playTo(page, 12);
   await clickId(page, 'icon-fair'); // locked while a win is uncollected
   assert.equal(await text(page, '#r-modal'), '');
+  await page.__done();
+});
+
+// ------------------------------------------------------------------ v3 rail controls (batch 3)
+const railText = (page, role) => text(page, `#r-controls [data-role="${role}"]`);
+const even = (n, v) => Object.fromEntries(Array.from({ length: n }, (_, i) => [i + 1, v]));
+
+test('bet field shows the TOTAL bet across all squares, with squares and the 200 round limit', async () => {
+  const page = await fresh();
+  assert.equal(await railText(page, 'total'), '0');
+  assert.match(await railText(page, 'bet-hint'), /1–10 per square · max 200 per round/);
+  await clickId(page, 'chip-5');
+  await clickId(page, 'sq-3');
+  await clickId(page, 'sq-12');
+  await clickId(page, 'chip-1');
+  await clickId(page, 'sq-8');
+  assert.deepEqual(await bets(page), { 3: 5, 8: 1, 12: 5 });
+  assert.equal(await railText(page, 'total'), '11', 'sum of all squares, not the chip');
+  assert.match(await railText(page, 'bet-hint'), /^3 squares · 11 \/ 200 per round$/);
+  assert.match(await text(page, '[data-id="btn-start"]'), /Start\s*11 credits on 3 squares/);
+  assert.match(await text(page, '#r-credits'), /Credits\s*1,000/);
+  await setup(page, { balance: 1000, bets: even(20, 10), chip: 1 });
+  assert.equal(await railText(page, 'total'), '200');
+  assert.match(await railText(page, 'bet-hint'), /20 squares · 200 \/ 200 per round/);
+  await page.__done();
+});
+
+test('x2 doubles every square, clamped to 10 per square, 200 per round and the balance (toasts); 1/2 halves (min 1); one Undo step each', async () => {
+  const page = await fresh();
+  await setup(page, { balance: 1000, bets: { 1: 6, 2: 3, 5: 1 }, chip: 1, history: [] });
+  assert.equal(await railText(page, 'total'), '10');
+  await clickId(page, 'btn-double');
+  assert.deepEqual(await bets(page), { 1: 10, 2: 6, 5: 2 }, 'square 1 capped at 10');
+  assert.equal(await railText(page, 'total'), '18');
+  assert.match(await toastText(page), /Max bet reached – 10 per square/);
+  await clickId(page, 'btn-half');
+  assert.deepEqual(await bets(page), { 1: 5, 2: 3, 5: 1 }, 'halved, rounded down, min 1');
+  assert.equal(await railText(page, 'total'), '9');
+  await page.keyboard.press('z');
+  assert.deepEqual(await bets(page), { 1: 10, 2: 6, 5: 2 }, 'Undo reverts one scale step');
+  await page.keyboard.press('z');
+  assert.deepEqual(await bets(page), { 1: 6, 2: 3, 5: 1 });
+  // round cap: 30 squares x 5 = 150 -> 200, shared evenly
+  await setup(page, { balance: 1000, bets: even(30, 5), chip: 1 });
+  await page.evaluate(() => { window.__rl.app.ui.toast = null; });
+  await clickId(page, 'btn-double');
+  const b = await bets(page);
+  assert.equal(Object.values(b).reduce((a, x) => a + x, 0), 200);
+  assert.ok(Object.values(b).every((x) => x === 6 || x === 7), 'even split');
+  assert.equal(await railText(page, 'total'), '200');
+  assert.match(await toastText(page), /Round limit reached – 200 per round/);
+  assert.equal(await attr(page, 'btn-double', 'aria-disabled'), 'true', 'x2 off at the round cap');
+  // balance cap
+  await setup(page, { balance: 25, bets: { 1: 5, 2: 5, 3: 5 }, chip: 1 });
+  await clickId(page, 'btn-double');
+  assert.equal(await railText(page, 'total'), '25');
+  assert.match(await toastText(page), /Not enough credits/);
+  // nothing to do -> disabled
+  await setup(page, { balance: 1000, bets: { 4: 1, 9: 1 }, chip: 1 });
+  assert.equal(await attr(page, 'btn-half', 'aria-disabled'), 'true', '1/2 off when every square is at 1');
+  await setup(page, { balance: 1000, bets: {}, chip: 1 });
+  assert.equal(await attr(page, 'btn-double', 'aria-disabled'), 'true', 'x2 off with no bets');
+  assert.equal(await attr(page, 'btn-half', 'aria-disabled'), 'true', '1/2 off with no bets');
+  // the scaled bets are what START plays
+  await setup(page, { balance: 1000, bets: { 12: 2, 3: 1 }, chip: 1, history: [] });
+  await clickId(page, 'btn-double');
+  await playTo(page, 27, null, 'BETTING');
+  const s = await state(page);
+  assert.deepEqual(s.round.bets, { 3: 2, 12: 4 });
+  assert.equal(s.balance, 994);
+  await page.__done();
+});
+
+test('last bets: each round shows its TOTAL bet, newest first', async () => {
+  const page = await fresh();
+  assert.match(await railText(page, 'last-bets'), /None yet/);
+  await setup(page, { balance: 1000, bets: { 12: 5, 3: 1 }, chip: 1, history: [] });
+  await playTo(page, 27, null, 'BETTING'); // loss: bets stay on the board
+  await clickId(page, 'btn-double');
+  await playTo(page, 27, null, 'BETTING');
+  const lbs = await page.evaluate(() => [...document.querySelectorAll('#r-controls [data-role="last-bets"] .lb')].map((e) => [e.textContent, e.classList.contains('new')]));
+  assert.deepEqual(lbs, [['12', true], ['6', false]]);
+  assert.match(await page.evaluate(() => document.querySelector('[data-role="last-bets"]').getAttribute('aria-label')), /newest first: 12, 6/);
+  await page.__done();
+});
+
+test('rail look (1920): flat token colours, blue Start, green Collect with dark text, blue Gamble; token sizes; no shadows', async () => {
+  const page = await fresh();
+  await setup(page, { balance: 1000, bets: { 12: 5 }, chip: 5, history: [] });
+  const look = await page.evaluate(() => {
+    const cs = (id) => getComputedStyle(document.querySelector(`[data-id="${id}"]`));
+    const h = (sel) => document.querySelector(sel).getBoundingClientRect().height;
+    const shadows = [...document.querySelectorAll('#r-controls *, #r-controls .chip')].flatMap((e) => [getComputedStyle(e), getComputedStyle(e, '::after')]).filter((s) => s.boxShadow !== 'none' || s.textShadow !== 'none' || s.filter !== 'none').length;
+    return {
+      start: [cs('btn-start').backgroundColor, cs('btn-start').color], input: h('.betin'), main: h('[data-id="btn-start"]'), act: h('[data-id="btn-undo"]'), chip: h('[data-id="chip-5"]'),
+      sel: getComputedStyle(document.querySelector('[data-id="chip-5"]'), '::after').borderTopColor, shadows,
+    };
+  });
+  assert.deepEqual(look.start, ['rgb(13, 110, 253)', 'rgb(255, 255, 255)'], 'Start: accent-blue, white text');
+  assert.deepEqual([look.input, look.main, look.act, look.chip], [40, 52, 32, 34]);
+  assert.equal(look.sel, 'rgb(255, 255, 255)', 'selected chip: white ring');
+  assert.equal(look.shadows, 0, 'no box/text shadows or filters in the rail');
+  await playTo(page, 12);
+  const win = await page.evaluate(() => {
+    const cs = (id) => getComputedStyle(document.querySelector(`[data-id="${id}"]`));
+    return { collect: [cs('btn-collect').backgroundColor, cs('btn-collect').color], gamble: cs('btn-gamble').backgroundColor };
+  });
+  assert.deepEqual(win.collect, ['rgb(22, 163, 74)', 'rgb(6, 33, 15)'], 'Collect: accent-green, dark text');
+  assert.equal(win.gamble, 'rgb(13, 110, 253)');
+  assert.match(await text(page, '[data-id="btn-collect"]'), /Collect 480/);
+  assert.match(await text(page, '[data-id="btn-gamble"]'), /Fair 50\/50 · 3 of 3 left/);
   await page.__done();
 });
 
@@ -641,8 +752,10 @@ test('narrow viewport (390x844) falls back to the tablet layout; below 320 wide 
 
 test('no console errors, no failed or external requests, fonts loaded locally (Poppins + JetBrains Mono)', async () => {
   const page = await fresh();
-  const fonts = await page.evaluate(() => ['600 20px Poppins', '700 20px Poppins', "600 20px 'JetBrains Mono'", "800 20px 'Plus Jakarta Sans'"].map((f) => document.fonts.check(f)));
-  assert.deepEqual(fonts, [true, true, true, true]);
+  const fonts = await page.evaluate(() => ['600 20px Poppins', '700 20px Poppins', "600 20px 'JetBrains Mono'"].map((f) => document.fonts.check(f)));
+  assert.deepEqual(fonts, [true, true, true]);
+  const faces = await page.evaluate(() => [...document.fonts].map((f) => `${f.family.replace(/"/g, '')} ${f.weight}`).sort());
+  assert.deepEqual(faces, ['JetBrains Mono 600', 'Poppins 600', 'Poppins 700'], 'only the v3 faces (no Plus Jakarta Sans)');
   const external = await page.evaluate(() => performance.getEntriesByType('resource').map((r) => r.name).filter((n) => !n.startsWith(location.origin) && !n.startsWith('data:')));
   assert.deepEqual(external, [], 'no external requests');
   await page.__done();
