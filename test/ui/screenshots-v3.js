@@ -1,18 +1,24 @@
-// v3 batch screenshots: the betting scene (mockup story: 20 credits on 6 squares, chip 5, last bets 20 20 15 30 10)
-// and the running scene (the same bets after START: credits 980, the light on #30 with its trail on #29 and #28,
-// as in running.png) at 1920x1080, 1280x720 and 768x1024, plus side-by-side compare-*.png (build left, mockup
-// right) against docs/design-v3/betting*.png and running.png. Test mode only (window.__rl hooks).
-// Usage: npm run build && node test/ui/screenshots-v3.js [--out docs/design-v3/batch-4] [--scenes betting,running]
+// v3 batch screenshots at 1920x1080, 1280x720 and 768x1024, plus side-by-side compare-*.png (build left, mockup
+// right, letterboxed where the mockup only exists at 1920x1080). Mockup story: 20 credits on 6 squares, chip 5,
+// credits 1,000, last bets 20 20 15 30 10. Test mode only (window.__rl hooks).
+//   betting   betting*.png         the board before START
+//   running   running.png          after START: credits 980, the light on #30 with its trail on #29 and #28
+//   win-gamble-offer               the light stopped on #13 (480x, 5 on it): You win 2,400, Collect / Gamble ×2
+//   gamble-flip                    flip 1 (White) won 2,400 -> 4,800; flip 2 on Red, frozen mid-flip
+//   loss                           the light stopped on #26 (no bet there)
+//   double-run-result              Double Run: #21 (960x, 2 on it) and #33 (24x, 5 on it): You win 2,040
+// Usage: npm run build && node test/ui/screenshots-v3.js [--out docs/design-v3/batch-5] [--scenes betting,running,...]
 import { mkdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { startServer, launch, openGame, sleep } from './harness.js';
-import { setup, force, H01 } from './scenes.js';
+import { startServer, launch, openGame, sleep, waitPhase } from './harness.js';
+import { setup, force, settle, H01 } from './scenes.js';
 
 const args = Object.fromEntries(process.argv.slice(2).reduce((a, x, i, arr) => (x.startsWith('--') ? [...a, [x.slice(2), arr[i + 1]]] : a), []));
 const ROOT = path.resolve(new URL('../../', import.meta.url).pathname);
-const OUT = path.resolve(ROOT, args.out || 'docs/design-v3/batch-4');
+const OUT = path.resolve(ROOT, args.out || 'docs/design-v3/batch-5');
 const MOCK = path.join(ROOT, 'docs/design-v3');
-const SCENES = (args.scenes || 'betting,running').split(',');
+const RESULT_SCENES = ['win-gamble-offer', 'gamble-flip', 'loss', 'double-run-result'];
+const SCENES = (args.scenes || RESULT_SCENES.join(',')).split(',');
 const SIZES = [[1920, 1080, 'betting.png'], [1280, 720, 'betting-1280x720.png'], [768, 1024, 'betting-768x1024.png']];
 export const MOCK_BETS = { 3: 2, 8: 1, 13: 5, 21: 2, 27: 5, 33: 5 }; // betting.png: 20 credits on 6 squares
 const MOCK_TOTALS = [20, 20, 15, 30, 10];
@@ -36,10 +42,61 @@ async function compare(file, mock, w, h, name) {
   await cmp.close();
 }
 
+// play a round for real (bet taken, stored outcome animated) at a fast time scale, then let every animation end
+async function play(page, s1, s2 = null, target = ['GAMBLE_OFFER', 'BETTING']) {
+  await force(page, s1, s2);
+  await page.evaluate(() => { window.__rl.app.ui.startLocked = false; window.__rl.game.dispatch({ type: 'START' }); });
+  await waitPhase(page, target, 30000);
+  await settle(page);
+}
+async function flip(page, pick, result) {
+  await page.evaluate((p, r) => {
+    const g = window.__rl.game;
+    g.dispatch({ type: 'PICK', colour: p });
+    g.test.forceNextGamble(r);
+    g.dispatch({ type: 'GAMBLE_FLIP' });
+  }, pick, result);
+}
+
+const SCENE = {
+  async running(page) {
+    // START for real, then freeze the run and show the mockup frame: light on #30, trail on #29 (.34) and #28 (.20)
+    await force(page, 30);
+    await page.evaluate(() => { window.__rl.app.ui.startLocked = false; window.__rl.game.dispatch({ type: 'START' }); });
+    await sleep(700);
+    await page.evaluate(() => {
+      const app = window.__rl.app;
+      app.setPaused(true);
+      app.ui.displayBalance = null;
+      app.ui.light1 = { idx: 30, trail: [29, 28], level: null };
+      app.render();
+    });
+  },
+  'win-gamble-offer': (page) => play(page, 13),
+  loss: (page) => play(page, 26, null, 'BETTING'),
+  'double-run-result': (page) => play(page, 21, 33),
+  async 'gamble-flip'(page) {
+    await play(page, 13);
+    await page.evaluate(() => window.__rl.game.dispatch({ type: 'GAMBLE_OPEN' }));
+    await flip(page, 'white', 'white');
+    await page.waitForFunction(() => window.__rl.game.state.phase === 'GAMBLE' && !window.__rl.game.state.gamble.revealing);
+    await settle(page);
+    await flip(page, 'red', 'red');
+    await sleep(60);
+    // freeze the stored flip mid-turn (the mockup's mid-flip frame): stop the rAF tasks and the CSS animation
+    await page.evaluate(() => {
+      window.__rl.app.setPaused(true);
+      const coin = document.querySelector('.flip .coin');
+      for (const a of coin.getAnimations()) a.cancel();
+      coin.style.transform = 'rotateY(72deg)';
+    });
+  },
+};
+
 try {
   for (const scene of SCENES) {
     for (const [w, h, betMock] of SIZES) {
-      const page = await openGame(browser, url, { seed: 7, timeScale: 1, width: w, height: h, touch: w < 900 });
+      const page = await openGame(browser, url, { seed: 7, timeScale: scene === 'betting' || scene === 'running' ? 1 : 4, width: w, height: h, touch: w < 900 });
       await setup(page, { balance: 1000, history: H01, bets: MOCK_BETS, chip: 5 });
       await page.evaluate((t, hist) => {
         const g = window.__rl.game;
@@ -47,29 +104,17 @@ try {
         window.__rl.app.ui.betTotals = t.map((v, i) => ({ id: `m${i}`, t: v }));
         window.__rl.app.render();
       }, MOCK_TOTALS, MOCK_HISTORY);
-      if (scene === 'running') {
-        // START for real (bet taken, controls locked), then freeze the run and show the mockup frame:
-        // light on #30, trail on #29 (.34) and #28 (.20)
-        await force(page, 30);
-        await page.evaluate(() => { window.__rl.app.ui.startLocked = false; window.__rl.game.dispatch({ type: 'START' }); });
-        await sleep(700);
-        await page.evaluate(() => {
-          const app = window.__rl.app;
-          app.setPaused(true);
-          app.ui.displayBalance = null;
-          app.ui.light1 = { idx: 30, trail: [29, 28], level: null };
-          app.render();
-        });
-      }
+      if (SCENE[scene]) await SCENE[scene](page);
       await page.mouse.move(w - 2, h - 2);
+      await page.evaluate(() => { window.__rl.app.ui.ringOn = false; document.getElementById('app').classList.remove('kbd'); });
       await sleep(400);
       const name = `${scene}-${w}x${h}`;
       const file = path.join(OUT, `${name}.png`);
       await page.screenshot({ path: file });
       issues.push(...page.__issues.map((i) => `${name}: ${i}`));
       await page.close();
-      // running.png exists at 1920x1080 only: the smaller running shots are compared against it scaled
-      await compare(file, scene === 'running' ? 'running.png' : betMock, w, h, name);
+      // only betting has mockups at every size; the others are compared against the 1920x1080 mockup, letterboxed
+      await compare(file, scene === 'betting' ? betMock : `${scene}.png`, w, h, name);
       console.log('captured', name);
     }
   }

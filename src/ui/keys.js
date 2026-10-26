@@ -1,11 +1,11 @@
 // Keyboard map (spec B8 + B13 fix 2). Pure: maps a key event + context to an intent.
 // Intents: { kind: 'dispatch', action } | { kind: 'activate' } (press focused control) |
-//          { kind: 'focusSquare', delta } | { kind: 'tab', delta } | { kind: 'slider', delta } | { kind: 'skip' } | null
+//          { kind: 'focusSquare', delta } | { kind: 'tab', delta } | { kind: 'slider', delta } | null
 
 const NAV_KEYS = new Set(['Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']);
 
 /**
- * ctx: { phase, info, refill, celebration, focus: { kind: 'square'|'button'|'chip'|'pick'|'slider'|'toggle'|'tab'|'icon'|null, square } }
+ * ctx: { phase, info, refill, focus: { kind: 'square'|'button'|'chip'|'pick'|'slider'|'toggle'|'tab'|'icon'|null, square } }
  */
 export function mapKey(e, ctx) {
   const key = e.key;
@@ -15,7 +15,6 @@ export function mapKey(e, ctx) {
   if (e.repeat && !(NAV_KEYS.has(key) && ctx.phase === 'BETTING' && !ctx.refill)) return null;
   if (e.altKey || e.metaKey) return null;
 
-  if (ctx.celebration && (k === ' ' || k === 'Escape')) return { kind: 'skip' };
   if (k === 'm' && !e.ctrlKey) return { kind: 'dispatch', action: { type: 'TOGGLE_MUTE' } };
 
   const activateOr = (fallback) => (focus.kind && focus.kind !== 'square' ? { kind: 'activate' } : fallback);

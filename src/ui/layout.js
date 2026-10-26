@@ -14,26 +14,22 @@ export const BIG_F = { 'desktop-xl': 88, desktop: 64, 'tablet-landscape': 64, 't
 
 // Rail controls (v3 batch 3, tokens.md §3): rail padding 16 (12 at 1280) with a 12 gap between blocks; input 40,
 // chip 34 (40 on tablet), secondary button 32, primary button 52 (48 at 1280, 56 on tablet).
-// px = the square pitch the v2 WIN tag sizes were drawn for (tags scale by pitch / px; restyled in batch 5).
+// disc = gamble disc size in the navy gamble panel of the centre (v3 batch 5).
 const BPS = {
   'desktop-xl': {
-    s: 1, px: 84,
-    tag: { h: 22, f: 12.5, gx: 70, gy: 32 },
+    s: 1, disc: 96,
     rail: { pad: 16, chip: 34, gapY: 12, inputH: 40, actH: 32, mainH: 52 },
   },
   desktop: {
-    s: 0.8, px: 53,
-    tag: { h: 17, f: 10.5, gx: 54, gy: 24 },
+    s: 0.8, disc: 72,
     rail: { pad: 12, chip: 34, gapY: 12, inputH: 40, actH: 32, mainH: 48 },
   },
   'tablet-landscape': {
-    s: 0.8, px: 44,
-    tag: { h: 16, f: 10, gx: 50, gy: 22 },
+    s: 0.8, disc: 64,
     rail: { pad: 12, chip: 34, gapY: 12, inputH: 40, actH: 32, mainH: 48 },
   },
   'tablet-portrait': {
-    s: 0.85, px: 45,
-    tag: { h: 16, f: 10, gx: 50, gy: 22 },
+    s: 0.85, disc: 56,
     dock: { minH: 390, chip: 40, gapY: 12, inputH: 40, actH: 32, mainH: 56 },
   },
 };
@@ -89,7 +85,6 @@ export function computeLayout(W, H) {
   const fit = Math.floor(Math.min(boxW / COLS, boxH / ROWS));
   const pitch = Math.min(TRACK.pitchMax, Math.max(fit, Math.min(TRACK.pitchMin, Math.floor(boxW / COLS))));
   const g = pitch >= TRACK.pitchMin ? TRACK.gap : Math.max(2, Math.round(pitch * 0.12));
-  const f = Math.min(1, pitch / B.px);
   const px = pitch, py = pitch;
   const tw = px - g, th = py - g;
   const trackW = COLS * px - g, trackH = ROWS * py - g;
@@ -105,7 +100,6 @@ export function computeLayout(W, H) {
   }
   // tile type (tokens.md §2-3): square numbers hidden at 48 px tiles and below; multiplier 12/11/10; badge 18/16/15
   const tile = { w: tw, h: th, showNum: tw > 48, mult: tw >= 60 ? 12 : tw >= 44 ? 11 : 10, badge: tw >= 60 ? 18 : tw >= 44 ? 16 : 15 };
-  const tag = { h: Math.max(14, B.tag.h * f), f: Math.max(9, B.tag.f * f), gx: B.tag.gx * f, gy: B.tag.gy * f };
   // centre panel: the ring interior inset by 12 px (tokens.md §4)
   const inner = { x: track.x + tw + 12, y: track.y + th + 12, w: (COLS - 1) * px - tw - 24, h: (ROWS - 1) * py - th - 24 };
   L.bigF = Math.min(BIG_F[bp], Math.floor(inner.w / 5.2));
@@ -114,7 +108,7 @@ export function computeLayout(W, H) {
     const [c, r, side] = cell(n);
     pos.push({ x: track.x + c * px, y: track.y + r * py, side });
   }
-  Object.assign(L, { f, px, py, g, tile, tag, frame, bar, stage, rail, dock, top, track, inner, pos });
+  Object.assign(L, { px, py, g, tile, disc: B.disc, frame, bar, stage, rail, dock, top, track, inner, pos });
   return L;
 }
 
@@ -123,7 +117,7 @@ export function layoutVars(L) {
   const t = L.tile;
   const v = {
     '--s': L.s, '--tw': `${t.w}px`, '--th': `${t.h}px`, '--num-d': t.showNum ? 'block' : 'none', '--mult-f': `${t.mult}px`,
-    '--badge': `${t.badge}px`, '--big-f': `${L.bigF}px`, '--tag-h': `${L.tag.h}px`, '--tag-f': `${L.tag.f}px`,
+    '--badge': `${t.badge}px`, '--big-f': `${L.bigF}px`, '--disc': `${L.disc}px`,
   };
   const c = L.rail || L.dock;
   Object.assign(v, {
@@ -131,17 +125,4 @@ export function layoutVars(L) {
     '--act-h': `${c.actH}px`, '--main-h': `${c.mainH}px`,
   });
   return v;
-}
-
-/** Where the inward WIN tag of square n goes (top row -> below, bottom -> above, left col -> right, right col -> left). */
-export function winTagRect(L, n, second) {
-  const { x, y, side } = L.pos[n];
-  const t = L.tag;
-  const w = (second ? 5 : 4.6) * t.f * 0.72 + t.h * 0.7;
-  const tw = L.tile.w, th = L.tile.h;
-  const cx = x + tw / 2, cy = y + th / 2;
-  if (side === 'top') return { x: cx - w / 2, y: y + th + 8, w, h: t.h, dir: 'down' };
-  if (side === 'bottom') return { x: cx - w / 2, y: y - 8 - t.h, w, h: t.h, dir: 'up' };
-  if (side === 'left') return { x: x + tw + 9, y: cy - t.h / 2, w, h: t.h, dir: 'right' };
-  return { x: x - 9 - w, y: cy - t.h / 2, w, h: t.h, dir: 'left' };
 }
