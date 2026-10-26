@@ -30,7 +30,9 @@ const BPS = {
   },
   'tablet-portrait': {
     s: 0.85, disc: 56,
-    dock: { minH: 390, chip: 40, gapY: 12, inputH: 40, actH: 32, mainH: 56 },
+    // fitH: the dock's content height (12 px padding, chips 62 + 12 + Collect / Gamble 120 in the tallest state,
+    // 12 + the one-line disclaimer 16), used to size the frame to its content (betting-768x1024.png)
+    dock: { minH: 390, fitH: 246, chip: 40, gapY: 12, inputH: 40, actH: 32, mainH: 56 },
   },
 };
 
@@ -53,14 +55,15 @@ export function cell(n, cols = COLS, rows = ROWS) {
   return [0, rows - 1 - (n - d), 'left'];
 }
 
-export function computeLayout(W, H) {
+/** fit (internal): { y, h, pitch } fixes the frame's vertical extent and the pitch (tablet-portrait second pass). */
+export function computeLayout(W, H, fit = null) {
   const bp = breakpointFor(W, H);
   const B = BPS[bp];
   const dockMode = bp === 'tablet-portrait';
   const L = { bp, W, H, s: B.s, cols: COLS, rows: ROWS, dockMode };
 
-  const fw0 = Math.min(FRAME.maxW, W - 2 * FRAME.margin), fh0 = Math.min(FRAME.maxH, H - 2 * FRAME.margin);
-  const frame = { x: Math.round((W - fw0) / 2), y: Math.round((H - fh0) / 2), w: fw0, h: fh0 };
+  const fw0 = Math.min(FRAME.maxW, W - 2 * FRAME.margin), fh0 = fit ? fit.h : Math.min(FRAME.maxH, H - 2 * FRAME.margin);
+  const frame = { x: Math.round((W - fw0) / 2), y: fit ? fit.y : Math.round((H - fh0) / 2), w: fw0, h: fh0 };
   const bar = { x: frame.x, y: frame.y + frame.h - FRAME.bar, w: frame.w, h: FRAME.bar };
   const bodyH = frame.h - FRAME.bar;
   L.header = frame.y; // top edge of the playable area (tooltips and full dialogs stay below it)
@@ -82,8 +85,8 @@ export function computeLayout(W, H) {
   const top = { x: stage.x + padX, y: stage.y, w: stage.w - 2 * padX, h: xl ? TOP_ROW.h : TOP_ROW.hSmall };
   const boxW = stage.w - 2 * padX;
   const boxH = dockMode ? bar.y - 12 - B.dock.minH - (stage.y + top.h) : stage.h - top.h;
-  const fit = Math.floor(Math.min(boxW / COLS, boxH / ROWS));
-  const pitch = Math.min(TRACK.pitchMax, Math.max(fit, Math.min(TRACK.pitchMin, Math.floor(boxW / COLS))));
+  const fitP = Math.floor(Math.min(boxW / COLS, boxH / ROWS));
+  const pitch = fit ? fit.pitch : Math.min(TRACK.pitchMax, Math.max(fitP, Math.min(TRACK.pitchMin, Math.floor(boxW / COLS))));
   const g = pitch >= TRACK.pitchMin ? TRACK.gap : Math.max(2, Math.round(pitch * 0.12));
   const px = pitch, py = pitch;
   const tw = px - g, th = py - g;
@@ -97,6 +100,10 @@ export function computeLayout(W, H) {
   if (dockMode) {
     const y = stage.y + stage.h;
     dock = { ...B.dock, x: frame.x + 12, y, w: frame.w - 24, h: bar.y - y - 12 };
+    // v3 batch 6 (betting-768x1024.png): the frame hugs its content (track, dock, bar) and is centred, instead of
+    // stretching the dock to the full height. Not below 600 px wide, where the dock text wraps (narrow fallback).
+    const need = stage.y - frame.y + stage.h + B.dock.fitH + 12 + FRAME.bar;
+    if (!fit && W >= 600 && need < frame.h) return computeLayout(W, H, { y: Math.round((H - need) / 2), h: need, pitch });
   }
   // tile type (tokens.md §2-3): square numbers hidden at 48 px tiles and below; multiplier 12/11/10; badge 18/16/15
   const tile = { w: tw, h: th, showNum: tw > 48, mult: tw >= 60 ? 12 : tw >= 44 ? 11 : 10, badge: tw >= 60 ? 18 : tw >= 44 ? 16 : 15 };
@@ -117,7 +124,7 @@ export function layoutVars(L) {
   const t = L.tile;
   const v = {
     '--s': L.s, '--tw': `${t.w}px`, '--th': `${t.h}px`, '--num-d': t.showNum ? 'block' : 'none', '--mult-f': `${t.mult}px`,
-    '--badge': `${t.badge}px`, '--big-f': `${L.bigF}px`, '--disc': `${L.disc}px`,
+    '--badge': `${t.badge}px`, '--big-f': `${L.bigF}px`, '--disc': `${L.disc}px`, '--mk-d': t.w >= 30 ? 'block' : 'none',
   };
   const c = L.rail || L.dock;
   Object.assign(v, {

@@ -145,12 +145,6 @@
   --c-cyan:var(--c-accent-blue-text);
   --c-cyan-ink:var(--c-text-on-light);
   --c-focus:var(--c-focus-ring);
-  --c-bulb-off:var(--c-tile);
-  --c-bulb-off-rim:var(--c-tile-border);
-  --c-bulb-warm:var(--c-tile-lit);
-  --c-bulb-warm-core:var(--c-tile-trail);
-  --c-bulb-cyan:var(--c-accent-blue-text);
-  --c-bulb-cyan-core:var(--c-text-strong);
   --c-pick-red:var(--c-gamble-red);
   --c-pick-red-ink:var(--c-text-strong);
   --c-pick-white:var(--c-gamble-white);
@@ -186,16 +180,7 @@
   --r-lg:var(--r-card);
   --r-xl:var(--r-frame);
   --r-sheet:var(--r-frame);
-  --sh-panel:none;
-  --sh-raised:none;
-  --sh-cta:none;
-  --sh-modal:none;
   --sh-focus:0 0 0 2px var(--c-focus-ring);
-  --sh-glow-warm:none;
-  --sh-glow-warm-trail1:none;
-  --sh-glow-warm-trail2:none;
-  --sh-glow-cyan:none;
-  --sh-glow-win:none;
   --f-display:var(--f-sans);
   --f-ui:var(--f-sans);
 }

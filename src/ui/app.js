@@ -25,13 +25,14 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
   const R = {};
   for (const n of REGIONS) R[n] = root.querySelector(`#r-${n}`);
   const cache = {};
+  let shownModal = null; // dialog kind on screen (its entrance plays once)
   let L = null;
 
   const ui = {
     tip: null, sheet: null, light1: null, light2: null,
     displayBalance: null, displayWin: null, delta: null, toast: null, toastSeq: 0, flip: null, matchMsg: null,
     gambleLoss: null, ringOn: false, roving: 1, showLastStop: false, startLocked: false,
-    paused: false, lightIndex: 1, start: startScreen, ringStep: 0, settingsReset, reducedNow: false,
+    paused: false, lightIndex: 1, start: startScreen, settingsReset, reducedNow: false,
     fairness: false, infoFrom: null, // fairness panel is UI-only (no engine state); infoFrom = icon that opened Info
     betTotals: [], // "Last bets": [{ id: roundId, t: total }], newest first (ui/bettotals.js)
   };
@@ -223,7 +224,13 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     }
     if (want('toast')) setRegion('toast', c.modal ? '' : V.toastHtml(ui.toast, L));
     if (want('tip')) setRegion('tip', tipMarkup(c));
-    if (want('modal')) setRegion('modal', modalMarkup(c));
+    if (want('modal')) {
+      // the 160 ms entrance plays once per dialog: a re-render of the same one (tab, toggle, slider) does not replay it
+      const again = !!c.modal && c.modal === shownModal;
+      setRegion('modal', modalMarkup(c));
+      if (again) R.modal.querySelector('.dlg')?.classList.add('still');
+      shownModal = c.modal;
+    }
     if (want('start')) setRegion('start', ui.start ? V.startScreen(s, ui, L) : '');
     R.start.hidden = !ui.start;
     for (const n of GAME_REGIONS) R[n].inert = !!c.modal || ui.start;
@@ -596,29 +603,14 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     ui.lightIndex = s.history.length ? s.history[s.history.length - 1].s1 : 1;
     relayout();
     if (ui.settingsReset) showToast('Settings were reset to the defaults', 'info');
-    if (ui.start) {
-      focusId('start-play', false);
-      startRingTicker();
-    } else afterStartFocus();
+    if (ui.start) focusId('start-play', false);
+    else afterStartFocus();
   }
   function afterStartFocus() {
     const s = game.state;
     if (s.phase === 'RECOVERY') focusId('m-continue', ui.ringOn);
     else if (s.phase === 'ERROR') focusId('m-reload', ui.ringOn);
     else if (game.needsRefill()) focusId('m-refill', ui.ringOn);
-  }
-  function startRingTicker() {
-    if (reduced()) return;
-    let next = now();
-    addTask((t) => {
-      if (!ui.start) return true;
-      if (t >= next) {
-        ui.ringStep = (ui.ringStep + 1) % 20;
-        next = t + 90 / timeScale;
-        render(['start']);
-      }
-      return false;
-    });
   }
   function leaveStart(then) {
     firstInteraction();

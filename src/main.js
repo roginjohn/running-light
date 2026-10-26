@@ -24,9 +24,9 @@ function checkSize() {
 window.addEventListener('resize', checkSize);
 checkSize();
 
-// Loading screen (INIT): bulb ring (90 ms/step) + progress while fonts load.
+// Loading screen (INIT): the flat v3 mark and a progress bar while fonts load (v3 batch 6: no bulb ring).
 const reducedPref = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let progress = 0, step = 0, label = 'Warming up the bulbs…';
+let progress = 0, step = 0, label = 'Loading…';
 const drawLoading = () => {
   loadingEl.innerHTML = loadingScreen(window.innerWidth, window.innerHeight, progress, reducedPref ? -1 : step, label);
   loadingEl.setAttribute('aria-valuenow', String(Math.round(progress * 100)));

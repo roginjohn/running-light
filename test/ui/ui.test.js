@@ -5,6 +5,7 @@ import test, { before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { startServer, launch, openGame, waitPhase, state, sleep, clickId, centerOf } from './harness.js';
 import { setup, playTo, dispatch, settle, force, BETS } from './scenes.js';
+import { MAX_GAMBLES, GAMBLE_CAP } from '../../src/engine/config.js';
 
 let server, url, browser;
 const issues = [];
@@ -314,7 +315,7 @@ test('corrupt settings key -> defaults + notice + toast (no ERROR); other keys u
   assert.match(await toastText(page), /Settings were reset to the defaults/);
   await clickId(page, 'icon-settings');
   assert.match(await text(page, '#r-modal'), /Your saved settings couldn’t be read, so they were reset to the defaults\./);
-  assert.match(await text(page, '#r-modal'), /PLACEHOLDER – pending approval/);
+  assert.match(await text(page, '#r-modal'), /Turbo ?Placeholder – pending approval/i);
   assert.equal(await attr(page, 'tg-turbo', 'aria-disabled'), 'true', 'Turbo is a disabled placeholder');
   // invalid (parseable) settings are reset too
   const p2 = await fresh({ presetStorage: { 'rl.v1.settings': JSON.stringify({ mute: 'yes', music: 500 }) } });
@@ -579,6 +580,186 @@ test('fairness panel: how results are decided (drawn first, 1/multiplier weights
   await page.__done();
 });
 
+// ------------------------------------------------------------------ v3 overlays and small screens (batch 6)
+/** The open dialog's look, and every element in it that still has a shadow, filter, text shadow or gradient. */
+const dialogLook = (page) => page.evaluate(() => {
+  const d = document.querySelector('#r-modal .dlg');
+  const cs = getComputedStyle(d);
+  const sc = document.querySelector('#r-modal .scrim');
+  const all = [d, ...d.querySelectorAll('*'), sc];
+  const bad = all.filter((e) => { const c = getComputedStyle(e); return e !== document.activeElement && (c.boxShadow !== 'none' || c.filter !== 'none' || c.textShadow !== 'none' || /gradient/.test(c.backgroundImage)); }).map((e) => e.className);
+  const r = (e) => e.getBoundingClientRect().toJSON();
+  return {
+    label: d.getAttribute('aria-label'), bg: cs.backgroundColor, border: `${cs.borderLeftWidth} ${cs.borderLeftColor}`, top: `${cs.borderTopWidth} ${cs.borderTopColor}`,
+    radius: cs.borderBottomRightRadius, bad, scrimBg: getComputedStyle(sc).backgroundColor, scrim: r(sc), box: r(d), stage: r(document.getElementById('r-stage')),
+    ring: document.querySelectorAll('.ring, .bunting, .bulb').length, inert: document.getElementById('r-track').inert,
+  };
+});
+const FLAT = { bg: 'rgb(26, 31, 38)', border: '1px rgb(47, 55, 66)', radius: '8px', bad: [], scrimBg: 'rgba(15, 18, 22, 0.78)', ring: 0, inert: true };
+const pick = (o, keys) => Object.fromEntries(keys.map((k) => [k, o[k]]));
+const textOf = (page, sel) => page.evaluate((s) => (document.querySelector(s)?.innerText || '').replace(/\s+/g, ' ').trim(), sel);
+
+test('overlays (refill.png, error.png, settings-paytable-help.png): flat bg-frame dialogs, 1 px border, flat scrim; no shadow, glow, gradient or bulb ring', async () => {
+  const page = await fresh();
+  // Game info at 1920: one window, three columns (Settings | Paytable | Help), header and footer
+  await clickId(page, 'icon-settings');
+  let d = await dialogLook(page);
+  assert.deepEqual(pick(d, Object.keys(FLAT)), FLAT, 'game info');
+  assert.equal(d.label, 'Game info');
+  assert.deepEqual([d.scrim.width, d.scrim.height], [1920, 1080], 'scrim over the whole page');
+  assert.ok(Math.abs(d.box.left + d.box.width / 2 - 960) <= 1 && d.box.width === 1180, 'centred, 1180 wide');
+  const info = await page.evaluate(() => ({
+    cols: [...document.querySelectorAll('#r-modal .icols .isec .ih')].map((e) => e.textContent),
+    tablist: !!document.querySelector('#r-modal [role="tablist"]'),
+    head: document.querySelector('#r-modal .ihead h2').textContent,
+    foot: [...document.querySelectorAll('#r-modal .ifoot span')].map((e) => e.textContent),
+    rows: [...document.querySelectorAll('#r-modal .ptab tr')].slice(1).map((tr) => [...tr.cells].map((c) => c.textContent)),
+    toggle: getComputedStyle(document.querySelector('[data-id="tg-mute"]')).backgroundColor,
+    focus: document.activeElement.dataset.id,
+  }));
+  assert.deepEqual(info.cols, ['Settings', 'Paytable', 'Help']);
+  assert.equal(info.tablist, false, 'no tabs when all three sections fit');
+  assert.equal(info.head, 'Running Light · Game info');
+  assert.deepEqual(info.foot, ['Esc closes this window', 'Outcome is decided and saved before the light runs']);
+  assert.deepEqual(info.rows[0], ['1920x', '1', '1 in 2,010', '8']);
+  assert.deepEqual(info.rows[1], ['960x', '2', '1 in 1,005', '21, 46']);
+  assert.equal(info.rows.length, 5);
+  assert.equal(info.toggle, 'rgb(13, 110, 253)', 'Sound on: accent-blue switch');
+  assert.equal(info.focus, 'tab-settings');
+  await page.keyboard.press('ArrowRight'); // arrows still move between the sections (the engine's Info tab)
+  assert.equal((await state(page)).info, 'paytable');
+  assert.equal(await page.evaluate(() => document.activeElement.dataset.id), 'tab-paytable');
+  assert.deepEqual(await page.evaluate(() => { const e = document.querySelector('#r-modal .dlg'); return [e.classList.contains('still'), e.getAnimations().length]; }), [true, 0], 're-rendering the same dialog does not replay its entrance');
+  await page.keyboard.press('Escape');
+  // fairness panel: the same flat dialog
+  await clickId(page, 'icon-fair');
+  d = await dialogLook(page);
+  assert.deepEqual(pick(d, Object.keys(FLAT)), FLAT, 'fairness');
+  assert.equal(d.label, 'How results are decided');
+  await page.keyboard.press('Escape');
+  // refill: dims and centres on the game area only (the rail and bar stay lit, as in refill.png)
+  await setup(page, { balance: 0, bets: {}, history: [] });
+  await page.evaluate(() => window.__rl.app.render());
+  d = await dialogLook(page);
+  assert.deepEqual(pick(d, Object.keys(FLAT)), FLAT, 'refill');
+  assert.equal(d.label, 'Out of play credits');
+  assert.deepEqual([d.scrim.left, d.scrim.top, d.scrim.width, d.scrim.height], [d.stage.left, d.stage.top, d.stage.width, d.stage.height], 'scrim = game area');
+  assert.ok(Math.abs(d.box.left + d.box.width / 2 - (d.stage.left + d.stage.width / 2)) <= 1 && d.box.width === 420, 'centred in the game area, 420 wide');
+  assert.equal(await textOf(page, '#r-modal .dlg'), 'Out of play credits Take a free refill and keep playing. Refills are unlimited, with no waiting and no cost. Free refill 1,000 credits Refill 1,000 Free · Enter Play credits only. No real money value.');
+  assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('[data-id="m-refill"]')).backgroundColor), 'rgb(13, 110, 253)', 'accent-blue Refill');
+  await page.evaluate(() => window.__rl.app.focusId('m-refill'));
+  await page.keyboard.press('Enter');
+  await settle(page);
+  // error: red top edge, the saved round on one mono line, Reload focused
+  await setup(page, { balance: 1000, bets: { 12: 5 }, history: [] });
+  await force(page, 30);
+  await dispatch(page, { type: 'START' });
+  await dispatch(page, { type: 'FAIL', message: 'storage setItem failed' });
+  d = await dialogLook(page);
+  assert.deepEqual(pick(d, Object.keys(FLAT)), FLAT, 'error');
+  assert.equal(d.label, 'Something went wrong');
+  assert.equal(d.top, '3px rgb(220, 38, 38)', 'accent-red top edge');
+  const err = await page.evaluate(() => ({ code: document.querySelector('[data-role="error-code"]').textContent, font: getComputedStyle(document.querySelector('[data-role="error-code"]')).fontFamily, focus: document.activeElement.dataset.id }));
+  assert.equal(err.code, 'Round in progress: bet 5 · 1 square · credits 995 · code E-STORAGE-WRITE');
+  assert.match(err.font, /^"JetBrains Mono"/);
+  assert.equal(err.focus, 'm-reload');
+  assert.match(await textOf(page, '#r-modal'), /reloading won’t change the outcome or charge you again\. .* Reload Restores your round · Enter Play credits only\. No real money value\.$/);
+  await page.__done();
+});
+
+test('Game info on smaller screens: tabs at 1280x720 and 1024x768, a bottom sheet at 768x1024; inside the viewport', async () => {
+  for (const [w, h] of [[1280, 720], [1024, 768], [768, 1024]]) {
+    const page = await fresh({ width: w, height: h, touch: w < 900 });
+    await clickId(page, 'icon-stats');
+    await sleep(250); // the 160 ms entrance (4 px rise) has ended
+    const g = () => page.evaluate(() => {
+      const d = document.querySelector('#r-modal .dlg').getBoundingClientRect();
+      return { d: [d.left, d.top, d.right, d.bottom].map(Math.round), tabs: [...document.querySelectorAll('#r-modal [role="tab"]')].map((t) => `${t.textContent}:${t.getAttribute('aria-selected')}`), secs: document.querySelectorAll('#r-modal .isec').length, scroll: document.documentElement.scrollWidth };
+    });
+    let r = await g();
+    assert.deepEqual(r.tabs, ['Settings:false', 'Paytable:true', 'Help:false'], `${w}: tabs`);
+    assert.equal(r.secs, 1, `${w}: one section at a time`);
+    assert.ok(r.d[0] >= 0 && r.d[1] >= 0 && r.d[2] <= w && r.d[3] <= h && r.scroll <= w, `${w}: dialog inside the viewport ${r.d}`);
+    if (w === 768) assert.deepEqual([r.d[0], r.d[2], r.d[3]], [0, 768, 1024], 'tablet portrait: a full-width bottom sheet');
+    await clickId(page, 'tab-help');
+    assert.equal((await state(page)).info, 'help');
+    assert.match(await text(page, '#r-modal [data-role="help-gamble"]'), /fair 50\/50/);
+    r = await g();
+    assert.ok(r.d[1] >= 0 && r.d[3] <= h, `${w}: help inside the viewport`);
+    await page.__done();
+  }
+});
+
+test('Help explains the gamble the way the engine plays it (fair 50/50 drawn and saved on Gamble, ×2 or lose the win, max 3, 30,000 cap)', async () => {
+  const page = await fresh();
+  await clickId(page, 'icon-stats');
+  const g = await textOf(page, '#r-modal [data-role="help-gamble"]');
+  assert.equal(g, [
+    'After a win, press Gamble ×2, pick red or white, then press Gamble on your colour.',
+    'Red or white is drawn at that moment, a fair 50/50, and saved before the disc flips.',
+    'Match: your win doubles. Gamble again or Collect. No match: the win is lost. Nothing else is taken.',
+    `Up to ${MAX_GAMBLES} gambles per win, and Collect is open between flips. Gamble is off when doubling would go over ${GAMBLE_CAP.toLocaleString('en-US')}.`,
+  ].join(' '));
+  const all = await textOf(page, '#r-modal');
+  assert.doesNotMatch(all, /gamble window/i, 'no "gamble window" (there is none since batch 5)');
+  assert.match(all, /Gamble: fair 50\/50 on red or white, up to 3 times per win\. Off when doubling would go over 30,000\./, 'paytable gamble line');
+  assert.match(all, /R \/ W ← → Pick red \/ white/, 'keys: the pick, not a window');
+  // the copy matches play: the draw is stored when Gamble is pressed, a match doubles, the cap stops a 4th or a >30,000 double
+  await page.keyboard.press('Escape');
+  await setup(page, { balance: 1000, bets: { 13: 5 }, history: [] });
+  await playTo(page, 13); // 480x: 2,400
+  await dispatch(page, { type: 'GAMBLE_OPEN' });
+  await dispatch(page, { type: 'PICK', colour: 'red' });
+  await page.evaluate(() => window.__rl.game.test.forceNextGamble('red'));
+  await dispatch(page, { type: 'GAMBLE_FLIP' });
+  const stored = await state(page);
+  assert.deepEqual([stored.round.gambles, stored.round.pendingReveal, stored.round.currentWin], [[{ pick: 'red', result: 'red' }], true, 2400], 'drawn and saved before the flip shows it');
+  await page.waitForFunction(() => !window.__rl.game.state.gamble.revealing);
+  assert.equal((await state(page)).round.currentWin, 4800, 'match doubles');
+  await settle(page);
+  await dispatch(page, { type: 'PICK', colour: 'white' });
+  await page.evaluate(() => window.__rl.game.test.forceNextGamble('white'));
+  await dispatch(page, { type: 'GAMBLE_FLIP' });
+  await page.waitForFunction(() => !window.__rl.game.state.gamble.revealing);
+  await settle(page);
+  assert.equal((await state(page)).round.currentWin, 9600);
+  await dispatch(page, { type: 'PICK', colour: 'red' });
+  await page.evaluate(() => window.__rl.game.test.forceNextGamble('red'));
+  assert.equal((await dispatch(page, { type: 'GAMBLE_FLIP' })).ok, true, 'a third gamble (9,600 -> 19,200, under the cap)');
+  await page.waitForFunction(() => !window.__rl.game.state.gamble.revealing);
+  await settle(page);
+  assert.equal((await state(page)).round.currentWin, 19200);
+  await dispatch(page, { type: 'PICK', colour: 'red' });
+  assert.equal((await dispatch(page, { type: 'GAMBLE_FLIP' })).ok, false, 'no fourth gamble');
+  assert.match(await textOf(page, '#r-centre .gmsg'), /^No gambles left for this win\. Collect your win\.$/);
+  await page.__done();
+});
+
+test('start and loading screens: flat v3 mark and plain controls; no bulb ring, glow or ticker re-render', async () => {
+  const page = await fresh({ startScreen: true });
+  const look = (sel) => page.evaluate((s) => {
+    const root = document.querySelector(s);
+    const bad = [...root.querySelectorAll('*')].filter((e) => { const c = getComputedStyle(e); return e !== document.activeElement && (c.boxShadow !== 'none' || c.filter !== 'none' || c.textShadow !== 'none' || /gradient/.test(c.backgroundImage)); }).map((e) => e.className);
+    return { bad, ring: root.querySelectorAll('.ring, .bunting, i.on').length, mark: root.querySelectorAll('svg.mark').length, h1: getComputedStyle(root.querySelector('h1')).fontFamily, text: root.innerText.replace(/\s+/g, ' ').trim() };
+  }, sel);
+  const st = await look('#r-start');
+  assert.deepEqual([st.bad, st.ring, st.mark], [[], 0, 1]);
+  assert.match(st.h1, /^Poppins/);
+  assert.equal(st.text, 'Running Light Bet play credits on a 50-square track. The light runs, slows and stops on one square. Credits 1,000 Play Turns sound on · Enter How to play Sound: on Play credits only · No real money value · Free refill to 1,000');
+  const before = await page.evaluate(() => document.getElementById('r-start').innerHTML);
+  await sleep(500);
+  assert.equal(await page.evaluate(() => document.getElementById('r-start').innerHTML), before, 'no ticker: the start screen is not re-rendered');
+  assert.equal(await page.evaluate(() => window.__rl.app.pendingTasks()), 0, 'no animation tasks');
+  await page.keyboard.press('Enter');
+  await page.evaluate(() => window.__rlShowLoading(0.5, 3, 'Loading sounds…'));
+  const ld = await look('#loading');
+  assert.deepEqual([ld.bad, ld.ring, ld.mark], [[], 0, 1]);
+  assert.match(ld.h1, /^Poppins/, 'not the mono big-number font');
+  assert.equal(ld.text, 'Running Light Loading sounds… 50% Play credits only · No real money value');
+  assert.equal(await page.evaluate(() => [document.querySelector('#loading .lbar i').style.width, document.getElementById('loading').getAttribute('aria-valuenow')].join()), '50%,50');
+  await page.__done();
+});
+
 // ------------------------------------------------------------------ v3 rail controls (batch 3)
 const railText = (page, role) => text(page, `#r-controls [data-role="${role}"]`);
 const even = (n, v) => Object.fromEntries(Array.from({ length: n }, (_, i) => [i + 1, v]));
@@ -586,7 +767,7 @@ const even = (n, v) => Object.fromEntries(Array.from({ length: n }, (_, i) => [i
 test('bet field shows the TOTAL bet across all squares, with squares and the 200 round limit', async () => {
   const page = await fresh();
   assert.equal(await railText(page, 'total'), '0');
-  assert.match(await railText(page, 'bet-hint'), /1–10 per square · max 200 per round/);
+  assert.match(await railText(page, 'bet-hint'), /^1–10 per square · 200 per round$/); // refill.png wording (fits the 1920 rail)
   await clickId(page, 'chip-5');
   await clickId(page, 'sq-3');
   await clickId(page, 'sq-12');
@@ -1007,7 +1188,7 @@ test('no glow, pulse or WIN tag remains on tiles in any result state (win, gambl
       tags: all.filter((r) => r.selectorText && /wtag|pulse|chase|win2|veil|celebrate|confetti/.test(r.selectorText)).map((r) => r.selectorText),
     };
   });
-  assert.deepEqual(sheet.keyframes, ['cfade', 'flipr', 'flipw', 'land', 'modalin', 'sheetin', 'toastin', 'toastout']);
+  assert.deepEqual(sheet.keyframes, ['cfade', 'dlgin', 'flipr', 'flipw', 'land', 'toastin', 'toastout']);
   assert.deepEqual(sheet.tileGlow, []);
   assert.deepEqual(sheet.tags, []);
   const scan = (label) => page.evaluate((l) => {
@@ -1096,10 +1277,11 @@ for (const [w, h, bp] of SIZES) {
       const out = kids.filter((e) => { const b = r(e); return b.left < box.left - 0.5 || b.right > box.right + 0.5 || b.top < box.top - 0.5 || b.bottom > box.bottom + 0.5; }).map((e) => e.className || e.tagName);
       const clipped = kids.filter((e) => e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflow !== 'visible').map((e) => e.className);
       const hit = (a, b) => a.left < b.right - 0.5 && b.left < a.right - 0.5 && a.top < b.bottom - 0.5 && b.top < a.bottom - 0.5;
-      const marks = [...document.querySelectorAll('.tile .mkt')].filter((m) => { const b = m.parentElement.parentElement.querySelector('.bet'); return b && hit(r(m), r(b)); }).length;
+      // batch 6: markers clear of the badge (a 2-digit one on #21) and of the multiplier, and inside their tile
+      const marks = [...document.querySelectorAll('.tile .mkt')].filter((m) => { const t = m.parentElement.parentElement, b = t.querySelector('.bet'), M = r(m), T = r(t); return (b && hit(M, r(b))) || hit(M, r(t.querySelector('.m'))) || (M.width > 0 && (M.left < T.left || M.top < T.top)); }).length;
       return { out, clipped, marks, tags: document.querySelectorAll('.wtag').length };
     });
-    await setup(page, { bets: { ...BETS, 46: 3 } });
+    await setup(page, { bets: { ...BETS, 21: 10, 46: 3 } });
     await playTo(page, 21, 46);
     assert.deepEqual(await fits(), { out: [], clipped: [], marks: 0, tags: 0 }, 'Double Run result');
     await dispatch(page, { type: 'GAMBLE_OPEN' });

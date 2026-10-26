@@ -602,7 +602,7 @@ function helpTab() {
   s.push(t(kx, ky, 'Mouse & keyboard', 34, C.marigold, DISP, 400, 'start'));
   const keys = [['Left-click / Enter', 'add chip to square'], ['Right-click / Shift+click / Backspace', 'remove one chip'], ['1 – 5', 'select chip'], ['Space', 'START  ·  press focused button'],
     ['Ctrl+Z', 'undo'], ['C', 'clear all bets'], ['R', 'rebet last round'], ['M', 'mute / unmute'], ['Tab', 'move focus between squares & buttons'],
-    ['Gamble:  R / W  or  ← →', 'pick red / white (gamble window only)'], ['Gamble:  G  ·  Enter', 'gamble  ·  collect']];
+    ['Gamble:  R / W  or  ← →', 'pick red / white (during a gamble)'], ['Gamble:  G  ·  Enter', 'gamble  ·  collect']];
   keys.forEach(([k, d], i) => {
     const col = i % 2, row = Math.floor(i / 2);
     const xx = kx + col * 540, yy = ky + 40 + row * 34;

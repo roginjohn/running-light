@@ -7,7 +7,13 @@
 //   gamble-flip                    flip 1 (White) won 2,400 -> 4,800; flip 2 on Red, frozen mid-flip
 //   loss                           the light stopped on #26 (no bet there)
 //   double-run-result              Double Run: #21 (960x, 2 on it) and #33 (24x, 5 on it): You win 2,040
-// Usage: npm run build && node test/ui/screenshots-v3.js [--out docs/design-v3/batch-5] [--scenes betting,running,...]
+//   refill                         credits 0, no bets: Out of play credits (refill.png)
+//   error                          paused mid-run (credits 980, the light on #30) with a storage write error (error.png)
+//   settings-paytable-help         the Game info window (settings-paytable-help.png)
+//   fairness, start, loading       not mocked: How results are decided, the Start screen, the loading screen
+// Overlays are captured at 1920x1080 only (Game info also at 1280x720 and 768x1024, where it shows tabs / a sheet);
+// the other scenes at all three sizes.
+// Usage: npm run build && node test/ui/screenshots-v3.js [--out docs/design-v3/batch-6] [--scenes betting,refill,...]
 import { mkdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { startServer, launch, openGame, sleep, waitPhase } from './harness.js';
@@ -15,10 +21,11 @@ import { setup, force, settle, H01 } from './scenes.js';
 
 const args = Object.fromEntries(process.argv.slice(2).reduce((a, x, i, arr) => (x.startsWith('--') ? [...a, [x.slice(2), arr[i + 1]]] : a), []));
 const ROOT = path.resolve(new URL('../../', import.meta.url).pathname);
-const OUT = path.resolve(ROOT, args.out || 'docs/design-v3/batch-5');
+const OUT = path.resolve(ROOT, args.out || 'docs/design-v3/batch-6');
 const MOCK = path.join(ROOT, 'docs/design-v3');
-const RESULT_SCENES = ['win-gamble-offer', 'gamble-flip', 'loss', 'double-run-result'];
-const SCENES = (args.scenes || RESULT_SCENES.join(',')).split(',');
+const OVERLAYS = ['refill', 'error', 'settings-paytable-help', 'fairness', 'start', 'loading'];
+const MOCKED = new Set(['betting', 'running', 'win-gamble-offer', 'gamble-flip', 'loss', 'double-run-result', 'refill', 'error', 'settings-paytable-help']);
+const SCENES = (args.scenes || ['betting', ...OVERLAYS].join(',')).split(',');
 const SIZES = [[1920, 1080, 'betting.png'], [1280, 720, 'betting-1280x720.png'], [768, 1024, 'betting-768x1024.png']];
 export const MOCK_BETS = { 3: 2, 8: 1, 13: 5, 21: 2, 27: 5, 33: 5 }; // betting.png: 20 credits on 6 squares
 const MOCK_TOTALS = [20, 20, 15, 30, 10];
@@ -59,6 +66,31 @@ async function flip(page, pick, result) {
 }
 
 const SCENE = {
+  async refill(page) {
+    await page.evaluate(() => {
+      window.__rl.game.test.setBets({});
+      window.__rl.game.test.setBalance(0);
+      window.__rl.app.render();
+    });
+  },
+  async error(page) {
+    await force(page, 30);
+    await page.evaluate(() => { window.__rl.app.ui.startLocked = false; window.__rl.game.dispatch({ type: 'START' }); });
+    await sleep(700);
+    await page.evaluate(() => {
+      const app = window.__rl.app;
+      app.setPaused(true);
+      app.ui.light1 = { idx: 30, trail: [], level: null };
+      window.__rl.game.dispatch({ type: 'FAIL', message: 'storage setItem failed' });
+    });
+  },
+  'settings-paytable-help': (page) => page.evaluate(() => window.__rl.game.dispatch({ type: 'OPEN_INFO', tab: 'settings' })),
+  async fairness(page) {
+    const r = await page.evaluate(() => document.querySelector('[data-id="icon-fair"]').getBoundingClientRect().toJSON());
+    await page.mouse.click(r.x + r.width / 2, r.y + r.height / 2);
+  },
+  start: (page) => page.evaluate(() => { window.__rl.app.ui.start = true; window.__rl.app.render(); }),
+  loading: (page) => page.evaluate(() => window.__rlShowLoading(0.72, 0, 'Loading sounds…')),
   async running(page) {
     // START for real, then freeze the run and show the mockup frame: light on #30, trail on #29 (.34) and #28 (.20)
     await force(page, 30);
@@ -95,7 +127,7 @@ const SCENE = {
 
 try {
   for (const scene of SCENES) {
-    for (const [w, h, betMock] of SIZES) {
+    for (const [w, h, betMock] of OVERLAYS.includes(scene) && scene !== 'settings-paytable-help' ? SIZES.slice(0, 1) : SIZES) {
       const page = await openGame(browser, url, { seed: 7, timeScale: scene === 'betting' || scene === 'running' ? 1 : 4, width: w, height: h, touch: w < 900 });
       await setup(page, { balance: 1000, history: H01, bets: MOCK_BETS, chip: 5 });
       await page.evaluate((t, hist) => {
@@ -114,7 +146,7 @@ try {
       issues.push(...page.__issues.map((i) => `${name}: ${i}`));
       await page.close();
       // only betting has mockups at every size; the others are compared against the 1920x1080 mockup, letterboxed
-      await compare(file, scene === 'betting' ? betMock : `${scene}.png`, w, h, name);
+      if (MOCKED.has(scene)) await compare(file, scene === 'betting' ? betMock : `${scene}.png`, w, h, name);
       console.log('captured', name);
     }
   }
