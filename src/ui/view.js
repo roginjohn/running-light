@@ -6,6 +6,7 @@ import { icon, star, chipFace, v3icon, v3mark } from './icons.js';
 import { halveBets, doubleBets } from './betscale.js';
 import { cell } from './layout.js';
 import { winTagRect } from './layout.js';
+import { winners, lightClass, bigMult, bigValue } from './track.js';
 
 export const fmt = (n) => Number(n).toLocaleString('en-US');
 const px = (v) => `${Math.round(v * 100) / 100}px`;
@@ -39,15 +40,7 @@ export function modeOf(s, ui) {
   }
 }
 
-/** Winning squares of the current round (only once revealed). */
-export function winners(s, ui) {
-  const r = s.round;
-  if (!r) return { w1: null, w2: null };
-  const revealed = ['GAMBLE_OFFER', 'GAMBLE', 'PAYOUT'].includes(s.phase) || ui.gambleLoss;
-  const w1 = (revealed || s.phase === 'DOUBLE_RUN') && r.bets[r.s1] ? r.s1 : null;
-  const w2 = revealed && r.s2 && r.bets[r.s2] ? r.s2 : null;
-  return { w1, w2 };
-}
+export { winners, lightClass, bigMult, bigValue };
 
 // ------------------------------------------------------------------ header
 function bunting(W, hh) {
@@ -144,11 +137,23 @@ function railNote(s, ui, c) {
   return `<div class="rnote${lw.pending ? ' pending' : ''}${lw.lost ? ' lost' : ''}"><span class="k">${lw.label}</span><b data-role="lastwin">${fmt(v)}</b><span class="n">${lw.note}</span></div>`;
 }
 
-/** "Last bets": the total bet of each recent round, newest first (ui.betTotals, recorded at START). */
-function lastBets(ui) {
-  const list = ui.betTotals || [];
-  const items = list.map((e, i) => `<span class="lb${i === 0 ? ' new' : ''}">${fmt(e.t)}</span>`).join('');
-  return `<div class="grp lastbets" data-role="last-bets" aria-label="Last bets, newest first: ${list.length ? list.map((e) => e.t).join(', ') : 'none yet'}"><div class="rhead"><span>Last bets</span></div><div class="lbs">${items || '<span class="none">None yet</span>'}</div></div>`;
+// ------------------------------------------------------------------ top row (v3 batch 4)
+/** Row above the track: "Last results:" (newest first) on the left, "Last bets:" (round totals from ui.betTotals,
+ *  newest first) on the right. Pills that do not fit wrap onto a hidden second line, so no pill is ever cut. */
+export function topRow(s, ui, L) {
+  const t = L.top;
+  const hist = s.history.slice(-HISTORY_SHOWN).reverse();
+  const res = hist.map((h, i) => {
+    const m = MULT[h.s1];
+    const label = h.s2 ? `${m}x · ${MULT[h.s2]}x` : `${m}x`;
+    return `<span class="tp k${h.s2 ? 'dr' : m}${i === 0 ? ' new' : ''}${h.win > 0 ? ' won' : ''}">${label}</span>`;
+  }).join('');
+  const resLabel = hist.map((h) => (h.s2 ? `#${h.s1} ${MULT[h.s1]}x and #${h.s2} ${MULT[h.s2]}x` : `#${h.s1} ${MULT[h.s1]}x`)).join(', ');
+  const bets = ui.betTotals || [];
+  const lbs = bets.map((e, i) => `<span class="lb${i === 0 ? ' new' : ''}">${fmt(e.t)}</span>`).join('');
+  return `<div class="toprow" style="left:${px(t.x)};top:${px(t.y)};width:${px(t.w)};height:${px(t.h)}">
+    <div class="tg" data-role="history" aria-label="Last results, newest first: ${resLabel || 'none yet'}"><span class="k">Last results:</span><span class="tps">${res || '<span class="none">None yet</span>'}</span></div>
+    <div class="tg lastbets" data-role="last-bets" aria-label="Last bets, newest first: ${bets.length ? bets.map((e) => e.t).join(', ') : 'none yet'}"><span class="k">Last bets:</span><span class="tps">${lbs || '<span class="none">None yet</span>'}</span></div></div>`;
 }
 
 function actionRow(s, c) {
@@ -188,41 +193,31 @@ export function controls(s, ui, c, L) {
   if (L.rail) {
     const r = L.rail;
     return `<div class="rail" role="region" aria-label="Bet controls" style="left:${px(r.x)};top:${px(r.y)};width:${px(r.w)};height:${px(r.h)}">
-      ${betField(s, c)}${chipGroup(s, c, true)}${mainButtons(s, ui, c, false)}${actionRow(s, c)}${lastBets(ui)}${railNote(s, ui, c)}
+      ${betField(s, c)}${chipGroup(s, c, true)}${mainButtons(s, ui, c, false)}${actionRow(s, c)}${railNote(s, ui, c)}
       <div style="flex:1"></div>${disclaimer()}</div>`;
   }
-  // tablet portrait: the rail as a 2-column block (left: bet field, last bets, note; right: chips, button, actions)
+  // tablet portrait: the rail as a 2-column block (left: bet field, note; right: chips, button, actions)
   const d = L.dock;
   return `<div class="dock" role="region" aria-label="Bet controls" style="left:${px(d.x)};top:${px(d.y)};width:${px(d.w)};height:${px(d.h)};padding:${DOCK_PAD}px 0">
-      <div class="dcol">${betField(s, c)}${lastBets(ui)}${railNote(s, ui, c)}</div>
+      <div class="dcol">${betField(s, c)}${railNote(s, ui, c)}</div>
       <div class="dcol">${chipGroup(s, c, false)}${mainButtons(s, ui, c, true)}${actionRow(s, c)}</div>
       ${disclaimer()}</div>`;
 }
 
 // ------------------------------------------------------------------ tiles
-export function tileStatic(n, L) {
-  const m = MULT[n];
-  return `<span class="num">${n}</span><span class="bulb"></span><span class="band t${m}">${tierLabel(m)}</span><span class="dyn"></span>`;
+// v3 batch 4: flat squares (tokens.md §1). The static part is built once per tile; per state only the tile's
+// class list and its .dyn child (bet badge, result veil) change, and during a light run only the class list.
+export function tileStatic(n) {
+  return `<span class="num">${n}</span><span class="m">${MULT[n]}x</span><span class="dyn"></span>`;
 }
 
 /** Per-tile dynamic look: { cls, dyn, disabled, label } (diffed by the controller). */
 export function tileLook(n, s, ui, c) {
   const r = s.round;
   const m = MULT[n];
-  const cls = [];
-  const l1 = ui.light1, l2 = ui.light2;
-  let light = null;
-  if (l2 && l2.idx === n) light = 'lit2';
-  else if (l2 && l2.trail && l2.trail[0] === n) light = 'trailc1';
-  else if (l2 && l2.trail && l2.trail[1] === n) light = 'trailc2';
-  else if (l1 && l1.idx === n) light = 'lit';
-  else if (l1 && l1.trail && l1.trail[0] === n) light = 'trail1';
-  else if (l1 && l1.trail && l1.trail[1] === n) light = 'trail2';
-  if (light) {
-    cls.push(light);
-    const lvl = (light === 'lit' ? l1 : light === 'lit2' ? l2 : null);
-    if (lvl && lvl.level != null && lvl.level < 1) cls.push(lvl.level < 0.5 ? 'lvl1' : 'lvl2');
-  }
+  const cls = [`q${m}`];
+  const light = lightClass(n, ui);
+  if (light) cls.push(light);
   const { w1, w2 } = winners(s, ui);
   let result = null;
   if (r && !light) {
@@ -232,12 +227,11 @@ export function tileLook(n, s, ui, c) {
     if (result) cls.push(result);
     if (result && ui.showLastStop) cls.push('fade');
   }
-  const isLit = !!(light || result);
   const live = s.bets[n] || 0;
   const ghostV = !live && c.ghosts && s.lastBets ? s.lastBets[n] || 0 : 0;
+  // No veil or lock icon while the light runs (running.png): squares keep their look, so a light step changes
+  // classes only. They are still aria-disabled.
   let dyn = '';
-  const lockedPhase = ['SPINNING', 'RESOLVING', 'DOUBLE_RUN', 'ERROR', 'RECOVERY'].includes(s.phase);
-  if (lockedPhase && !isLit) dyn += `<span class="veil" style="opacity:.25"></span><span class="lock">${icon('lock')}</span>`;
   const dimPhase = ['GAMBLE_OFFER', 'GAMBLE', 'PAYOUT'].includes(s.phase) || ui.gambleLoss;
   if (dimPhase && (w1 || w2) && n !== w1 && n !== w2) dyn += '<span class="veil" style="opacity:.5"></span>';
   if (live) dyn += `<span class="bet">${live}</span>`;
@@ -268,7 +262,7 @@ export function centreModel(s, ui, c) {
   if (s.phase === 'ERROR') return { ...M, status: ['coral', 'Paused'], headline: 'Paused', sub: '' };
   if (s.phase === 'RECOVERY') return { ...M, status: ['amber', 'Restoring'], headline: 'Round restored', sub: '' };
   if (s.phase === 'SPINNING' || s.phase === 'RESOLVING') {
-    return { ...M, status: ['amber', 'Running'], headline: 'Running…', sub: 'Bets are locked until the light stops.', note: `Credits ${fmt(r.balanceBefore)} − ${fmt(r.totalBet)} bet = ${fmt(r.balance)}` };
+    return { ...M, status: ['amber', 'Running'], headline: 'Running…', sub: 'Bets are locked until the light stops.', note: `Credits ${fmt(r.balanceBefore)} − ${fmt(r.totalBet)} bet = <b>${fmt(r.balance)}</b>` };
   }
   if (s.phase === 'DOUBLE_RUN') {
     const b = r.bets[r.s1] || 0;
@@ -310,59 +304,24 @@ export function centreModel(s, ui, c) {
     return { ...M, status: ['idle', 'Betting open'], headline: 'No win this time', sub: `The light stopped on #${r.s1} (${MULT[r.s1]}x). Your bets are still on the board. Press START to play them again.`, results: [{ n: r.s1, text: `Stopped on #${r.s1} · no bet there` }] };
   }
   if (c.ghosts) return { ...M, status: ['idle', 'Betting open'], headline: 'Place your bets', sub: `Last round’s bets are shown as outlines. Press Rebet to place all ${totalOf(s.lastBets)} again.` };
-  return { ...M, status: ['idle', 'Betting open'], headline: 'Place your bets', sub: 'Pick a chip, tap squares, then press START.' };
+  return { ...M, status: ['idle', 'Betting open'], headline: 'Place your bets', sub: 'Pick a chip, tap squares, then press <b>Start</b>.' };
 }
 
+/** Centre (v3 batch 4, betting.png / running.png): status pills, the big multiplier, a flat title and sub line,
+ *  and the pays row. The number's text is written by the controller (app.js paintBig), so a light step never
+ *  rebuilds this region. */
 export function centre(s, ui, c, L) {
   const M = centreModel(s, ui, c);
-  const cw = L.inner.w;
-  const small = cw < 560;
-  const k = Math.min(1, L.f);
-  const pf = fs(L, 13, 11);
-  const st = `<span class="pill st ${M.status[0]}" data-role="status" style="font-size:${px(pf)};padding:${px(5 * L.s)} ${px(12 * L.s)}"><span class="dot"></span>${M.status[1]}</span>`;
-  const dr = `<span class="pill dr${M.dr ? ' on' : ''}" style="font-size:${px(pf)};padding:${px(5 * L.s)} ${px(12 * L.s)}"><span class="dot"></span>${M.dr ? 'Double Run on' : 'Double Run · 1 in 25'}</span>`;
-  const hf = Math.max(18, (L.bp === 'tablet-portrait' || L.bp === 'tablet-landscape' ? 30 : fs(L, 56, 30)) * k);
-  const rf = fs(L, 15, 12);
-  const rl = (x) => {
-    const m = MULT[x.n];
-    if (x.text) return `<span class="pill res" style="font-size:${px(rf)}">${tierBand(m, rf * 0.8, rf * 1.45)}<span>${x.text}</span></span>`;
-    return `<span class="pill res ${x.second ? 'w2' : 'w1'}" style="font-size:${px(rf)}">${tierBand(m, rf * 0.8, rf * 1.45)}<span>${x.label ? `${x.label}: ` : ''}#${x.n} · ${x.bet} × ${m} = <b class="${x.second ? 'cyan' : 'mint'}">${fmt(x.win)}</b></span></span>`;
-  };
-  let resultLine = '';
-  if (M.results) resultLine = `<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">${M.results.map(rl).join('')}</div>`;
-  if (M.note) resultLine = `<span class="pill" style="font-size:${px(fs(L, 14, 12))};padding:6px 12px">${M.note}</span>`;
-  let legend;
-  if (small) {
-    const lf = 10;
-    legend = `<div class="legend" style="gap:6px;width:100%;justify-content:center">${TIERS.map((m) => `<div class="lg" style="padding:4px 2px;gap:3px">${tierBand(m, lf, lf * 1.6)}<span class="lo" style="font-size:${px(lf)};font-weight:700;white-space:nowrap">${ODDS[m].replace('1 in ', '1/')}</span></div>`).join('')}</div>`;
-  } else {
-    legend = `<div style="width:100%"><div class="sect-lbl" style="font-size:${px(fs(L, 11, 10))};margin-bottom:${px(8 * L.s)}"><span>Pays (total return per credit)</span><span class="r">hit chance per round</span></div><div class="legend" style="gap:${px(10 * L.s)}">${TIERS.map((m) => `<div class="lg" style="padding:${px(10 * L.s)} 6px;gap:${px(6 * L.s)}">${tierBand(m, fs(L, 17, 12), fs(L, 28, 20))}<span style="font-size:${px(fs(L, 13, 11))};font-weight:700">${ODDS[m]}</span><span class="lo" style="font-size:${px(fs(L, 12, 10))};font-weight:600">${COUNT_BY_TIER[m]} square${COUNT_BY_TIER[m] > 1 ? 's' : ''}</span></div>`).join('')}</div></div>`;
-  }
-  const padc = small ? 12 : 24 * L.s;
-  const gap = small ? 10 : 16 * L.s;
-  const hist = historyRow(s, cw - 2 * padc, small, L);
-  return `<div class="centre" style="left:${px(L.inner.x)};top:${px(L.inner.y)};width:${px(cw)};height:${px(L.inner.h)};padding:${px(padc)};gap:${px(gap)}">
-    <div style="display:flex;justify-content:space-between;width:100%;gap:8px">${st}${dr}</div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:${px(10 * L.s)};${M.hide ? 'opacity:0' : ''}" aria-live="polite">
-      <div class="headline${M.tone ? ` ${M.tone}` : ''}${M.banner && !c.reduced ? ' banner' : ''}" data-role="headline" style="font-size:${px(hf)}">${UP(M.headline)}</div>
-      ${M.sub ? `<div class="muted" style="font-size:${px(fs(L, 18, 13))};font-weight:600;text-align:center;max-width:${px(cw * 0.86)};line-height:1.4">${M.sub}</div>` : ''}
-      ${resultLine}</div>
-    <div style="display:flex;flex-direction:column;gap:${px(14 * L.s)};width:100%">${legend}${hist}</div></div>`;
-}
-
-function historyRow(s, w, small, L) {
-  const items = s.history.slice(-HISTORY_SHOWN);
-  const used = items.reduce((a, it) => a + (it.s2 ? 2 : 1), 0);
-  const slots = Math.max(10, used);
-  const gap = 6;
-  const ew = (w - (slots - 1) * gap) / slots;
-  const eh = small ? 34 : fs(L, 52, 36);
-  const f = small ? 10.5 : fs(L, 15, 11);
-  const one = (n, ww) => { const m = MULT[n]; return `<div class="he t${m}" style="width:${px(ww)};height:${px(eh)};font-size:${px(f)}"><span>#${n}</span><span class="m" style="font-size:${px(f * 0.8)}">${tierLabel(m)}</span></div>`; };
-  const line = items.map((it) => (it.s2
-    ? `<div class="he dr" style="width:${px(ew * 2 + gap)};height:${px(eh)};font-size:${px(f)}" aria-label="Double Run: #${it.s1} and #${it.s2}"><span class="tab">DOUBLE</span>${one(it.s1, ew - 2)}${one(it.s2, ew - 2)}</div>`
-    : one(it.s1, ew))).join('');
-  return `<div style="width:100%"><div class="sect-lbl" style="font-size:${px(fs(L, 11, 10))};margin-bottom:${px(8 * L.s)}"><span>Last 10 rounds</span><span class="r">newest →</span></div><div class="hist" data-role="history" style="gap:${px(gap)};min-height:${px(eh)}">${line || `<span class="lo" style="font-size:${px(f)};font-weight:600;align-self:center">No rounds yet.</span>`}</div></div>`;
+  const I = L.inner;
+  const st = `<span class="cp ${M.status[0]}" data-role="status">${M.status[1]}</span>`;
+  const dr = `<span class="cp${M.dr ? ' on' : ''}">${M.dr ? 'Double Run on' : `Double Run · 1 in ${DOUBLE_RUN_ONE_IN}`}</span>`;
+  const res = (x) => `<div class="cres">${x.text || `${x.label ? `${x.label}: ` : ''}#${x.n} · ${x.bet} × ${MULT[x.n]} = <b class="${x.second ? 'cyan' : 'mint'}">${fmt(x.win)}</b>`}</div>`;
+  const pays = I.w < 420 ? '' : `<div class="pays">${TIERS.map((m) => `<span class="pay"><b>${m}x</b><i>${COUNT_BY_TIER[m]} square${COUNT_BY_TIER[m] > 1 ? 's' : ''}</i></span>`).join('')}</div>`;
+  return `<div class="centre" style="left:${px(I.x)};top:${px(I.y)};width:${px(I.w)};height:${px(I.h)}">
+    <div class="cps">${st}${dr}</div>
+    <div class="big" aria-hidden="true"><span data-role="big"></span><small>x</small></div>
+    <div class="ctxt" aria-live="polite"${M.hide ? ' style="opacity:0"' : ''}><div class="ctitle${M.tone ? ` ${M.tone}` : ''}" data-role="headline">${M.headline}</div>${M.sub ? `<div class="csub">${M.sub}${M.note ? ` ${M.note}` : ''}</div>` : ''}${(M.results || []).map(res).join('')}</div>
+    ${pays}</div>`;
 }
 
 // ------------------------------------------------------------------ bottom bar (v3 batch 2)

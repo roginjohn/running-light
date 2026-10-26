@@ -1,0 +1,44 @@
+// v3 batch 4: pure helpers for the track's running light and the centre's big multiplier. No DOM, no layout
+// reads: the controller turns these strings into class swaps and one textContent write per light step.
+import { MULT } from '../engine/config.js';
+
+/** Winning squares of the current round (only once revealed). */
+export function winners(s, ui) {
+  const r = s.round;
+  if (!r) return { w1: null, w2: null };
+  const revealed = ['GAMBLE_OFFER', 'GAMBLE', 'PAYOUT'].includes(s.phase) || ui.gambleLoss;
+  const w1 = (revealed || s.phase === 'DOUBLE_RUN') && r.bets[r.s1] ? r.s1 : null;
+  const w2 = revealed && r.s2 && r.bets[r.s2] ? r.s2 : null;
+  return { w1, w2 };
+}
+
+/** Light classes for square n: lit / trail1 / trail2 (second light: lit2 / trailc1 / trailc2), or lvl1 / lvl2
+ *  while the reduced-motion fade comes up, plus `land` once a run has stopped on n. */
+export function lightClass(n, ui) {
+  const l1 = ui.light1, l2 = ui.light2;
+  let L = null, light = null;
+  if (l2 && l2.idx === n) [L, light] = [l2, 'lit2'];
+  else if (l2 && l2.trail && l2.trail[0] === n) light = 'trailc1';
+  else if (l2 && l2.trail && l2.trail[1] === n) light = 'trailc2';
+  else if (l1 && l1.idx === n) [L, light] = [l1, 'lit'];
+  else if (l1 && l1.trail && l1.trail[0] === n) light = 'trail1';
+  else if (l1 && l1.trail && l1.trail[1] === n) light = 'trail2';
+  if (L && L.level != null && L.level < 1) return L.level < 0.5 ? 'lvl1' : 'lvl2';
+  if (L && L.done) return `${light} land`;
+  return light;
+}
+
+/** The big mono number is the MULTIPLIER (open question 3): "00.00" while betting, the multiplier under the
+ *  light during a run, then the stopped square's multiplier. It never shows a stop before the light gets there.
+ *  (The win colour and the Double Run "960.00x + 24.00x" form are result states: batch 5.) */
+export const bigMult = (m) => `${String(m).padStart(2, '0')}.00`;
+export function bigValue(s, ui) {
+  const lit = ui.light2 && ui.light2.idx ? ui.light2 : ui.light1 && ui.light1.idx ? ui.light1 : null;
+  if (lit) return bigMult(MULT[lit.idx]);
+  const r = s.round;
+  if (r && ['RESOLVING', 'DOUBLE_RUN', 'GAMBLE_OFFER', 'GAMBLE', 'PAYOUT'].includes(s.phase)) {
+    const { w1, w2 } = winners(s, ui);
+    return bigMult(MULT[w1 || w2 || r.s1]);
+  }
+  return bigMult(0);
+}

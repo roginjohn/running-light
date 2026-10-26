@@ -132,7 +132,7 @@ test('Start is accent-blue with white text, Collect accent-green with dark text;
 });
 
 test('no glows or shadows on the rail controls', () => {
-  for (const sel of ['.rail, .dock', '.betin', '.btn', '.btn.sec', '.btn.sec.hi', '.chip', '.chip.sel::after', '.rnote', '.lastbets .lb', '.credits']) {
+  for (const sel of ['.rail, .dock', '.betin', '.btn', '.btn.sec', '.btn.sec.hi', '.chip', '.chip.sel::after', '.rnote', '.lb', '.lb.new', '.credits']) {
     assert.doesNotMatch(rule(sel), /box-shadow|text-shadow|filter|gradient/, sel);
   }
   assert.doesNotMatch(STYLES, /\.chip\.sel \{[^}]*transform/, 'no chip lift');

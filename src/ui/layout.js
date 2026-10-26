@@ -7,28 +7,33 @@
 // viewports fall back to the tablet-portrait layout (scaled down). See README.md.
 
 export const FRAME = { maxW: 1600, maxH: 980, margin: 16, rail: 230, divider: 1, bar: 40 };
+export const TRACK = { gap: 6, pitchMin: 40, pitchMax: 70 };
+export const TOP_ROW = { h: 56, hSmall: 44 };
+// big mono multiplier (tokens.md §2): 88 desktop, 64 at 1280x720, 52 on tablet portrait
+export const BIG_F = { 'desktop-xl': 88, desktop: 64, 'tablet-landscape': 64, 'tablet-portrait': 52 };
 
 // Rail controls (v3 batch 3, tokens.md §3): rail padding 16 (12 at 1280) with a 12 gap between blocks; input 40,
 // chip 34 (40 on tablet), secondary button 32, primary button 52 (48 at 1280, 56 on tablet).
+// px = the square pitch the v2 WIN tag sizes were drawn for (tags scale by pitch / px; restyled in batch 5).
 const BPS = {
   'desktop-xl': {
-    s: 1, px: 84, py: 80, g: 8,
-    tile: { num: 17, bulb: 24, band: 21, bandF: 13, badge: 22, badgeF: 13 }, tag: { h: 22, f: 12.5, gx: 70, gy: 32 },
+    s: 1, px: 84,
+    tag: { h: 22, f: 12.5, gx: 70, gy: 32 },
     rail: { pad: 16, chip: 34, gapY: 12, inputH: 40, actH: 32, mainH: 52 },
   },
   desktop: {
-    s: 0.8, px: 53, py: 52, g: 5,
-    tile: { num: 13, bulb: 15, band: 15, bandF: 10, badge: 16, badgeF: 10.5 }, tag: { h: 17, f: 10.5, gx: 54, gy: 24 },
+    s: 0.8, px: 53,
+    tag: { h: 17, f: 10.5, gx: 54, gy: 24 },
     rail: { pad: 12, chip: 34, gapY: 12, inputH: 40, actH: 32, mainH: 48 },
   },
   'tablet-landscape': {
-    s: 0.8, px: 44, py: 54, g: 4,
-    tile: { num: 12, bulb: 15, band: 15, bandF: 9.5, badge: 16, badgeF: 10 }, tag: { h: 16, f: 10, gx: 50, gy: 22 },
+    s: 0.8, px: 44,
+    tag: { h: 16, f: 10, gx: 50, gy: 22 },
     rail: { pad: 12, chip: 34, gapY: 12, inputH: 40, actH: 32, mainH: 48 },
   },
   'tablet-portrait': {
-    s: 0.85, px: 45, py: 44, g: 4,
-    tile: { num: 12, bulb: 14, band: 15, bandF: 9.5, badge: 16, badgeF: 10 }, tag: { h: 16, f: 10, gx: 50, gy: 22 },
+    s: 0.85, px: 45,
+    tag: { h: 16, f: 10, gx: 50, gy: 22 },
     dock: { minH: 390, chip: 40, gapY: 12, inputH: 40, actH: 32, mainH: 56 },
   },
 };
@@ -64,55 +69,52 @@ export function computeLayout(W, H) {
   const bodyH = frame.h - FRAME.bar;
   L.header = frame.y; // top edge of the playable area (tooltips and full dialogs stay below it)
 
-  let stage, rail = null, dock = null, f;
+  let stage, rail = null, dock = null;
   if (!dockMode) {
     rail = { ...B.rail, x: frame.x, y: frame.y, w: FRAME.rail, h: bodyH };
     const gx = frame.x + FRAME.rail + FRAME.divider;
     stage = { x: gx, y: frame.y, w: frame.x + frame.w - gx, h: bodyH };
-    const fw = (stage.w - 24 + B.g) / (COLS * B.px);
-    const fh = (stage.h - 24 + B.g) / (ROWS * B.py);
-    f = Math.max(0.3, Math.min(1, fw, fh));
   } else {
-    const d = B.dock;
-    const fw = (frame.w - 24 + B.g) / (COLS * B.px);
-    const fh = (bodyH - 24 - 12 - d.minH + B.g) / (ROWS * B.py);
-    f = Math.max(0.3, Math.min(1, fw, fh));
     stage = { x: frame.x, y: frame.y, w: frame.w, h: 0 };
   }
 
-  const px = B.px * f, py = B.py * f, g = Math.max(2, B.g * f);
+  // Track (v3 batch 4, tokens.md §4): a top row ("Last results" / "Last bets"), then the track box. Square pitch
+  // = clamp(40, floor(min(boxW / 16, boxH / 11)), 70), tile = pitch - 6, centred in the box. The 40 floor only
+  // gives way when 16 squares of 40 cannot fit the width (the narrow < 600 px fallback, not a v3 layout).
+  const xl = bp === 'desktop-xl';
+  const padX = xl ? 24 : 16;
+  const top = { x: stage.x + padX, y: stage.y, w: stage.w - 2 * padX, h: xl ? TOP_ROW.h : TOP_ROW.hSmall };
+  const boxW = stage.w - 2 * padX;
+  const boxH = dockMode ? bar.y - 12 - B.dock.minH - (stage.y + top.h) : stage.h - top.h;
+  const fit = Math.floor(Math.min(boxW / COLS, boxH / ROWS));
+  const pitch = Math.min(TRACK.pitchMax, Math.max(fit, Math.min(TRACK.pitchMin, Math.floor(boxW / COLS))));
+  const g = pitch >= TRACK.pitchMin ? TRACK.gap : Math.max(2, Math.round(pitch * 0.12));
+  const f = Math.min(1, pitch / B.px);
+  const px = pitch, py = pitch;
   const tw = px - g, th = py - g;
   const trackW = COLS * px - g, trackH = ROWS * py - g;
-  if (dockMode) stage.h = trackH + 24;
+  if (dockMode) stage.h = top.h + trackH + 12;
   const track = {
-    x: stage.x + (stage.w - trackW) / 2,
-    y: stage.y + (dockMode ? 12 : Math.max(12, (stage.h - trackH) / 2)),
+    x: Math.round(stage.x + (stage.w - trackW) / 2),
+    y: Math.round(stage.y + top.h + (dockMode ? 0 : Math.max(0, (boxH - trackH) / 2))),
     w: trackW, h: trackH,
   };
   if (dockMode) {
     const y = stage.y + stage.h;
     dock = { ...B.dock, x: frame.x + 12, y, w: frame.w - 24, h: bar.y - y - 12 };
   }
-  const tile = {
-    w: tw, h: th,
-    num: Math.max(10, B.tile.num * f), bulb: Math.max(8, B.tile.bulb * f), band: Math.max(11, B.tile.band * f),
-    bandF: Math.max(9, B.tile.bandF * f), badge: Math.max(13, B.tile.badge * f), badgeF: Math.max(9, B.tile.badgeF * f),
-  };
-  tile.numX = Math.max(4, tw * 0.11);
-  tile.numY = Math.max(4, th * 0.1);
-  tile.bulbY = (th - tile.band) * 0.56 + 2;
-  tile.lock = Math.max(10, tile.num * 0.75);
+  // tile type (tokens.md §2-3): square numbers hidden at 48 px tiles and below; multiplier 12/11/10; badge 18/16/15
+  const tile = { w: tw, h: th, showNum: tw > 48, mult: tw >= 60 ? 12 : tw >= 44 ? 11 : 10, badge: tw >= 60 ? 18 : tw >= 44 ? 16 : 15 };
   const tag = { h: Math.max(14, B.tag.h * f), f: Math.max(9, B.tag.f * f), gx: B.tag.gx * f, gy: B.tag.gy * f };
-  const inner = {
-    x: track.x + px + tag.gx, y: track.y + py + tag.gy,
-    w: (COLS - 2) * px - g - 2 * tag.gx, h: (ROWS - 2) * py - g - 2 * tag.gy,
-  };
+  // centre panel: the ring interior inset by 12 px (tokens.md §4)
+  const inner = { x: track.x + tw + 12, y: track.y + th + 12, w: (COLS - 1) * px - tw - 24, h: (ROWS - 1) * py - th - 24 };
+  L.bigF = Math.min(BIG_F[bp], Math.floor(inner.w / 5.2));
   const pos = [null];
   for (let n = 1; n <= 50; n++) {
     const [c, r, side] = cell(n);
     pos.push({ x: track.x + c * px, y: track.y + r * py, side });
   }
-  Object.assign(L, { f, px, py, g, tile, tag, frame, bar, stage, rail, dock, track, inner, pos });
+  Object.assign(L, { f, px, py, g, tile, tag, frame, bar, stage, rail, dock, top, track, inner, pos });
   return L;
 }
 
@@ -120,9 +122,8 @@ export function computeLayout(W, H) {
 export function layoutVars(L) {
   const t = L.tile;
   const v = {
-    '--s': L.s, '--tw': `${t.w}px`, '--th': `${t.h}px`, '--num-f': `${t.num}px`, '--num-x': `${t.numX}px`, '--num-y': `${t.numY}px`,
-    '--bulb': `${t.bulb}px`, '--bulb-y': `${t.bulbY}px`, '--band': `${t.band}px`, '--band-f': `${t.bandF}px`,
-    '--badge': `${t.badge}px`, '--badge-f': `${t.badgeF}px`, '--lock-s': `${t.lock}px`, '--tag-h': `${L.tag.h}px`, '--tag-f': `${L.tag.f}px`,
+    '--s': L.s, '--tw': `${t.w}px`, '--th': `${t.h}px`, '--num-d': t.showNum ? 'block' : 'none', '--mult-f': `${t.mult}px`,
+    '--badge': `${t.badge}px`, '--big-f': `${L.bigF}px`, '--tag-h': `${L.tag.h}px`, '--tag-f': `${L.tag.f}px`,
   };
   const c = L.rail || L.dock;
   Object.assign(v, {

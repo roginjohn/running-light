@@ -11,8 +11,8 @@ import { createCryptoRng } from '../engine/rng.js';
 import { halveBets, doubleBets } from './betscale.js';
 import { recordTotal, loadTotals, saveTotals } from './bettotals.js';
 
-const REGIONS = ['frame', 'stage', 'track', 'tags', 'centre', 'credits', 'bar', 'controls', 'toast', 'tip', 'fx', 'modal', 'start'];
-const GAME_REGIONS = ['credits', 'track', 'centre', 'bar', 'controls'];
+const REGIONS = ['frame', 'stage', 'track', 'tags', 'centre', 'top', 'credits', 'bar', 'controls', 'toast', 'tip', 'fx', 'modal', 'start'];
+const GAME_REGIONS = ['credits', 'track', 'centre', 'top', 'bar', 'controls'];
 const UI_TOASTS = { [TOASTS.noSave]: "Progress won't be saved on this device" };
 const LONG_PRESS_MS = 400;
 const GAMBLE_LOSS_MS = 3000;
@@ -146,7 +146,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     // persistent tile buttons (#1 top-left, clockwise)
     if (!R.track.children.length) {
       let h = '';
-      for (let n = 1; n <= 50; n++) h += `<button class="tile hit" data-id="sq-${n}" tabindex="${n === ui.roving ? 0 : -1}">${V.tileStatic(n, L)}</button>`;
+      for (let n = 1; n <= 50; n++) h += `<button class="tile hit" data-id="sq-${n}" tabindex="${n === ui.roving ? 0 : -1}">${V.tileStatic(n)}</button>`;
       R.track.innerHTML = h;
       tileCache.length = 0;
     }
@@ -173,8 +173,25 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
         else el.removeAttribute('aria-disabled');
       }
       if (!prev || prev.label !== look.label) el.setAttribute('aria-label', look.label);
-      el.tabIndex = n === ui.roving ? 0 : -1;
+      const ti = n === ui.roving ? 0 : -1;
+      if (el.tabIndex !== ti) el.tabIndex = ti;
       tileCache[n] = look;
+    }
+  }
+
+  // Big multiplier: written as text on a fixed-size, contained element (no layout reads, at most once per light
+  // step); the centre region's markup never carries the value, so a step never rebuilds the centre.
+  let bigEl = null, bigShown = null;
+  function paintBig() {
+    if (!bigEl || !bigEl.isConnected) {
+      bigEl = R.centre.querySelector('[data-role="big"]');
+      bigShown = null;
+    }
+    if (!bigEl) return;
+    const v = V.bigValue(game.state, ui);
+    if (v !== bigShown) {
+      bigEl.textContent = v;
+      bigShown = v;
     }
   }
 
@@ -189,6 +206,8 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     if (want('track')) renderTiles(c);
     if (want('tags')) setRegion('tags', V.winTags(s, ui, L));
     if (want('centre')) setRegion('centre', V.centre(s, ui, c, L));
+    paintBig();
+    if (want('top')) setRegion('top', V.topRow(s, ui, L));
     if (want('bar')) setRegion('bar', V.bottomBar(s, ui, c, L));
     if (want('controls')) setRegion('controls', V.controls(s, ui, c, L));
     if (want('toast')) setRegion('toast', c.modal ? '' : V.toastHtml(ui.toast, L));
