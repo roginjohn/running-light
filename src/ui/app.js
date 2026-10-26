@@ -8,6 +8,8 @@ import { planFirstRunV2, planSecondRunV2, planFade, advance } from './lightplan.
 import { MULT, TOASTS } from '../engine/config.js';
 import { totalOf, countOf, sameBets } from '../engine/bets.js';
 import { createCryptoRng } from '../engine/rng.js';
+import { halveBets, doubleBets } from './betscale.js';
+import { recordTotal, loadTotals, saveTotals } from './bettotals.js';
 
 const REGIONS = ['frame', 'stage', 'track', 'tags', 'centre', 'credits', 'bar', 'controls', 'toast', 'tip', 'fx', 'modal', 'start'];
 const GAME_REGIONS = ['credits', 'track', 'centre', 'bar', 'controls'];
@@ -31,7 +33,9 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     gambleLoss: null, celebration: null, confetti: [], ringOn: false, roving: 1, showLastStop: false, startLocked: false,
     paused: false, lightIndex: 1, start: startScreen, ringStep: 0, settingsReset, reducedNow: false,
     fairness: false, infoFrom: null, // fairness panel is UI-only (no engine state); infoFrom = icon that opened Info
+    betTotals: [], // "Last bets": [{ id: roundId, t: total }], newest first (ui/bettotals.js)
   };
+  const backend = game.store && game.store.backend;
 
   // ------------------------------------------------------------ animation scheduler (rAF; pauses when the tab is hidden)
   const tasks = new Set();
@@ -329,8 +333,16 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     });
   }
 
+  function noteBetTotal(r) {
+    const next = recordTotal(ui.betTotals, r.roundId, r.totalBet);
+    if (next === ui.betTotals) return;
+    ui.betTotals = next;
+    saveTotals(backend, next);
+  }
+
   function startRound() {
     const r = game.state.round;
+    noteBetTotal(r);
     ui.showLastStop = false;
     ui.pulse = null;
     ui.chase = null;
@@ -629,6 +641,9 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
 
   function onInit() {
     const s = game.state;
+    ui.betTotals = loadTotals(backend);
+    if (s.round) noteBetTotal(s.round); // a round restored after a reload (no-op if it was already recorded)
+    else if (!ui.betTotals.length && s.lastBets) noteBetTotal({ roundId: null, totalBet: totalOf(s.lastBets) });
     ui.lightIndex = s.history.length ? s.history[s.history.length - 1].s1 : 1;
     relayout();
     if (ui.settingsReset) showToast('Settings were reset to the defaults', 'info');
@@ -708,6 +723,30 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     return { ok: true };
   }
 
+  // ------------------------------------------------------------ 1/2 and x2 (scale every square's bet)
+  // The locked engine has no scale action, so the UI computes the clamped map (ui/betscale.js, engine limits) and
+  // applies it the way the engine's own bet handlers do: one undo step, ghosts cleared. Only while betting is open;
+  // START re-checks every limit in the engine.
+  function scaleBets(kind) {
+    const c = ctx();
+    const s = game.state;
+    if (c.mode !== 'bet' || !c.canBet || !c.total || !game.canDispatch({ type: 'ADD_BET', square: 1 })) return null;
+    const r = kind === 'half' ? halveBets(s.bets) : doubleBets(s.bets, s.balance);
+    if (r.limit) {
+      audio.play('sfx_deny');
+      showToast(TOASTS[r.limit], r.limit === 'credits' ? 'error' : 'warn');
+    }
+    if (!r.changed) return { ok: false, reason: 'no change' };
+    s.undo.push(s.bets);
+    s.bets = r.bets;
+    s.ghosts = false;
+    audio.play(kind === 'half' ? 'sfx_chip_remove' : 'sfx_chip_place');
+    render();
+    const n = countOf(r.bets);
+    if (!r.limit) announce(`Total bet ${V.fmt(totalOf(r.bets))} on ${n} square${n === 1 ? '' : 's'}.`);
+    return { ok: true };
+  }
+
   // ------------------------------------------------------------ input
   function activate(id, { shift = false } = {}) {
     const d = (a) => game.dispatch(a);
@@ -723,6 +762,8 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
       case 'btn-undo': return d({ type: 'UNDO' });
       case 'btn-clear': return d({ type: 'CLEAR' });
       case 'btn-rebet': return d({ type: 'REBET' });
+      case 'btn-half': return scaleBets('half');
+      case 'btn-double': return scaleBets('double');
       case 'btn-start': {
         if (ui.startLocked) return null;
         ui.startLocked = true; // disables synchronously on first activation
@@ -994,5 +1035,6 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     },
     pendingTasks: () => tasks.size,
     leaveStart: () => leaveStart(),
+    scaleBets,
   };
 }

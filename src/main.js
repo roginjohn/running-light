@@ -57,7 +57,7 @@ async function boot() {
   assertArrangement(tokens['board-arrangement']); // B1 startup assertion (v3 tokens vs config.js)
   try {
     await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 2500))]);
-    await Promise.all(['600 20px Poppins', '700 20px Poppins', "600 20px 'JetBrains Mono'", "800 20px 'Plus Jakarta Sans'"].map((f) => document.fonts.load(f)));
+    await Promise.all(['600 20px Poppins', '700 20px Poppins', "600 20px 'JetBrains Mono'"].map((f) => document.fonts.load(f)));
   } catch { /* fonts are decorative; fall back silently */ }
   label = 'Loading sounds…';
   // T.noStorage simulates unavailable localStorage the same way detectBackend() falls back.

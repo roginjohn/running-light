@@ -8,28 +8,28 @@
 
 export const FRAME = { maxW: 1600, maxH: 980, margin: 16, rail: 230, divider: 1, bar: 40 };
 
-// Rail controls are still the v2 components (restyled in batch 3). Only their container changed: they now sit in the
-// 230 px v3 rail, so the button sizes are the ones that fit that width.
+// Rail controls (v3 batch 3, tokens.md §3): rail padding 16 (12 at 1280) with a 12 gap between blocks; input 40,
+// chip 34 (40 on tablet), secondary button 32, primary button 52 (48 at 1280, 56 on tablet).
 const BPS = {
   'desktop-xl': {
     s: 1, px: 84, py: 80, g: 8,
     tile: { num: 17, bulb: 24, band: 21, bandF: 13, badge: 22, badgeF: 13 }, tag: { h: 22, f: 12.5, gx: 70, gy: 32 },
-    rail: { pad: 16, chip: 68, gapY: 16, fieldH: 140, actH: 40, actF: 13, mainH: 64, mainF: 22 },
+    rail: { pad: 16, chip: 34, gapY: 12, inputH: 40, actH: 32, mainH: 52 },
   },
   desktop: {
     s: 0.8, px: 53, py: 52, g: 5,
     tile: { num: 13, bulb: 15, band: 15, bandF: 10, badge: 16, badgeF: 10.5 }, tag: { h: 17, f: 10.5, gx: 54, gy: 24 },
-    rail: { pad: 12, chip: 54, gapY: 12, fieldH: 78, actH: 32, actF: 12, mainH: 56, mainF: 20, compact: true },
+    rail: { pad: 12, chip: 34, gapY: 12, inputH: 40, actH: 32, mainH: 48 },
   },
   'tablet-landscape': {
     s: 0.8, px: 44, py: 54, g: 4,
     tile: { num: 12, bulb: 15, band: 15, bandF: 9.5, badge: 16, badgeF: 10 }, tag: { h: 16, f: 10, gx: 50, gy: 22 },
-    rail: { pad: 12, chip: 40, gapY: 12, fieldH: 78, actH: 32, actF: 12, mainH: 56, mainF: 20, compact: true },
+    rail: { pad: 12, chip: 34, gapY: 12, inputH: 40, actH: 32, mainH: 48 },
   },
   'tablet-portrait': {
     s: 0.85, px: 45, py: 44, g: 4,
     tile: { num: 12, bulb: 14, band: 15, bandF: 9.5, badge: 16, badgeF: 10 }, tag: { h: 16, f: 10, gx: 50, gy: 22 },
-    dock: { minH: 390, chip: 64, actH: 44, actF: 14, mainH: 76, mainF: 26, fieldH: 72 },
+    dock: { minH: 390, chip: 40, gapY: 12, inputH: 40, actH: 32, mainH: 56 },
   },
 };
 
@@ -126,8 +126,8 @@ export function layoutVars(L) {
   };
   const c = L.rail || L.dock;
   Object.assign(v, {
-    '--chip': `${c.chip}px`, '--gap-y': `${c.gapY || 14}px`, '--rail-pad': `${c.pad || 16}px`, '--field-h': `${c.fieldH}px`,
-    '--act-h': `${c.actH}px`, '--act-f': `${c.actF}px`, '--main-h': `${c.mainH}px`, '--main-f': `${c.mainF}px`,
+    '--chip': `${c.chip}px`, '--gap-y': `${c.gapY}px`, '--rail-pad': `${c.pad || 0}px`, '--input-h': `${c.inputH}px`,
+    '--act-h': `${c.actH}px`, '--main-h': `${c.mainH}px`,
   });
   return v;
 }
