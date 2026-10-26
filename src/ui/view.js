@@ -5,8 +5,7 @@ import { totalOf } from '../engine/bets.js';
 import { icon, star, chipFace, v3icon, v3mark } from './icons.js';
 import { halveBets, doubleBets } from './betscale.js';
 import { cell } from './layout.js';
-import { winTagRect } from './layout.js';
-import { winners, lightClass, bigMult, bigValue } from './track.js';
+import { winners, lightClass, bigMult, bigValue, bigResult } from './track.js';
 
 export const fmt = (n) => Number(n).toLocaleString('en-US');
 const px = (v) => `${Math.round(v * 100) / 100}px`;
@@ -14,7 +13,7 @@ const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const fs = (L, v, min) => Math.max(min, v * L.s);
 const kc = (k) => `<span class="kc">${k}</span>`;
 const dis = (d) => (d ? ' aria-disabled="true"' : '');
-const UP = (c) => c.toUpperCase();
+const cap = (c) => c[0].toUpperCase() + c.slice(1);
 
 export const ODDS = Object.fromEntries(TIERS.map((t) => [t, `1 in ${fmt(Math.round(1 / pRound(t)))}`]));
 
@@ -40,7 +39,7 @@ export function modeOf(s, ui) {
   }
 }
 
-export { winners, lightClass, bigMult, bigValue };
+export { winners, lightClass, bigMult, bigValue, bigResult };
 
 // ------------------------------------------------------------------ header
 function bunting(W, hh) {
@@ -117,8 +116,11 @@ export function lastWin(s, ui, c) {
     return { label: 'This round', value: w1, note: 'so far · second light running' };
   }
   if (ui.gambleLoss) return { label: 'Last win', value: 0, note: 'gamble lost', lost: true };
-  if (m === 'offer') return { label: 'Uncollected win', value: r.currentWin, note: 'collect it or gamble it', pending: true };
-  if (m === 'ingamble') return { label: 'Win in gamble', value: r.currentWin, note: 'not collected yet', pending: true };
+  if (m === 'offer') {
+    const { w1, w2 } = winners(s, ui);
+    return { label: 'Uncollected win', value: r.currentWin, note: w1 && w2 ? '2 squares' : '' };
+  }
+  if (m === 'ingamble') return { label: 'In gamble', value: r.currentWin, note: 'not collected' };
   if (m === 'payout') return { label: 'Last win', value: r.currentWin, note: 'collected' };
   const lw = s.lastWin;
   if (m === 'bet' && lw.kind === 'loss') return { label: 'Last win', value: 0, note: 'no win this round' };
@@ -129,12 +131,13 @@ export function lastWin(s, ui, c) {
   return null; // nothing to report yet: the note is not shown
 }
 
-/** Rail note (component sheet): "Uncollected win 2,400" etc. Hidden until there is a result to report. */
+/** Rail note (component sheet): "Uncollected win 2,400", "In gamble 4,800 · not collected". Hidden until there
+ *  is a result to report. */
 function railNote(s, ui, c) {
   const lw = lastWin(s, ui, c);
   if (!lw) return '';
-  const v = ui.displayWin == null ? lw.value : ui.displayWin;
-  return `<div class="rnote${lw.pending ? ' pending' : ''}${lw.lost ? ' lost' : ''}"><span class="k">${lw.label}</span><b data-role="lastwin">${fmt(v)}</b><span class="n">${lw.note}</span></div>`;
+  const v = lw.value; // the count-up writes this number's text only (app.js paintWin), never the rail markup
+  return `<div class="rnote${lw.lost ? ' lost' : ''}"><span class="k">${lw.label}</span> <b data-role="lastwin">${fmt(v)}</b>${lw.note ? `<span class="n"> · ${lw.note}</span>` : ''}</div>`;
 }
 
 // ------------------------------------------------------------------ top row (v3 batch 4)
@@ -165,21 +168,37 @@ function actionRow(s, c) {
   return `<div class="acts">${one('btn-undo', 'Undo', 'Z', undoDis)}${one('btn-clear', 'Clear', 'C', clearDis)}${one('btn-rebet', c.ghosts && !c.rebetWhy ? `Rebet ${lastT}` : 'Rebet', 'R', rebetDis, c.ghosts && !rebetDis, c.rebetWhy && s.lastBets ? c.rebetWhy : '')}</div>`;
 }
 
-/** Primary button(s): Start (blue), Collect (green, dark text) + Gamble ×2 (blue) after a win, or a disabled state. */
+const gambleWhyText = (gw) => (gw === 'cap' ? `Doubling would go over the ${fmt(GAMBLE_CAP)} cap` : gw === 'max' ? 'No gambles left for this win' : '');
+
+/** Primary button(s): Start (blue); after a win the Collect (green, dark text) + Gamble ×2 (blue) stack; in the
+ *  gamble, Gamble on <colour> (blue) + Collect, which is locked (outline) while the disc flips. */
 function mainButtons(s, ui, c, dock) {
   const m = c.mode;
   const r = s.round;
   const st = (inner, d = true) => `<button class="btn pri stack hit" data-id="btn-start"${dis(d)}>${inner}</button>`;
+  const collect = (locked) => `<button class="btn ${locked ? 'out' : 'collect'} stack hit" data-id="btn-collect" aria-label="Collect ${fmt(r.currentWin)} to credits (Enter)"${dis(locked)}><span>Collect ${fmt(r.currentWin)}</span><span class="sub">${locked ? 'After the flip' : 'Add to credits'}${dock ? '' : ' · Enter'}</span></button>`;
   if (m === 'offer') {
     const gw = c.gambleWhy;
-    const gwText = gw === 'cap' ? 'Doubling would go over the 30,000 cap' : gw === 'max' ? 'No gambles left for this win' : '';
+    const gwText = gambleWhyText(gw);
     const left = MAX_GAMBLES - r.gambles.length;
-    return `<div class="mains">
-      <button class="btn collect stack hit" data-id="btn-collect" aria-label="Collect ${fmt(r.currentWin)} to credits (Enter)"><span>Collect ${fmt(r.currentWin)}</span><span class="sub">Add to credits${dock ? '' : ' · Enter'}</span></button>
+    return `<div class="mains">${collect(false)}
       <button class="btn gam stack hit" data-id="btn-gamble" aria-label="Gamble times 2, fair 50/50 (G)"${gwText ? ` title="${esc(gwText)}"` : ''}${dis(!!gw)}><span>Gamble ×2</span><span class="sub">${gw ? esc(gwText) : `Fair 50/50 · ${left} of ${MAX_GAMBLES} left${dock ? '' : ' · G'}`}</span></button></div>`;
   }
   if (m === 'locked') return st(`<span>${s.phase === 'DOUBLE_RUN' ? 'Double Run…' : 'Running…'}</span><span class="sub">controls locked</span>`);
-  if (m === 'ingamble') return st('<span>In gamble</span><span class="sub">finish or collect in the gamble window</span>');
+  if (m === 'ingamble' && ui.gambleLoss) {
+    return `<div class="mains"><button class="btn pri stack hit" data-id="btn-back" aria-label="Back to the board (Enter)"><span>Back to the board</span><span class="sub">continues in ${ui.gambleLoss.left} s${dock ? '' : ' · Enter'}</span></button></div>`;
+  }
+  if (m === 'ingamble') {
+    const w = r.currentWin, pick = s.gamble.pick, gw = c.gambleWhy;
+    const odds = `${fmt(w)} → ${fmt(w * 2)} or 0`;
+    const flip = (inner, d, label = '') => `<button class="btn gam stack hit" data-id="btn-flip"${label ? ` aria-label="${esc(label)}"` : ''}${dis(d)}>${inner}</button>`;
+    let f;
+    if (s.gamble.revealing) f = flip(`<span>Flipping…</span><span class="sub">${cap(pick)} · ${odds}</span>`, true);
+    else if (gw) f = flip(`<span>Gamble ×2</span><span class="sub">${esc(gambleWhyText(gw))}</span>`, true);
+    else if (!pick) f = flip(`<span>Pick red or white</span><span class="sub">${dock ? 'tap a disc' : 'R / W, then G'}</span>`, true);
+    else f = flip(`<span>Gamble on ${pick}</span><span class="sub">${odds}${dock ? '' : ' · G'}</span>`, false, `Gamble on ${pick}: ${w} becomes ${w * 2} or 0 (G)`);
+    return `<div class="mains">${f}${collect(s.gamble.revealing)}</div>`;
+  }
   if (m === 'payout') return st('<span>Paying…</span><span class="sub">tap to skip the count-up</span>');
   if (m === 'paused') return st('<span>Paused</span><span class="sub">see the message</span>');
   if (!c.total) return st('<span>Place a bet</span><span class="sub">then press START</span>');
@@ -190,17 +209,22 @@ const disclaimer = () => `<p class="rdisc"><b>Play credits only.</b> No real mon
 const chipGroup = (s, c, keys) => `<div class="grp"><div class="rhead"><span>Chip value</span></div>${chipRow(s, c, keys)}</div>`;
 
 export function controls(s, ui, c, L) {
+  // win offer and gamble (win-gamble-offer.png, gamble-flip.png): the note goes above the Collect / Gamble stack
+  // and Undo / Clear / Rebet are not shown (they cannot be used until the win is settled)
+  const result = c.mode === 'offer' || c.mode === 'ingamble';
+  const acts = result ? '' : actionRow(s, c);
   if (L.rail) {
     const r = L.rail;
+    const note = railNote(s, ui, c);
     return `<div class="rail" role="region" aria-label="Bet controls" style="left:${px(r.x)};top:${px(r.y)};width:${px(r.w)};height:${px(r.h)}">
-      ${betField(s, c)}${chipGroup(s, c, true)}${mainButtons(s, ui, c, false)}${actionRow(s, c)}${railNote(s, ui, c)}
+      ${betField(s, c)}${chipGroup(s, c, true)}${result ? note : ''}${mainButtons(s, ui, c, false)}${acts}${result ? '' : note}
       <div style="flex:1"></div>${disclaimer()}</div>`;
   }
   // tablet portrait: the rail as a 2-column block (left: bet field, note; right: chips, button, actions)
   const d = L.dock;
   return `<div class="dock" role="region" aria-label="Bet controls" style="left:${px(d.x)};top:${px(d.y)};width:${px(d.w)};height:${px(d.h)};padding:${DOCK_PAD}px 0">
       <div class="dcol">${betField(s, c)}${railNote(s, ui, c)}</div>
-      <div class="dcol">${chipGroup(s, c, false)}${mainButtons(s, ui, c, true)}${actionRow(s, c)}</div>
+      <div class="dcol">${chipGroup(s, c, false)}${mainButtons(s, ui, c, true)}${acts}</div>
       ${disclaimer()}</div>`;
 }
 
@@ -218,42 +242,43 @@ export function tileLook(n, s, ui, c) {
   const cls = [`q${m}`];
   const light = lightClass(n, ui);
   if (light) cls.push(light);
+  // v3 batch 5 result look (component sheet): a winning stop is flat accent-green with dark text, a losing stop
+  // keeps the tile-lit fill, and in a Double Run both stops show "1st" / "2nd" in place of the square number.
+  // No glow, ring, pulse, chase, veil or WIN tag; the only motion is the batch-4 landing pop (transform).
   const { w1, w2 } = winners(s, ui);
-  let result = null;
-  if (r && !light) {
+  let mark = '', result = '';
+  if (r) {
     const revealed = ['GAMBLE_OFFER', 'GAMBLE', 'PAYOUT'].includes(s.phase) || ui.gambleLoss || ui.showLastStop;
-    if (n === r.s1 && (revealed || s.phase === 'DOUBLE_RUN')) result = n === w1 ? 'win' : 'lit';
-    else if (r.s2 && n === r.s2 && revealed) result = n === w2 ? 'win2' : 'lit2';
-    if (result) cls.push(result);
-    if (result && ui.showLastStop) cls.push('fade');
+    const first = n === r.s1 && (revealed || s.phase === 'DOUBLE_RUN');
+    const second = r.s2 && n === r.s2 && revealed;
+    if (first || second) {
+      result = n === w1 || n === w2 ? 'win' : 'lit';
+      if (!light) cls.push(result);
+      if (r.doubleRun) {
+        cls.push('mk');
+        mark = `<span class="mkt">${first ? '1st' : '2nd'}</span>`;
+      }
+    }
   }
   const live = s.bets[n] || 0;
   const ghostV = !live && c.ghosts && s.lastBets ? s.lastBets[n] || 0 : 0;
   // No veil or lock icon while the light runs (running.png): squares keep their look, so a light step changes
   // classes only. They are still aria-disabled.
-  let dyn = '';
-  const dimPhase = ['GAMBLE_OFFER', 'GAMBLE', 'PAYOUT'].includes(s.phase) || ui.gambleLoss;
-  if (dimPhase && (w1 || w2) && n !== w1 && n !== w2) dyn += '<span class="veil" style="opacity:.5"></span>';
+  let dyn = mark;
   if (live) dyn += `<span class="bet">${live}</span>`;
   else if (ghostV) dyn += `<span class="bet ghost">${ghostV}</span>`;
-  if (ui.pulse && ui.pulse.includes(n)) cls.push('pulse');
-  if (ui.chase && ui.chase.includes(n)) cls.push('chase');
-  return { cls: cls.join(' '), dyn, disabled: !c.canBet, label: `Square ${n}, pays ${m}x, your bet ${live}` };
-}
-
-export function winTags(s, ui, L) {
-  const { w1, w2 } = winners(s, ui);
-  let h = '';
-  const tag = (n, second) => {
-    const t = winTagRect(L, n, second);
-    return `<div class="wtag ${second ? 'c' : 'm'} ${t.dir}" style="left:${px(t.x)};top:${px(t.y)};width:${px(t.w)}">${second ? 'WIN 2' : `${star()}WIN`}</div>`;
-  };
-  if (w1 && !(ui.light2 && ui.light2.idx === w1)) h += tag(w1, false);
-  if (w2) h += tag(w2, true);
-  return h;
+  const said = result === 'win' ? ', winning stop' : result ? ', the light stopped here' : '';
+  return { cls: cls.join(' '), dyn, disabled: !c.canBet, label: `Square ${n}, pays ${m}x, your bet ${live}${said}` };
 }
 
 // ------------------------------------------------------------------ centre panel
+const cardOf = (r, n, idx) => {
+  const b = r.bets[n] || 0;
+  return `<div class="card${b ? ' won' : ''}"><b>${idx ? `${idx} · ` : ''}#${n}</b><span class="cm">${MULT[n]}x</span><span class="cv"><i>${b ? 'Bet × pays' : 'Your bet'}</i><b>${b ? `${b} × ${MULT[n]} = ${fmt(b * MULT[n])}` : 'No bet there'}</b></span></div>`;
+};
+const pips = (used) => `<span class="pips" aria-hidden="true">${[0, 1, 2].map((i) => `<i${i < used ? ' class="used"' : ''}></i>`).join('')}</span>`;
+const leftText = (used) => (used >= MAX_GAMBLES ? 'none left' : `${MAX_GAMBLES - used} of ${MAX_GAMBLES} left`);
+
 export function centreModel(s, ui, c) {
   const r = s.round;
   const m = c.mode;
@@ -265,63 +290,118 @@ export function centreModel(s, ui, c) {
     return { ...M, status: ['amber', 'Running'], headline: 'Running…', sub: 'Bets are locked until the light stops.', note: `Credits ${fmt(r.balanceBefore)} − ${fmt(r.totalBet)} bet = <b>${fmt(r.balance)}</b>` };
   }
   if (s.phase === 'DOUBLE_RUN') {
-    const b = r.bets[r.s1] || 0;
-    return {
-      ...M, status: ['cyan', 'Double Run'], headline: 'Double Run!', tone: 'cyan', banner: true,
-      sub: `A second light is running. #${r.s1} stays lit, and the second light can’t stop on it.`,
-      results: [b ? { n: r.s1, bet: b, win: b * MULT[r.s1], label: 'First stop' } : { n: r.s1, text: `First stop: #${r.s1} · no bet there` }],
-    };
+    return { ...M, status: ['cyan', 'Double Run'], headline: 'Double Run!', sub: `A second light is running. #${r.s1} stays lit, and the second light can’t stop on it.`, cards: [cardOf(r, r.s1, 1)] };
   }
-  if (m === 'offer' || m === 'ingamble' || (m === 'payout' && ui.gambleLoss)) {
-    const { w1, w2 } = winners(s, ui);
-    const status = ui.gambleLoss ? ['coral', 'Gamble lost'] : m === 'ingamble' ? ['mint', 'Gamble'] : MULT[w1] === 1920 || MULT[w2] === 1920 ? ['mint', 'Jackpot'] : r.doubleRun ? ['mint', 'Double Run win'] : ['mint', 'Win'];
-    const res = (n, second) => ({ n, bet: r.bets[n], win: r.bets[n] * MULT[n], second });
-    let sub, results;
-    const jackpotN = [w1, w2].find((n) => n && MULT[n] === 1920);
-    if (jackpotN && !r.doubleRun) {
-      sub = `#${jackpotN} · ★1920X · your ${r.bets[jackpotN]} credit${r.bets[jackpotN] === 1 ? '' : 's'}`;
-    } else if (r.doubleRun && w1 && w2) {
-      sub = 'Two squares won this round.';
-      results = [res(w1), res(w2, true)];
-    } else if (r.doubleRun && w1) {
-      sub = `The second light stopped on #${r.s2} (no bet there).`;
-      results = [res(w1)];
-    } else if (r.doubleRun && w2) {
-      sub = `The first light stopped on #${r.s1} (no bet there).`;
-      results = [res(w2, true)];
-    } else {
-      sub = 'Collect it, or gamble it on a fair 50/50.';
-      results = [res(w1)];
-    }
-    return { ...M, status, headline: `You win ${fmt(r.baseWin)}`, tone: 'mint', sub, results, hide: !!ui.celebration };
+  const { w1, w2 } = winners(s, ui);
+  const cards = r ? (r.doubleRun ? [cardOf(r, r.s1, 1), cardOf(r, r.s2, 2)] : [cardOf(r, r.s1)]) : [];
+  if (m === 'ingamble') {
+    const won = w1 && w2 ? `Double Run · won ${fmt(r.baseWin)}` : `#${w1 || w2} · ${MULT[w1 || w2]}x · won ${fmt(r.baseWin)}`;
+    return { ...M, gamble: true, status: ui.gambleLoss ? ['coral', 'Gamble lost'] : ['on', 'Gamble'], won };
+  }
+  M.on = new Set([w1, w2].filter(Boolean).map((n) => MULT[n]));
+  if (m === 'offer') {
+    const status = MULT[w1] === 1920 || MULT[w2] === 1920 ? ['mint', 'Jackpot'] : r.doubleRun ? ['mint', 'Double Run win'] : ['mint', 'Win'];
+    let sub;
+    if (r.doubleRun && w1 && w2) sub = `Two squares won this round. A second light ran and could not stop on #${r.s1}.`;
+    else if (r.doubleRun && w1) sub = `The second light stopped on #${r.s2} (no bet there).`;
+    else if (r.doubleRun) sub = `The first light stopped on #${r.s1} (no bet there).`;
+    else sub = c.gambleWhy ? `Collect it. Gamble is off above ${fmt(GAMBLE_CAP)} credits.` : 'Collect it, or gamble it on a fair 50/50.';
+    return { ...M, status, headline: `You win ${fmt(r.baseWin)}`, sub, cards, band: true };
   }
   if (m === 'payout') {
-    return { ...M, status: ['mint', 'Paid'], headline: `+${fmt(r.currentWin)} collected`, tone: 'mint', sub: `Added to your credits: ${fmt(s.balance - r.currentWin)} → ${fmt(s.balance)}` };
+    return { ...M, status: ['mint', 'Paid'], headline: `+${fmt(r.currentWin)} collected`, sub: `Added to your credits: ${fmt(s.balance - r.currentWin)} → ${fmt(s.balance)}`, cards };
   }
   // BETTING
   if (ui.showLastStop && r) {
-    if (r.doubleRun) return { ...M, status: ['idle', 'Betting open'], headline: 'No win this time', sub: `The lights stopped on #${r.s1} and #${r.s2}. Your bets are still on the board.`, results: [{ n: r.s1, text: `Stopped on #${r.s1} · no bet there` }, { n: r.s2, text: `Second stop #${r.s2} · no bet there`, second: true }] };
-    return { ...M, status: ['idle', 'Betting open'], headline: 'No win this time', sub: `The light stopped on #${r.s1} (${MULT[r.s1]}x). Your bets are still on the board. Press START to play them again.`, results: [{ n: r.s1, text: `Stopped on #${r.s1} · no bet there` }] };
+    const sub = r.doubleRun ? `The lights stopped on #${r.s1} and #${r.s2}. Your bets are still on the board.` : `The light stopped on #${r.s1} (${MULT[r.s1]}x). Your bets are still on the board. Press <b>Start</b> to play them again.`;
+    return { ...M, status: ['coral', 'No win'], headline: 'No win this time', sub, cards };
   }
   if (c.ghosts) return { ...M, status: ['idle', 'Betting open'], headline: 'Place your bets', sub: `Last round’s bets are shown as outlines. Press Rebet to place all ${totalOf(s.lastBets)} again.` };
   return { ...M, status: ['idle', 'Betting open'], headline: 'Place your bets', sub: 'Pick a chip, tap squares, then press <b>Start</b>.' };
 }
 
-/** Centre (v3 batch 4, betting.png / running.png): status pills, the big multiplier, a flat title and sub line,
- *  and the pays row. The number's text is written by the controller (app.js paintBig), so a light step never
- *  rebuilds this region. */
+/** Navy "Double or nothing" band under a win (win-gamble-offer.png): the fair 50/50, both outcomes, gambles left. */
+function gambleBand(s, c) {
+  const r = s.round;
+  const used = r.gambles.length;
+  const what = c.gambleWhy ? gambleWhyText(c.gambleWhy) : `Fair 50/50 · Win → ${fmt(r.currentWin * 2)} · Lose → 0`;
+  return `<div class="gband"><b>Double or nothing</b><span>${esc(what)}</span>${pips(used)}<span>${leftText(used)}</span></div>`;
+}
+
+function recapText(r, loss) {
+  const parts = [];
+  let w = r.baseWin;
+  r.gambles.forEach((g, i) => {
+    if (r.pendingReveal && i === r.gambles.length - 1) return;
+    if (loss && i === r.gambles.length - 1) parts.push(`Flip ${i + 1}: you picked ${cap(g.pick)} · ${cap(g.result)} lit`);
+    else if (g.pick === g.result) { parts.push(`Flip ${i + 1}: you picked ${cap(g.pick)} · ${cap(g.result)} lit · ${fmt(w)} → ${fmt(w * 2)}`); w *= 2; }
+  });
+  return parts.join(' · ');
+}
+
+/** Gamble (gamble-flip.png): a navy panel in the centre with the two flat discs, the flip disc between them, the
+ *  outcome cards and the flips so far. The flip is one element with two faces turned by a 700 ms rotateY (CSS),
+ *  ending on the result the engine stored when GAMBLE was pressed. Gamble / Collect stay in the rail. */
+function gamblePanel(s, ui, c, L) {
+  const r = s.round;
+  const loss = ui.gambleLoss;
+  const used = r.gambles.length;
+  const rev = s.gamble.revealing;
+  const pick = loss ? loss.pick : s.gamble.pick;
+  const w = loss ? loss.win : r.currentWin;
+  const flipNo = loss ? loss.flip : rev ? used : used + 1;
+  const shown = rev ? used - 1 : used; // the flip in progress is not used up until it resolves
+  const off = !!loss || rev || !!c.gambleWhy;
+  const disc = (col) => {
+    const sel = pick === col;
+    const key = col === 'red' ? 'R / ←' : 'W / →';
+    const foot = sel ? '<span class="yp">Your pick</span>' : L.dockMode ? '' : `<span class="gk">key ${key}</span>`;
+    return `<button class="pick hit ${col}${sel ? ' sel' : ''}" data-id="pick-${col}" role="radio" aria-checked="${sel}" aria-label="${cap(col)} (key ${col === 'red' ? 'R or left arrow' : 'W or right arrow'})"${dis(off)}><span class="disc"></span><b>${cap(col)}</b>${foot}</button>`;
+  };
+  // flip disc: turning while the stored result is revealed, then resting on the last result
+  const lastRes = used ? r.gambles[used - 1].result : null;
+  const turning = rev && ui.flip && !ui.flip.final;
+  const mid = lastRes && (rev || loss || ui.flip || ui.matchMsg)
+    ? `<span class="flip ${lastRes === 'red' ? 'r' : 'w'}${turning ? ' go' : ''}" aria-hidden="true"><i class="coin"><i class="f"></i><i class="f b"></i></i></span>`
+    : '<span class="gor">or</span>';
+  let msg;
+  if (loss) msg = `<b class="lost">No match.</b> ${cap(loss.result)} lit. Your pick was ${cap(loss.pick)}, so the ${fmt(w)} gamble is lost.`;
+  else if (rev) msg = `<b>Flipping…</b> If ${pick} lights, your win doubles.`;
+  else if (ui.matchMsg) msg = `<b class="won">Match!</b> ${cap(ui.matchMsg.colour)} lit. Your win is now ${fmt(r.currentWin)}.${c.gambleWhy ? ' Collect it.' : ' Gamble again or collect.'}`;
+  else if (c.gambleWhy) msg = `${esc(gambleWhyText(c.gambleWhy))}. Collect your win.`;
+  else if (!pick) msg = `Pick red or white for flip ${flipNo}. If your colour lights, your win doubles.`;
+  else msg = `You picked ${pick}. If ${pick} lights, your win doubles.`;
+  const gc = (k, v, cls = '') => `<div class="gc"><span>${k}</span><b${cls ? ` class="${cls}"` : ''}>${v}</b></div>`;
+  const other = pick === 'red' ? 'white' : 'red';
+  const cards = loss
+    ? gc('Gamble lost', fmt(w), 'lost') + gc('Credits', fmt(s.balance))
+    : gc('Current win', `<span data-role="current-win">${fmt(w)}</span>`) + gc(pick ? `${cap(pick)} lights` : 'Match', fmt(w * 2), 'won') + gc(pick ? `${cap(other)} lights` : 'No match', '0');
+  const recap = recapText(r, loss);
+  return `<div class="gpanel" role="group" aria-label="Double or nothing">
+    <div class="ghead"><b>Double or nothing · flip ${flipNo}</b><span class="gl">${pips(shown)}${leftText(shown)}</span></div>
+    <div class="gdiscs" role="radiogroup" aria-label="Pick a colour">${disc('red')}${mid}${disc('white')}</div>
+    <div class="gmsg" data-role="gamble-instr" aria-live="polite">${msg}</div>
+    <div class="gcards"${loss ? ' data-role="gamble-loss"' : ''}>${cards}</div>${recap ? `<div class="grec">${recap}</div>` : ''}</div>
+    <div class="gnote">${loss ? `Your credits stay at <b>${fmt(s.balance)}</b>. Nothing else was taken.` : `Gamble is turned off when doubling would go over ${fmt(GAMBLE_CAP)} credits.`}</div>`;
+}
+
+/** Centre (v3 batches 4–5): status pills, the big multiplier, a flat title and sub line, the pays row (the won
+ *  tiers in green), result cards, and the navy gamble band; or the gamble panel. The number's text is written by
+ *  the controller (app.js paintBig), so a light step never rebuilds this region. */
 export function centre(s, ui, c, L) {
   const M = centreModel(s, ui, c);
   const I = L.inner;
+  const box = (cls, inner) => `<div class="centre${cls}" style="left:${px(I.x)};top:${px(I.y)};width:${px(I.w)};height:${px(I.h)}">${inner}</div>`;
   const st = `<span class="cp ${M.status[0]}" data-role="status">${M.status[1]}</span>`;
+  if (M.gamble) return box(' gam', `<div class="cps">${st}<span class="cp mint">${M.won}</span></div>${gamblePanel(s, ui, c, L)}`);
   const dr = `<span class="cp${M.dr ? ' on' : ''}">${M.dr ? 'Double Run on' : `Double Run · 1 in ${DOUBLE_RUN_ONE_IN}`}</span>`;
-  const res = (x) => `<div class="cres">${x.text || `${x.label ? `${x.label}: ` : ''}#${x.n} · ${x.bet} × ${MULT[x.n]} = <b class="${x.second ? 'cyan' : 'mint'}">${fmt(x.win)}</b>`}</div>`;
-  const pays = I.w < 420 ? '' : `<div class="pays">${TIERS.map((m) => `<span class="pay"><b>${m}x</b><i>${COUNT_BY_TIER[m]} square${COUNT_BY_TIER[m] > 1 ? 's' : ''}</i></span>`).join('')}</div>`;
-  return `<div class="centre" style="left:${px(I.x)};top:${px(I.y)};width:${px(I.w)};height:${px(I.h)}">
-    <div class="cps">${st}${dr}</div>
-    <div class="big" aria-hidden="true"><span data-role="big"></span><small>x</small></div>
-    <div class="ctxt" aria-live="polite"${M.hide ? ' style="opacity:0"' : ''}><div class="ctitle${M.tone ? ` ${M.tone}` : ''}" data-role="headline">${M.headline}</div>${M.sub ? `<div class="csub">${M.sub}${M.note ? ` ${M.note}` : ''}</div>` : ''}${(M.results || []).map(res).join('')}</div>
-    ${pays}</div>`;
+  const B = bigResult(s, ui);
+  const on = M.on || new Set();
+  const pays = I.w < 420 ? '' : `<div class="pays">${TIERS.map((m) => `<span class="pay${on.has(m) ? ' on' : ''}"><b>${m}x</b><i>${COUNT_BY_TIER[m]} square${COUNT_BY_TIER[m] > 1 ? 's' : ''}</i></span>`).join('')}</div>`;
+  return box('', `<div class="cps">${st}${dr}</div>
+    <div class="bigrow"><div class="big${B.win ? ' win' : ''}" aria-hidden="true"><span data-role="big"></span><small>x</small></div>${B.extra ? `<div class="big2" aria-hidden="true">+ ${B.extra}<small>x</small></div>` : ''}</div>
+    <div class="ctxt" aria-live="polite"><div class="ctitle" data-role="headline">${M.headline}</div>${M.sub ? `<div class="csub">${M.sub}${M.note ? ` ${M.note}` : ''}</div>` : ''}</div>
+    ${pays}${M.cards && M.cards.length ? `<div class="cards">${M.cards.join('')}</div>` : ''}${M.band ? gambleBand(s, c) : ''}`);
 }
 
 // ------------------------------------------------------------------ bottom bar (v3 batch 2)
@@ -396,75 +476,6 @@ function frame(L, mw, mh, opts = {}) {
 }
 const open = (b, pad, label, extraCls = '', extra = '') => `<div class="modal${b.sheet ? ' sheet' : ''}${extraCls}" role="dialog" aria-modal="true" aria-label="${esc(label)}" style="left:${px(b.x)};top:${px(b.y)};width:${px(b.w)};height:${px(b.h)};${extra}">${b.sheet ? '<div class="grab"></div>' : ''}<div class="mbody" style="padding:${px(pad)}">`;
 const bigBtn = (id, cls, inner, h, f, w = '100%', d = false, label = '') => `<button class="btn ${cls} stack hit" data-id="${id}"${label ? ` aria-label="${esc(label)}"` : ''}${dis(d)} style="width:${w};height:${px(h)};font-size:${px(f)}">${inner}</button>`;
-
-export function gambleModal(s, ui, c, L) {
-  const r = s.round;
-  const loss = ui.gambleLoss;
-  const xl = L.bp === 'desktop-xl';
-  const mw = xl ? 720 : L.bp === 'desktop' ? 560 : 520;
-  const mh = xl ? 720 : 560;
-  const { box, scrim } = frame(L, mw, mh, { sheetH: 724 });
-  const k = xl ? 1 : 0.8;
-  const pad = 28 * k;
-  const used = r.gambles.length;
-  const revealing = s.gamble.revealing;
-  const flipNo = revealing ? used : used + 1;
-  const pick = loss ? loss.pick : s.gamble.pick;
-  const w = loss ? loss.win : (ui.displayWin == null ? r.currentWin : ui.displayWin);
-  const bh = L.dockMode ? 60 : 76 * k;
-  let h = scrim + open(box, pad, 'Double or nothing');
-  h += `<div class="mhead"><span class="mtitle" style="font-size:${px(28 * k)}">Double or nothing</span><span class="pill" style="margin-left:auto;font-size:${px(13 * k + 1)};padding:5px 12px;gap:8px"><span class="pips">${[0, 1, 2].map((i) => `<i class="${i < used ? 'used' : ''}"></i>`).join('')}</span>${used >= MAX_GAMBLES ? 'none left' : `${MAX_GAMBLES - used} of 3 left`}</span></div>`;
-  let instr;
-  if (loss) instr = `Flip ${loss.flip} result`;
-  else if (revealing) instr = 'Flipping…';
-  else if (ui.matchMsg) instr = `<b class="mint">MATCH! ${UP(ui.matchMsg.colour)} lit. Your win is now ${fmt(r.currentWin)}.</b> Gamble again or Collect.`;
-  else instr = `Pick a colour for flip ${flipNo}, then press GAMBLE. Fair 50/50: if your colour lights, your win doubles.`;
-  h += `<div class="muted" data-role="gamble-instr" aria-live="polite" style="font-size:${px(15 * k + 1)};font-weight:600;margin-top:${px(8 * k)}">${instr}</div>`;
-  if (!loss) {
-    h += `<div class="field" style="margin-top:${px(18 * k)};padding:${px(16 * k)} ${px(20 * k)};display:flex;align-items:center;justify-content:space-between;border-color:rgba(59,227,163,.5)"><div><div class="sect-lbl" style="font-size:12px"><span>Current win</span></div><div class="val mint" data-role="current-win" style="font-size:${px(44 * k)};margin-top:6px">${fmt(w)}</div></div><div class="muted" style="text-align:right;font-weight:700;font-size:${px(15 * k + 1)}">Win → <b class="mint">${fmt(r.currentWin * 2)}</b><br>Lose → <b class="coral">0</b></div></div>`;
-  } else {
-    h += `<div class="field" data-role="gamble-loss" style="margin-top:${px(18 * k)};padding:${px(16 * k)} ${px(20 * k)};border-color:rgba(255,93,115,.55);background:linear-gradient(180deg,rgba(255,93,115,.10),var(--c-bg-0))"><div class="mtitle coral" style="font-size:${px(30 * k)}">No match</div><div style="font-size:${px(16 * k + 1)};font-weight:600;margin-top:8px;line-height:1.45;white-space:normal">${UP(loss.result)} lit. Your pick was ${UP(loss.pick)}, so the <b>${fmt(loss.win)}</b> gamble is lost.<br><span class="muted">Your credits stay at <b style="color:var(--c-text-hi)">${fmt(s.balance)}</b>. Nothing else was taken.</span></div></div>`;
-  }
-  const ph = L.dockMode ? 150 : 190 * k;
-  const pw = (box.w - 2 * pad - (L.dockMode ? 40 : 56 * k)) / 2;
-  const card = (col) => {
-    const sel = pick === col;
-    const flipLit = ui.flip && ui.flip.lit === col;
-    const lit = loss ? loss.result === col : flipLit;
-    const on = lit || (sel && !loss && !ui.flip);
-    const cls = loss ? (lit ? ' lit' : ' dim') : `${sel && !ui.flip ? ' sel' : ''}${ui.flip && ui.flip.final && !flipLit ? ' dim' : ''}${ui.flip && ui.flip.final && flipLit ? ' lit' : ''}`;
-    const b = L.dockMode ? 56 : 74 * k;
-    const tags = `${sel ? `<span class="yp">${loss ? 'YOUR PICK' : '✓ YOUR PICK'}</span>` : ''}${(loss && lit) || (ui.flip && ui.flip.final && flipLit) ? '<span class="yp litt">LIT</span>' : ''}`;
-    return `<button class="pick hit${cls}" data-id="pick-${col}" role="radio" aria-checked="${sel}" aria-label="${UP(col)} (key ${col === 'red' ? 'R or left arrow' : 'W or right arrow'})"${dis(!!loss || revealing || !!c.gambleWhy)} style="width:${px(pw)};height:${px(ph)};gap:${px(10 * k)}">${tags}<span class="pb ${col}${on ? ' on' : ''}" style="width:${px(b)};height:${px(b)};margin-top:${px(sel || lit ? 14 : 0)}"></span><span class="disp" style="font-size:${px(22 * k + 2)};color:${col === 'red' ? '#FF8A98' : 'var(--c-text-hi)'}">${UP(col)}</span><span class="lo" style="font-size:12px;font-weight:700">key ${col === 'red' ? 'R / ←' : 'W / →'}</span></button>`;
-  };
-  h += `<div role="radiogroup" aria-label="Pick a colour" style="display:flex;align-items:center;justify-content:space-between;margin-top:${px(18 * k)}">${card('red')}<span class="lo" style="font-weight:800;font-size:14px">or</span>${card('white')}</div>`;
-  const recap = recapText(r, loss);
-  h += `<div class="lo" style="font-size:${px(13 * k + 1)};font-weight:600;margin-top:${px(14 * k)};text-align:center;white-space:normal">${recap}</div><div style="flex:1"></div>`;
-  if (!loss) {
-    const why = c.gambleWhy;
-    let g;
-    if (why) g = bigBtn('m-gamble', 'red', `<span>Gamble</span><span class="sub">${why === 'cap' ? 'Doubling would go over the 30,000 cap' : 'No gambles left for this win'}</span>`, bh, 24 * k, '58%', true);
-    else if (!pick) g = bigBtn('m-gamble', 'red', '<span>Pick a colour</span><span class="sub">R / W, then G</span>', bh, 24 * k, '58%', true);
-    else g = bigBtn('m-gamble', pick === 'red' ? 'red' : 'whitec', `<span>Gamble on ${pick}</span><span class="sub">${fmt(r.currentWin)} → ${fmt(r.currentWin * 2)} or 0${L.dockMode ? '' : ' · G'}</span>`, bh, 24 * k, '58%', revealing, `Gamble on ${pick}: ${r.currentWin} becomes ${r.currentWin * 2} or 0 (G)`);
-    h += `<div class="row" style="gap:12px">${g}${bigBtn('m-collect', 'collect', `<span>Collect</span><span class="sub">${fmt(r.currentWin)} → credits${L.dockMode ? '' : ' · Enter'}</span>`, bh, 24 * k, 'calc(42% - 12px)', revealing, `Collect ${r.currentWin} to credits (Enter)`)}</div>`;
-    h += `<div class="lo" style="font-size:12px;font-weight:600;text-align:center;margin-top:10px">Gamble is turned off when doubling would go over ${fmt(GAMBLE_CAP)} credits.</div>`;
-  } else {
-    h += `<div class="row">${bigBtn('m-back', 'cta', `<span>Back to the board</span><span class="sub">continues by itself in ${loss.left} s</span>`, bh, 24 * k, '100%', false, 'Back to the board (Enter)')}</div>`;
-    h += '<div class="lo" style="font-size:12px;font-weight:600;text-align:center;margin-top:10px">Gamble is optional: you can always Collect instead.</div>';
-  }
-  return `${h}</div></div>`;
-}
-
-function recapText(r, loss) {
-  const parts = [];
-  let w = r.baseWin;
-  r.gambles.forEach((g, i) => {
-    if (r.pendingReveal && i === r.gambles.length - 1) return;
-    if (loss && i === r.gambles.length - 1) parts.push(`Flip ${i + 1}: ${UP(g.pick)} picked · ${UP(g.result)} lit`);
-    else if (g.pick === g.result) { parts.push(`Flip ${i + 1}: you picked ${UP(g.pick)} · ${UP(g.result)} lit · ${fmt(w)} → ${fmt(w * 2)}`); w *= 2; }
-  });
-  return parts.join(' · ') || '&nbsp;';
-}
 
 export function refillModal(s, ui, L) {
   const xl = L.bp === 'desktop-xl';
@@ -609,27 +620,7 @@ function helpBody(k, L) {
   return `${h}</div>`;
 }
 
-// ------------------------------------------------------------------ celebration, rings, start, loading
-export function celebration(s, ui, L) {
-  const cel = ui.celebration;
-  if (!cel) return '';
-  const c = L.inner;
-  const r = s.round;
-  let conf = '';
-  if (!ui.reducedNow) {
-    const cols = ['#FFB72B', '#3BE3A3', '#FF5D73', '#5BE2FF', '#A98BFF', '#FFF0A8'];
-    for (const p of ui.confetti) conf += `<i style="left:${px(p.x)};top:${px(p.y)};width:${px(8 * L.s)};height:${px(14 * L.s)};background:${cols[p.c]};transform:rotate(${p.r.toFixed(0)}deg);opacity:.85"></i>`;
-  }
-  const f = L.bp.startsWith('tablet') ? 40 : fs(L, 84, 40);
-  const b = r.bets[8] || 0;
-  return `<div class="confetti">${conf}</div>
-    <div class="celebrate" role="status" aria-label="Jackpot" style="left:${px(c.x)};top:${px(c.y + c.h * (L.bp === 'desktop-xl' ? 0.16 : 0.09))};width:${px(c.w)};gap:${px(12 * L.s)}">
-      <span class="pill" style="font-size:${px(fs(L, 16, 12))};padding:6px 14px;border-color:var(--t1920-edge);color:#FFE58A;background:rgba(242,193,78,.12)">${star()}Jackpot square #8</span>
-      <span class="disp big" style="font-size:${px(f)}">1920X</span>
-      <span class="val mint" style="font-size:${px(fs(L, 52, 28))};font-weight:800">+${fmt(b * 1920)}</span>
-      <span class="muted" style="font-size:${px(fs(L, 15, 12))};font-weight:700">${b} credit${b === 1 ? '' : 's'} on #8 · tap, Space or Esc to skip</span></div>`;
-}
-
+// ------------------------------------------------------------------ rings, start, loading
 export function ringBulbs(size, n, onIdx, t1 = [], t2 = []) {
   let s = '';
   const b = size * 0.16;

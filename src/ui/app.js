@@ -11,7 +11,7 @@ import { createCryptoRng } from '../engine/rng.js';
 import { halveBets, doubleBets } from './betscale.js';
 import { recordTotal, loadTotals, saveTotals } from './bettotals.js';
 
-const REGIONS = ['frame', 'stage', 'track', 'tags', 'centre', 'top', 'credits', 'bar', 'controls', 'toast', 'tip', 'fx', 'modal', 'start'];
+const REGIONS = ['frame', 'stage', 'track', 'centre', 'top', 'credits', 'bar', 'controls', 'toast', 'tip', 'modal', 'start'];
 const GAME_REGIONS = ['credits', 'track', 'centre', 'top', 'bar', 'controls'];
 const UI_TOASTS = { [TOASTS.noSave]: "Progress won't be saved on this device" };
 const LONG_PRESS_MS = 400;
@@ -19,7 +19,7 @@ const GAMBLE_LOSS_MS = 3000;
 
 export function startApp({ game, root, testMode = false, timeScale = 1, startScreen = true, settingsReset = false }) {
   const audio = createAudio();
-  const cosmetic = createCryptoRng(); // cosmetic randomness only (durations, confetti); never outcomes
+  const cosmetic = createCryptoRng(); // cosmetic randomness only (light-run durations); never outcomes
   const u01 = () => cosmetic.randInt(1_000_000) / 1_000_000;
   const live = root.querySelector('#live');
   const R = {};
@@ -28,9 +28,9 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
   let L = null;
 
   const ui = {
-    tip: null, sheet: null, light1: null, light2: null, pulse: null, chase: null,
+    tip: null, sheet: null, light1: null, light2: null,
     displayBalance: null, displayWin: null, delta: null, toast: null, toastSeq: 0, flip: null, matchMsg: null,
-    gambleLoss: null, celebration: null, confetti: [], ringOn: false, roving: 1, showLastStop: false, startLocked: false,
+    gambleLoss: null, ringOn: false, roving: 1, showLastStop: false, startLocked: false,
     paused: false, lightIndex: 1, start: startScreen, ringStep: 0, settingsReset, reducedNow: false,
     fairness: false, infoFrom: null, // fairness panel is UI-only (no engine state); infoFrom = icon that opened Info
     betTotals: [], // "Last bets": [{ id: roundId, t: total }], newest first (ui/bettotals.js)
@@ -105,7 +105,6 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     let modal = null;
     if (s.phase === 'ERROR') modal = 'error';
     else if (s.phase === 'RECOVERY') modal = 'recovery';
-    else if (s.phase === 'GAMBLE' || ui.gambleLoss) modal = 'gamble';
     else if (needsRefill) modal = 'refill';
     else if (s.info) modal = 'info';
     else if (ui.fairness) modal = 'fairness';
@@ -195,6 +194,16 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     }
   }
 
+  // Rail note count-up (win offer, gamble win): only the number's text changes, so the rail is not rebuilt (and
+  // the focused Collect button is not re-focused, which would force a layout) on every frame.
+  function paintWin() {
+    const el = R.controls.querySelector('[data-role="lastwin"]');
+    if (!el) return;
+    const lw = V.lastWin(game.state, ui, ctx());
+    const v = V.fmt(ui.displayWin == null || !lw ? (lw ? lw.value : 0) : ui.displayWin);
+    if (el.textContent !== v) el.textContent = v;
+  }
+
   function render(names = null) {
     if (!L) return;
     const s = game.state;
@@ -204,15 +213,16 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     const want = (n) => !names || names.includes(n);
     if (want('credits')) setRegion('credits', V.credits(s, ui, L));
     if (want('track')) renderTiles(c);
-    if (want('tags')) setRegion('tags', V.winTags(s, ui, L));
     if (want('centre')) setRegion('centre', V.centre(s, ui, c, L));
     paintBig();
     if (want('top')) setRegion('top', V.topRow(s, ui, L));
     if (want('bar')) setRegion('bar', V.bottomBar(s, ui, c, L));
-    if (want('controls')) setRegion('controls', V.controls(s, ui, c, L));
+    if (want('controls')) {
+      setRegion('controls', V.controls(s, ui, c, L));
+      if (ui.displayWin != null) paintWin();
+    }
     if (want('toast')) setRegion('toast', c.modal ? '' : V.toastHtml(ui.toast, L));
     if (want('tip')) setRegion('tip', tipMarkup(c));
-    if (want('fx')) setRegion('fx', V.celebration(s, ui, L));
     if (want('modal')) setRegion('modal', modalMarkup(c));
     if (want('start')) setRegion('start', ui.start ? V.startScreen(s, ui, L) : '');
     R.start.hidden = !ui.start;
@@ -227,7 +237,6 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     switch (c.modal) {
       case 'error': return V.errorModal(s, L);
       case 'recovery': return V.recoveryModal(s, L);
-      case 'gamble': return V.gambleModal(s, ui, c, L);
       case 'refill': return V.refillModal(s, ui, L);
       case 'info': return V.infoModal(s, ui, L);
       case 'fairness': return V.fairnessModal(L);
@@ -281,30 +290,6 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     });
   }
 
-  // ------------------------------------------------------------ confetti (<= 40 rects, none in reduced motion)
-  function burst(n = 40, ms = 1500) {
-    if (reduced()) return;
-    const c = L.inner;
-    for (let i = 0; i < n && ui.confetti.length < 40; i++) {
-      ui.confetti.push({ x: c.x + c.w * (0.2 + 0.6 * u01()), y: c.y + c.h * 0.4, vx: (u01() - 0.5) * 700, vy: -300 - u01() * 450, r: u01() * 360, vr: (u01() - 0.5) * 600, c: Math.floor(u01() * 6) });
-    }
-    let last = now();
-    const end = now() + ms / timeScale;
-    addTask((t) => {
-      const dt = Math.min(0.05, (t - last) / 1000) * timeScale;
-      last = t;
-      for (const p of ui.confetti) {
-        p.vy += 900 * dt;
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        p.r += p.vr * dt;
-      }
-      if (t >= end) ui.confetti = [];
-      render(['fx']);
-      return t >= end;
-    });
-  }
-
   // ------------------------------------------------------------ light runs (outcome first)
   function runLight(plan, which, onDone) {
     const start = now();
@@ -336,7 +321,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
         }
         ui[which] = { idx, trail, level: null };
       }
-      render(['track', 'tags']);
+      render(['track']);
       if (el >= plan.durationMs) {
         const finalIdx = plan.indexAt(plan.durationMs);
         if (finalIdx !== plan.to) throw new Error(`display mismatch: animated ${finalIdx} != stored ${plan.to}`); // integrity assertion
@@ -344,7 +329,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
         ui.lightIndex = plan.to;
         audio.play('sfx_stop_thunk');
         if (ducked) wait(600, () => audio.duck(false));
-        render(['track', 'tags']);
+        render(['track']);
         onDone();
         return true;
       }
@@ -363,8 +348,6 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     const r = game.state.round;
     noteBetTotal(r);
     ui.showLastStop = false;
-    ui.pulse = null;
-    ui.chase = null;
     ui.tip = null;
     ui.sheet = null;
     audio.play('sfx_start');
@@ -395,24 +378,22 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     ui.light1 = null;
     ui.light2 = null;
     if (s.phase === 'GAMBLE_OFFER') {
+      // v3 batch 5: the win is shown by flat state (green stop, light big number, green pays pill); no pulse, chase,
+      // WIN tag or confetti. The rail note counts up (batch 3); sounds as before.
       const { w1, w2 } = V.winners(s, ui);
-      const ws = [w1, w2].filter(Boolean);
-      const top = Math.max(...ws.map((n) => MULT[n]));
-      if (!reduced()) {
-        if (top >= 480) ui.chase = ws;
-        else ui.pulse = ws;
-      }
+      const top = Math.max(...[w1, w2].filter(Boolean).map((n) => MULT[n]));
       if (!recovered && !reduced()) {
         ui.displayWin = 0;
         const target = r.currentWin;
-        countTween = tween(Math.min(1500, 400 + target / 4), (x) => { ui.displayWin = Math.round(target * x); render(['controls']); }, () => { ui.displayWin = null; countTween = null; render(['controls']); }, (x) => 1 - (1 - x) ** 4);
+        countTween = tween(Math.min(1500, 400 + target / 4), (x) => { ui.displayWin = Math.round(target * x); paintWin(); }, () => { ui.displayWin = null; countTween = null; paintWin(); }, (x) => 1 - (1 - x) ** 4);
       }
-      if (top >= 1920) jackpot();
-      else if (top >= 480) bigWin();
-      else audio.play('sfx_win_small');
-      wait(top >= 480 ? 2500 : 1300, () => { ui.pulse = null; ui.chase = null; render(['track']); });
+      if (top >= 480) {
+        audio.play(top >= 1920 ? 'sfx_win_jackpot' : 'sfx_win_big');
+        audio.duck(true);
+        wait(2500, () => audio.duck(false));
+      } else audio.play('sfx_win_small');
       render();
-      focusId('btn-collect', !ui.celebration);
+      focusId('btn-collect', true);
       announce(`You win ${V.fmt(r.currentWin)}. Collect or gamble.`);
     } else {
       ui.showLastStop = true;
@@ -424,89 +405,41 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     }
   }
 
-  function bigWin() {
-    audio.play('sfx_win_big');
-    audio.duck(true);
-    wait(2500, () => audio.duck(false));
-    burst(40, 1500);
-  }
-
-  function jackpot() {
-    audio.play('sfx_win_jackpot');
-    audio.duck(true);
-    ui.celebration = { kind: 'jackpot' };
-    burst(20, 1500);
-    wait(1600, () => ui.celebration && burst(20, 1500));
-    ui.celebrationTimer = wait(4000, () => endCelebration());
-  }
-  function endCelebration(skipped = false) {
-    if (!ui.celebration) return;
-    ui.celebration = null;
-    ui.confetti = [];
-    if (ui.celebrationTimer) ui.celebrationTimer.cancel();
-    if (skipped) audio.stopJackpot();
-    audio.duck(false);
-    render();
-  }
-
   // ------------------------------------------------------------ gamble flip (stored result revealed)
+  // One disc with two faces turns by CSS (700 ms rotateY, ending on the stored result; a 120 ms crossfade in
+  // reduced motion). The centre is rendered once when it starts and once when it ends: no per-frame work.
+  const FLIP_MS = 700;
   function runFlip() {
-    const r = game.state.round;
-    const g = r.gambles[r.gambles.length - 1];
     ui.matchMsg = null;
-    const finish = () => {
-      ui.flip = null;
-      game.dispatch({ type: 'REVEAL_DONE' });
-    };
     audio.play('sfx_drumroll');
-    if (reduced()) {
-      ui.flip = { lit: null };
-      render(['modal']);
-      wait(600, () => {
-        ui.flip = { lit: g.result, final: true };
-        render(['modal']);
-        wait(500, finish);
+    ui.flip = { final: false };
+    render(['centre', 'controls']);
+    wait(reduced() ? 120 : FLIP_MS, () => {
+      ui.flip = { final: true };
+      render(['centre']);
+      wait(reduced() ? 400 : 300, () => {
+        ui.flip = null;
+        game.dispatch({ type: 'REVEAL_DONE' });
       });
-      return;
-    }
-    ui.flip = { lit: 'red' };
-    const start = now();
-    let last = start, cur = 'red';
-    addTask((t) => {
-      const el = (t - start) * timeScale;
-      if (el < 1200 && (t - last) * timeScale >= 120) { // two cards alternate (not the screen): stays under 3 flashes/s per card
-        cur = cur === 'red' ? 'white' : 'red';
-        ui.flip.lit = cur;
-        last = t;
-        render(['modal']);
-      }
-      if (el >= 1200) {
-        ui.flip = { lit: g.result, final: true };
-        render(['modal']);
-        wait(300, finish);
-        return true;
-      }
-      return false;
     });
-    render(['modal']);
   }
 
   function afterRevealDone(prevWin) {
     const s = game.state;
     const r = s.round;
     if (s.phase === 'PAYOUT') {
-      // gamble loss: the loss result view stays in the gamble dialog, then returns to the board (3 s or the button)
+      // gamble loss: the loss result stays in the centre's gamble panel, then returns to the board (3 s or the button)
       const g = r.gambles[r.gambles.length - 1];
       audio.play('sfx_gamble_lose');
       ui.gambleLoss = { pick: g.pick, result: g.result, win: prevWin, flip: r.gambles.length, left: Math.round(GAMBLE_LOSS_MS / 1000) };
-      announce(`No match. ${g.result.toUpperCase()} lit. Your pick was ${g.pick.toUpperCase()}, so the ${V.fmt(prevWin)} gamble is lost. Your credits stay at ${V.fmt(s.balance)}.`);
+      announce(`No match. ${g.result} lit. Your pick was ${g.pick}, so the ${V.fmt(prevWin)} gamble is lost. Your credits stay at ${V.fmt(s.balance)}.`);
       const t0 = now();
       lossTask = addTask((t) => {
         if (!ui.gambleLoss) return true;
         const left = Math.max(0, Math.ceil((GAMBLE_LOSS_MS - (t - t0) * timeScale) / 1000));
         if (left !== ui.gambleLoss.left) {
           ui.gambleLoss = { ...ui.gambleLoss, left };
-          render(['modal']);
+          render(['controls']);
         }
         if ((t - t0) * timeScale >= GAMBLE_LOSS_MS) {
           finishGambleLoss();
@@ -515,17 +448,17 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
         return false;
       });
       render();
-      focusId('m-back', ui.ringOn);
+      focusId('btn-back', ui.ringOn);
     } else {
       audio.play('sfx_gamble_win');
       const g = r.gambles[r.gambles.length - 1];
       ui.matchMsg = { colour: g.result };
       const target = r.currentWin;
-      if (!reduced()) tween(500, (x) => { ui.displayWin = Math.round(prevWin + (target - prevWin) * x); render(['modal', 'controls']); }, () => { ui.displayWin = null; render(); });
-      announce(`Match! ${g.result.toUpperCase()} lit. Your win is now ${V.fmt(target)}. Gamble again or Collect.`);
+      if (!reduced()) tween(500, (x) => { ui.displayWin = Math.round(prevWin + (target - prevWin) * x); paintWin(); }, () => { ui.displayWin = null; paintWin(); });
+      announce(`Match! ${g.result} lit. Your win is now ${V.fmt(target)}. Gamble again or Collect.`);
       render();
       const a = document.activeElement;
-      if (!a || !root.contains(a) || a === document.body) focusId('m-collect', ui.ringOn);
+      if (!a || !root.contains(a) || a === document.body) focusId('btn-collect', ui.ringOn);
     }
   }
   let lossTask = null;
@@ -609,7 +542,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
         audio.play('sfx_modal');
         ui.matchMsg = null;
         render();
-        focusId('m-collect', ui.ringOn);
+        focusId('btn-collect', ui.ringOn);
         return;
       case 'PICK':
         audio.play('sfx_gamble_pick');
@@ -622,8 +555,6 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
       case 'REVEAL_DONE': afterRevealDone(prevWin); return;
       case 'COLLECT': startPayout(); return;
       case 'PAYOUT_DONE':
-        ui.pulse = null;
-        ui.chase = null;
         ui.showLastStop = false;
         render();
         if (!root.contains(document.activeElement) || document.activeElement === document.body || document.activeElement.getAttribute('aria-disabled') === 'true') focusId(game.rebetBlock() ? `sq-${ui.roving}` : 'btn-rebet', false);
@@ -647,7 +578,6 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
         ui.light1 = null;
         ui.light2 = null;
         ui.gambleLoss = null;
-        ui.celebration = null;
         render();
         focusId('m-reload', ui.ringOn);
         return;
@@ -709,7 +639,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
       if (s.gamble.revealing) {
         prevWin = r.currentWin;
         runFlip();
-      } else focusId('m-collect', ui.ringOn);
+      } else focusId('btn-collect', ui.ringOn);
     } else if (s.phase === 'PAYOUT') startPayout();
     else render();
   }
@@ -791,10 +721,10 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
         if (!res.ok) render(['controls']);
         return res;
       }
-      case 'btn-collect': case 'm-collect': return d({ type: 'COLLECT' });
+      case 'btn-collect': return d({ type: 'COLLECT' });
       case 'btn-gamble': return d({ type: 'GAMBLE_OPEN' });
-      case 'm-gamble': return d({ type: 'GAMBLE_FLIP' });
-      case 'm-back': return finishGambleLoss();
+      case 'btn-flip': return d({ type: 'GAMBLE_FLIP' });
+      case 'btn-back': return finishGambleLoss();
       case 'm-refill': return d({ type: 'REFILL' });
       case 'm-continue': return d({ type: 'CONTINUE' });
       case 'm-reload': return reload();
@@ -832,11 +762,6 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     if (!ui.start) firstInteraction();
     ui.ringOn = false;
     root.classList.remove('kbd');
-    if (ui.celebration) {
-      endCelebration(true);
-      e.preventDefault();
-      return;
-    }
     if (payoutTween) {
       payoutTween.finish();
       return;
@@ -979,7 +904,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     if (id) kind = id.startsWith('sq-') ? 'square' : id.startsWith('chip-') ? 'chip' : id.startsWith('pick-') ? 'pick' : id.startsWith('sl-') ? 'slider' : id.startsWith('tg-') ? 'toggle' : id.startsWith('tab-') ? 'tab' : id.startsWith('icon-') ? 'icon' : 'button';
     const s = game.state;
     const intent = mapKey(e, {
-      phase: s.phase, info: s.info, refill: game.needsRefill(), celebration: !!ui.celebration,
+      phase: s.phase, info: s.info, refill: game.needsRefill(),
       focus: { kind, square: kind === 'square' ? Number(id.slice(3)) : null },
     });
     if (e.key === ' ' || e.key === 'Backspace' || e.key.startsWith('Arrow')) e.preventDefault();
@@ -992,7 +917,6 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
       return;
     }
     switch (intent.kind) {
-      case 'skip': endCelebration(true); break;
       case 'activate':
         if (h && h.getAttribute('aria-disabled') !== 'true') {
           audio.play('sfx_click');

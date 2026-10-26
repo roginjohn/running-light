@@ -28,9 +28,9 @@ export function lightClass(n, ui) {
   return light;
 }
 
-/** The big mono number is the MULTIPLIER (open question 3): "00.00" while betting, the multiplier under the
- *  light during a run, then the stopped square's multiplier. It never shows a stop before the light gets there.
- *  (The win colour and the Double Run "960.00x + 24.00x" form are result states: batch 5.) */
+/** The big mono number is the MULTIPLIER (open question 3, confirmed): "00.00" while betting and after a loss
+ *  (loss.png), the multiplier under the light during a run, the stopped square's while it resolves, then the
+ *  winning square's. It never shows a stop before the light gets there. */
 export const bigMult = (m) => `${String(m).padStart(2, '0')}.00`;
 export function bigValue(s, ui) {
   const lit = ui.light2 && ui.light2.idx ? ui.light2 : ui.light1 && ui.light1.idx ? ui.light1 : null;
@@ -38,7 +38,17 @@ export function bigValue(s, ui) {
   const r = s.round;
   if (r && ['RESOLVING', 'DOUBLE_RUN', 'GAMBLE_OFFER', 'GAMBLE', 'PAYOUT'].includes(s.phase)) {
     const { w1, w2 } = winners(s, ui);
+    if (!w1 && !w2 && !['RESOLVING', 'DOUBLE_RUN'].includes(s.phase)) return bigMult(0);
     return bigMult(MULT[w1 || w2 || r.s1]);
   }
   return bigMult(0);
+}
+
+/** Result look of the big number (batch 5): `win` = light #e6eaee once a win is revealed, and `extra` = the second
+ *  multiplier when both Double Run squares won ("960.00x + 24.00x"). Static per state, never written per step. */
+export function bigResult(s, ui) {
+  const r = s.round;
+  if (!r || !['GAMBLE_OFFER', 'GAMBLE', 'PAYOUT'].includes(s.phase) || ui.gambleLoss) return { win: false, extra: null };
+  const { w1, w2 } = winners(s, ui);
+  return { win: !!(w1 || w2), extra: w1 && w2 ? bigMult(MULT[w2]) : null };
 }
