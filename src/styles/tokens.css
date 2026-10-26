@@ -108,6 +108,20 @@
   --r-chip:999px;
   --b-hairline:1px;
   --b-focus:2px;
+  /* v3 stacking (z), then the extra layers v3 does not name (legacy.z, slotted between them) */
+  --z-track:1;
+  --z-light-layer:2;
+  --z-centre:3;
+  --z-toast:20;
+  --z-scrim:30;
+  --z-dialog:31;
+  --z-frame:0;
+  --z-tags:4;
+  --z-focus:5;
+  --z-hud:10;
+  --z-tooltip:25;
+  --z-celebration:32;
+  --z-screen:40;
   /* v2 names still used by components, mapped to v3 values (legacy) */
   --c-bg-0:var(--c-bg-page);
   --c-bg-1:var(--c-bg-frame);
@@ -182,20 +196,6 @@
   --sh-glow-warm-trail2:none;
   --sh-glow-cyan:none;
   --sh-glow-win:none;
-  --z-background:0;
-  --z-stage:10;
-  --z-tiles:20;
-  --z-light:30;
-  --z-tags:35;
-  --z-centre:25;
-  --z-hud:60;
-  --z-toast:70;
-  --z-tooltip:80;
-  --z-scrim:90;
-  --z-modal:100;
-  --z-celebration:110;
-  --z-hud-over-scrim:120;
-  --z-error:200;
   --f-display:var(--f-sans);
   --f-ui:var(--f-sans);
 }

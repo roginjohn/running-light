@@ -9,8 +9,8 @@ import { MULT, TOASTS } from '../engine/config.js';
 import { totalOf, countOf, sameBets } from '../engine/bets.js';
 import { createCryptoRng } from '../engine/rng.js';
 
-const REGIONS = ['bg', 'hdr', 'stage', 'track', 'tags', 'centre', 'util', 'controls', 'toast', 'tip', 'fx', 'modal', 'start'];
-const GAME_REGIONS = ['hdr', 'track', 'centre', 'util', 'controls'];
+const REGIONS = ['frame', 'stage', 'track', 'tags', 'centre', 'credits', 'bar', 'controls', 'toast', 'tip', 'fx', 'modal', 'start'];
+const GAME_REGIONS = ['credits', 'track', 'centre', 'bar', 'controls'];
 const UI_TOASTS = { [TOASTS.noSave]: "Progress won't be saved on this device" };
 const LONG_PRESS_MS = 400;
 const GAMBLE_LOSS_MS = 3000;
@@ -30,6 +30,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     displayBalance: null, displayWin: null, delta: null, toast: null, toastSeq: 0, flip: null, matchMsg: null,
     gambleLoss: null, celebration: null, confetti: [], ringOn: false, roving: 1, showLastStop: false, startLocked: false,
     paused: false, lightIndex: 1, start: startScreen, ringStep: 0, settingsReset, reducedNow: false,
+    fairness: false, infoFrom: null, // fairness panel is UI-only (no engine state); infoFrom = icon that opened Info
   };
 
   // ------------------------------------------------------------ animation scheduler (rAF; pauses when the tab is hidden)
@@ -103,6 +104,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     else if (s.phase === 'GAMBLE' || ui.gambleLoss) modal = 'gamble';
     else if (needsRefill) modal = 'refill';
     else if (s.info) modal = 'info';
+    else if (ui.fairness) modal = 'fairness';
     const total = totalOf(s.bets);
     const mode = V.modeOf(s, ui);
     return {
@@ -134,9 +136,9 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     L = computeLayout(window.innerWidth, window.innerHeight);
     for (const [k, v] of Object.entries(layoutVars(L))) root.style.setProperty(k, v);
     root.dataset.bp = L.bp;
-    R.hdr.style.height = `${L.header}px`;
     const st = L.stage;
     R.stage.style.cssText = `left:${st.x}px;top:${st.y}px;width:${st.w}px;height:${st.h}px`;
+    setRegion('frame', V.pageFrame(L));
     // persistent tile buttons (#1 top-left, clockwise)
     if (!R.track.children.length) {
       let h = '';
@@ -179,11 +181,11 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     const c = ctx();
     ui.reducedNow = c.reduced;
     const want = (n) => !names || names.includes(n);
-    if (want('hdr')) setRegion('hdr', V.header(s, ui, L));
+    if (want('credits')) setRegion('credits', V.credits(s, ui, L));
     if (want('track')) renderTiles(c);
     if (want('tags')) setRegion('tags', V.winTags(s, ui, L));
     if (want('centre')) setRegion('centre', V.centre(s, ui, c, L));
-    if (want('util')) setRegion('util', V.util(s, ui, c, L));
+    if (want('bar')) setRegion('bar', V.bottomBar(s, ui, c, L));
     if (want('controls')) setRegion('controls', V.controls(s, ui, c, L));
     if (want('toast')) setRegion('toast', c.modal ? '' : V.toastHtml(ui.toast, L));
     if (want('tip')) setRegion('tip', tipMarkup(c));
@@ -205,6 +207,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
       case 'gamble': return V.gambleModal(s, ui, c, L);
       case 'refill': return V.refillModal(s, ui, L);
       case 'info': return V.infoModal(s, ui, L);
+      case 'fairness': return V.fairnessModal(L);
       default: return '';
     }
   }
@@ -336,7 +339,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     audio.play('sfx_start');
     const before = r.balanceBefore, after = r.balance;
     ui.displayBalance = before;
-    tween(300, (x) => { ui.displayBalance = Math.round(before + (after - before) * x); render(['hdr']); }, () => { ui.displayBalance = null; render(['hdr']); });
+    tween(300, (x) => { ui.displayBalance = Math.round(before + (after - before) * x); render(['credits']); }, () => { ui.displayBalance = null; render(['credits']); });
     const plan = reduced() ? planFade(r.s1) : planFirstRunV2(ui.lightIndex, r.s1, u01(), u01());
     announce(`Running. Credits ${V.fmt(before)} minus ${V.fmt(r.totalBet)} bet = ${V.fmt(after)}.`);
     runLight(plan, 'light1', () => game.dispatch({ type: 'LIGHT1_DONE' }));
@@ -527,7 +530,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
         payoutTween = tween(300, () => {}, done);
       } else {
         ui.displayBalance = before;
-        payoutTween = tween(Math.min(1500, 500 + r.currentWin / 3), (x) => { ui.displayBalance = Math.round(before + (after - before) * x); render(['hdr']); }, done, (x) => 1 - (1 - x) ** 4);
+        payoutTween = tween(Math.min(1500, 500 + r.currentWin / 3), (x) => { ui.displayBalance = Math.round(before + (after - before) * x); render(['credits']); }, done, (x) => 1 - (1 - x) ** 4);
         render();
       }
       announce(`${V.fmt(r.currentWin)} collected. Added to your credits: ${V.fmt(before)} to ${V.fmt(after)}.`);
@@ -540,7 +543,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
   function refillAnim() {
     audio.play('sfx_refill');
     ui.displayBalance = 0;
-    tween(reduced() ? 1 : 1000, (x) => { ui.displayBalance = Math.round(1000 * x); render(['hdr']); }, () => {
+    tween(reduced() ? 1 : 1000, (x) => { ui.displayBalance = Math.round(1000 * x); render(['credits']); }, () => {
       ui.displayBalance = null;
       render();
     }, (x) => x);
@@ -604,7 +607,8 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
         return;
       case 'CLOSE_INFO':
         render();
-        focusId('icon-info', false);
+        focusId(ui.infoFrom || 'icon-stats', false);
+        ui.infoFrom = null;
         return;
       case 'CONTINUE': onContinue(); return;
       case 'ERROR': case 'FAIL':
@@ -686,6 +690,24 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     if (!testMode || !globalThis.__RL_TEST__?.noReload) globalThis.location.reload();
   }
 
+  // ------------------------------------------------------------ fairness panel (UI only; same lock as Info/Settings)
+  function openFairness() {
+    if (!ctx().canInfo) return null;
+    ui.fairness = true;
+    ui.tip = null;
+    audio.play('sfx_modal');
+    render();
+    focusId('f-close', ui.ringOn);
+    return { ok: true };
+  }
+  function closeFairness() {
+    if (!ui.fairness) return null;
+    ui.fairness = false;
+    render();
+    focusId('icon-fair', false);
+    return { ok: true };
+  }
+
   // ------------------------------------------------------------ input
   function activate(id, { shift = false } = {}) {
     const d = (a) => game.dispatch(a);
@@ -716,9 +738,10 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
       case 'm-refill': return d({ type: 'REFILL' });
       case 'm-continue': return d({ type: 'CONTINUE' });
       case 'm-reload': return reload();
-      case 'icon-info': return d({ type: 'OPEN_INFO', tab: 'paytable' });
-      case 'icon-settings': return d({ type: 'OPEN_INFO', tab: 'settings' });
-      case 'icon-help': return d({ type: 'OPEN_INFO', tab: 'help' });
+      case 'icon-stats': ui.infoFrom = id; return d({ type: 'OPEN_INFO', tab: 'paytable' }); // Paytable + Help tabs
+      case 'icon-settings': ui.infoFrom = id; return d({ type: 'OPEN_INFO', tab: 'settings' });
+      case 'icon-fair': return openFairness();
+      case 'f-close': return closeFairness();
       case 'icon-sound': case 'tg-mute': case 'start-sound': return d({ type: 'TOGGLE_MUTE' });
       case 'tg-rm': return d({ type: 'SET_SETTING', key: 'reducedMotion', value: !game.state.settings.reducedMotion });
       case 'close': return d({ type: 'CLOSE_INFO' });
@@ -874,6 +897,16 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     if (ui.gambleLoss && (k === 'Enter' || k === ' ') && !e.repeat) {
       e.preventDefault();
       finishGambleLoss();
+      return;
+    }
+    // Fairness panel: Esc closes it; Enter/Space press the focused button; M still mutes; game keys are ignored
+    if (ui.fairness) {
+      if (e.repeat) return;
+      if (k === 'Escape') closeFairness();
+      else if (k === 'm' && !e.ctrlKey) game.dispatch({ type: 'TOGGLE_MUTE' });
+      else if ((k === 'Enter' || k === ' ') && h && R.modal.contains(h)) activate(id);
+      else return;
+      e.preventDefault();
       return;
     }
     // Long-press sheet: Esc closes it

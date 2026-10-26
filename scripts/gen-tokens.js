@@ -62,12 +62,17 @@ export function tokensCss(T) {
   for (const [k, v] of Object.entries(T.space)) css += `  --sp-${k}:${v}px;\n`;
   for (const [k, v] of Object.entries(T.radius)) css += `  --r-${k}:${v}px;\n`;
   for (const [k, v] of Object.entries(T.border)) css += `  --b-${k}:${v}px;\n`;
+  css += '  /* v3 stacking (z), then the extra layers v3 does not name (legacy.z, slotted between them) */\n';
+  for (const [k, v] of Object.entries(T.z)) css += `  --z-${k}:${v};\n`;
+  for (const [k, v] of Object.entries(L.z)) {
+    if (k in T.z) throw new Error(`legacy.z.${k} collides with the v3 z token of the same name`);
+    css += `  --z-${k}:${v};\n`;
+  }
   css += '  /* v2 names still used by components, mapped to v3 values (legacy) */\n';
   for (const [k, v] of Object.entries(L.color)) css += `  --c-${k}:${cssRef(T, v)};\n`;
   for (const [t, v] of Object.entries(L.tier)) css += `  --t${t}:${cssRef(T, v.fill)};\n  --t${t}-ink:${cssRef(T, v.ink)};\n  --t${t}-edge:${cssRef(T, v.edge)};\n  --t${t}-solid:${cssRef(T, v.fill)};\n`;
   for (const [k, v] of Object.entries(L.radius)) css += `  --r-${k}:${cssRef(T, v)};\n`;
   for (const [k, v] of Object.entries(L.shadow)) css += `  --sh-${k}:${cssRef(T, v)};\n`;
-  for (const [k, v] of Object.entries(L.z)) css += `  --z-${k}:${v};\n`;
   css += '  --f-display:var(--f-sans);\n  --f-ui:var(--f-sans);\n}\n';
   return css;
 }

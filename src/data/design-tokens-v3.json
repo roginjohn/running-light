@@ -477,22 +477,15 @@
       "glow-cyan": "none",
       "glow-win": "none"
     },
-    "z-note": "v2 stacking order, kept unchanged in batch 1 (z is structure, not colour/type/spacing). v3 z replaces it with the new frame in batch 2.",
+    "z-note": "Batch 2: stacking is rebased on the v3 `z` scale (track 1, light-layer 2, centre 3, toast 20, scrim 30, dialog 31). These are only the extra layers v3 does not name, slotted between the v3 values. A name here must never repeat a v3 `z` name (gen-tokens.js fails if it does).",
     "z": {
-      "background": 0,
-      "stage": 10,
-      "tiles": 20,
-      "light": 30,
-      "tags": 35,
-      "centre": 25,
-      "hud": 60,
-      "toast": 70,
-      "tooltip": 80,
-      "scrim": 90,
-      "modal": 100,
-      "celebration": 110,
-      "hud-over-scrim": 120,
-      "error": 200
+      "frame": 0,
+      "tags": 4,
+      "focus": 5,
+      "hud": 10,
+      "tooltip": 25,
+      "celebration": 32,
+      "screen": 40
     }
   },
   "contrast": [
