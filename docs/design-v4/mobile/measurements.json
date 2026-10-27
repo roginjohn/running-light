@@ -1,0 +1,1459 @@
+{
+  "summary": {
+    "generated": "2026-10-27T03:55:49.595Z",
+    "rules": {
+      "minTapTarget": 44,
+      "minFont": 12,
+      "minBodyFont": 14
+    },
+    "pages": 45,
+    "failing": 0,
+    "minTapTargetOverall": 44,
+    "minFontOverall": 12,
+    "minBodyFontOverall": 14
+  },
+  "results": [
+    {
+      "file": "png/betting-360x640.png",
+      "page": "mocks/betting.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 63,
+      "minTapTarget": {
+        "size": 44,
+        "x": 260,
+        "y": 29.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": null,
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/running-360x640.png",
+      "page": "mocks/running.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 13,
+      "minTapTarget": {
+        "size": 44,
+        "x": 260,
+        "y": 29.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"The result was drawn when you pressed St\""
+      },
+      "ringTileMin": 24.6,
+      "violations": []
+    },
+    {
+      "file": "png/win-gamble-offer-360x640.png",
+      "page": "mocks/win-gamble-offer.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 11,
+      "minTapTarget": {
+        "size": 44,
+        "x": 260,
+        "y": 29.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Collect it, or gamble it on a fair 50/50\""
+      },
+      "ringTileMin": 24.6,
+      "violations": []
+    },
+    {
+      "file": "png/gamble-flip-360x640.png",
+      "page": "mocks/gamble-flip.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 13,
+      "minTapTarget": {
+        "size": 44,
+        "x": 260,
+        "y": 29.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.gmsg \"Flipping… If red lights, your win double\""
+      },
+      "ringTileMin": 24.6,
+      "violations": []
+    },
+    {
+      "file": "png/loss-360x640.png",
+      "page": "mocks/loss.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 14,
+      "minTapTarget": {
+        "size": 44,
+        "x": 260,
+        "y": 29.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Stopped on #26 (24x). Your bets are kept\""
+      },
+      "ringTileMin": 24.6,
+      "violations": []
+    },
+    {
+      "file": "png/settings-360x640.png",
+      "page": "mocks/settings.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 9,
+      "minTapTarget": {
+        "size": 44,
+        "x": 311,
+        "y": 54.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib.x \"Close\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.body \"Long-press any square for its pays, hit \""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/paytable-360x640.png",
+      "page": "mocks/paytable.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 4,
+      "minTapTarget": {
+        "size": 44,
+        "x": 311,
+        "y": 54.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib.x \"Close\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.body \"Pays include your stake. A bet of 5 on a\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/help-360x640.png",
+      "page": "mocks/help.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 4,
+      "minTapTarget": {
+        "size": 44,
+        "x": 311,
+        "y": 54.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib.x \"Close\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.body \"Pick a chip1, 5, 10, 25 or 50 credits.\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/refill-360x640.png",
+      "page": "mocks/refill.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 1,
+      "minTapTarget": {
+        "size": 56,
+        "x": 33,
+        "y": 523,
+        "w": 294,
+        "h": 56,
+        "el": "button.btn.pri.stack.dbtn \"Refill 1,000Free\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.body \"Take a free refill and keep playing. Ref\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/start-360x640.png",
+      "page": "mocks/start.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 3,
+      "minTapTarget": {
+        "size": 48,
+        "x": 20,
+        "y": 528,
+        "w": 156,
+        "h": 48,
+        "el": "button.btn.sec \"How to play\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Turns sound on",
+        "el": "span.sub \"Turns sound on\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.body \"Bet play credits on a 50-square track. T\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/loading-360x640.png",
+      "page": "mocks/loading.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 0,
+      "minTapTarget": null,
+      "minFont": {
+        "size": 12,
+        "text": "Loading sounds and fonts",
+        "el": "span \"Loading sounds and fonts\""
+      },
+      "minBodyFont": null,
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/error-360x640.png",
+      "page": "mocks/error.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 1,
+      "minTapTarget": {
+        "size": 56,
+        "x": 33,
+        "y": 523,
+        "w": 294,
+        "h": 56,
+        "el": "button.btn.pri.stack.dbtn \"ReloadRestores your round\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"The result was drawn when you pressed St\""
+      },
+      "ringTileMin": 24.6,
+      "violations": []
+    },
+    {
+      "file": "png/betting-390x844.png",
+      "page": "mocks/betting.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 63,
+      "minTapTarget": {
+        "size": 44,
+        "x": 290,
+        "y": 52.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, then tap squares.\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/running-390x844.png",
+      "page": "mocks/running.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 13,
+      "minTapTarget": {
+        "size": 44,
+        "x": 290,
+        "y": 52.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"The result was drawn when you pressed St\""
+      },
+      "ringTileMin": 30.5,
+      "violations": []
+    },
+    {
+      "file": "png/win-gamble-offer-390x844.png",
+      "page": "mocks/win-gamble-offer.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 11,
+      "minTapTarget": {
+        "size": 44,
+        "x": 290,
+        "y": 52.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Collect it, or gamble it on a fair 50/50\""
+      },
+      "ringTileMin": 30.5,
+      "violations": []
+    },
+    {
+      "file": "png/gamble-flip-390x844.png",
+      "page": "mocks/gamble-flip.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 13,
+      "minTapTarget": {
+        "size": 44,
+        "x": 290,
+        "y": 52.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.gmsg \"Flipping… If red lights, your win double\""
+      },
+      "ringTileMin": 30.5,
+      "violations": []
+    },
+    {
+      "file": "png/loss-390x844.png",
+      "page": "mocks/loss.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 14,
+      "minTapTarget": {
+        "size": 44,
+        "x": 290,
+        "y": 52.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Stopped on #26 (24x). Your bets are kept\""
+      },
+      "ringTileMin": 30.5,
+      "violations": []
+    },
+    {
+      "file": "png/settings-390x844.png",
+      "page": "mocks/settings.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 9,
+      "minTapTarget": {
+        "size": 44,
+        "x": 341,
+        "y": 190.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib.x \"Close\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, then tap squares.\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/paytable-390x844.png",
+      "page": "mocks/paytable.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 4,
+      "minTapTarget": {
+        "size": 44,
+        "x": 341,
+        "y": 77.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib.x \"Close\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, then tap squares.\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/help-390x844.png",
+      "page": "mocks/help.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 4,
+      "minTapTarget": {
+        "size": 44,
+        "x": 341,
+        "y": 77.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib.x \"Close\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, then tap squares.\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/refill-390x844.png",
+      "page": "mocks/refill.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 1,
+      "minTapTarget": {
+        "size": 56,
+        "x": 33,
+        "y": 693,
+        "w": 324,
+        "h": 56,
+        "el": "button.btn.pri.stack.dbtn \"Refill 1,000Free\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.body \"Take a free refill and keep playing. Ref\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/start-390x844.png",
+      "page": "mocks/start.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 3,
+      "minTapTarget": {
+        "size": 48,
+        "x": 20,
+        "y": 714,
+        "w": 171,
+        "h": 48,
+        "el": "button.btn.sec \"How to play\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Turns sound on",
+        "el": "span.sub \"Turns sound on\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.body \"Bet play credits on a 50-square track. T\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/loading-390x844.png",
+      "page": "mocks/loading.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 0,
+      "minTapTarget": null,
+      "minFont": {
+        "size": 12,
+        "text": "Loading sounds and fonts",
+        "el": "span \"Loading sounds and fonts\""
+      },
+      "minBodyFont": null,
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/error-390x844.png",
+      "page": "mocks/error.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 1,
+      "minTapTarget": {
+        "size": 56,
+        "x": 33,
+        "y": 693,
+        "w": 324,
+        "h": 56,
+        "el": "button.btn.pri.stack.dbtn \"ReloadRestores your round\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"The result was drawn when you pressed St\""
+      },
+      "ringTileMin": 30.5,
+      "violations": []
+    },
+    {
+      "file": "png/betting-430x932.png",
+      "page": "mocks/betting.html",
+      "viewport": "430x932",
+      "safeArea": {
+        "t": 59,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 63,
+      "minTapTarget": {
+        "size": 44,
+        "x": 330,
+        "y": 64.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, then tap squares.\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/running-430x932.png",
+      "page": "mocks/running.html",
+      "viewport": "430x932",
+      "safeArea": {
+        "t": 59,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 13,
+      "minTapTarget": {
+        "size": 44,
+        "x": 330,
+        "y": 64.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"The result was drawn when you pressed St\""
+      },
+      "ringTileMin": 34.1,
+      "violations": []
+    },
+    {
+      "file": "png/win-gamble-offer-430x932.png",
+      "page": "mocks/win-gamble-offer.html",
+      "viewport": "430x932",
+      "safeArea": {
+        "t": 59,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 11,
+      "minTapTarget": {
+        "size": 44,
+        "x": 330,
+        "y": 64.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Collect it, or gamble it on a fair 50/50\""
+      },
+      "ringTileMin": 34.1,
+      "violations": []
+    },
+    {
+      "file": "png/gamble-flip-430x932.png",
+      "page": "mocks/gamble-flip.html",
+      "viewport": "430x932",
+      "safeArea": {
+        "t": 59,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 13,
+      "minTapTarget": {
+        "size": 44,
+        "x": 330,
+        "y": 64.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.gmsg \"Flipping… If red lights, your win double\""
+      },
+      "ringTileMin": 34.1,
+      "violations": []
+    },
+    {
+      "file": "png/loss-430x932.png",
+      "page": "mocks/loss.html",
+      "viewport": "430x932",
+      "safeArea": {
+        "t": 59,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 14,
+      "minTapTarget": {
+        "size": 44,
+        "x": 330,
+        "y": 64.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Stopped on #26 (24x). Your bets are kept\""
+      },
+      "ringTileMin": 34.1,
+      "violations": []
+    },
+    {
+      "file": "png/settings-430x932.png",
+      "page": "mocks/settings.html",
+      "viewport": "430x932",
+      "safeArea": {
+        "t": 59,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 9,
+      "minTapTarget": {
+        "size": 44,
+        "x": 381,
+        "y": 298.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib.x \"Close\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, then tap squares.\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/paytable-430x932.png",
+      "page": "mocks/paytable.html",
+      "viewport": "430x932",
+      "safeArea": {
+        "t": 59,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 4,
+      "minTapTarget": {
+        "size": 44,
+        "x": 381,
+        "y": 131.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib.x \"Close\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, then tap squares.\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/help-430x932.png",
+      "page": "mocks/help.html",
+      "viewport": "430x932",
+      "safeArea": {
+        "t": 59,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 4,
+      "minTapTarget": {
+        "size": 44,
+        "x": 381,
+        "y": 89.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib.x \"Close\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, then tap squares.\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/refill-430x932.png",
+      "page": "mocks/refill.html",
+      "viewport": "430x932",
+      "safeArea": {
+        "t": 59,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 1,
+      "minTapTarget": {
+        "size": 56,
+        "x": 33,
+        "y": 781,
+        "w": 364,
+        "h": 56,
+        "el": "button.btn.pri.stack.dbtn \"Refill 1,000Free\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.body \"Take a free refill and keep playing. Ref\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/start-430x932.png",
+      "page": "mocks/start.html",
+      "viewport": "430x932",
+      "safeArea": {
+        "t": 59,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 3,
+      "minTapTarget": {
+        "size": 48,
+        "x": 20,
+        "y": 802,
+        "w": 191,
+        "h": 48,
+        "el": "button.btn.sec \"How to play\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Turns sound on",
+        "el": "span.sub \"Turns sound on\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.body \"Bet play credits on a 50-square track. T\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/loading-430x932.png",
+      "page": "mocks/loading.html",
+      "viewport": "430x932",
+      "safeArea": {
+        "t": 59,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 0,
+      "minTapTarget": null,
+      "minFont": {
+        "size": 12,
+        "text": "Loading sounds and fonts",
+        "el": "span \"Loading sounds and fonts\""
+      },
+      "minBodyFont": null,
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/error-430x932.png",
+      "page": "mocks/error.html",
+      "viewport": "430x932",
+      "safeArea": {
+        "t": 59,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 1,
+      "minTapTarget": {
+        "size": 56,
+        "x": 33,
+        "y": 781,
+        "w": 364,
+        "h": 56,
+        "el": "button.btn.pri.stack.dbtn \"ReloadRestores your round\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"The result was drawn when you pressed St\""
+      },
+      "ringTileMin": 34.1,
+      "violations": []
+    },
+    {
+      "file": "png/tip-sheet-390x844.png",
+      "page": "mocks/tip-sheet.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 3,
+      "minTapTarget": {
+        "size": 44,
+        "x": 341,
+        "y": 557.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib.x \"Close\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, then tap squares.\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/landscape-A-betting-844x390.png",
+      "page": "mocks/betting.html",
+      "viewport": "844x390",
+      "safeArea": {
+        "t": 0,
+        "r": 47,
+        "b": 21,
+        "l": 47
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 63,
+      "minTapTarget": {
+        "size": 44,
+        "x": 441,
+        "y": 2,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": null,
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/landscape-A-running-844x390.png",
+      "page": "mocks/running.html",
+      "viewport": "844x390",
+      "safeArea": {
+        "t": 0,
+        "r": 47,
+        "b": 21,
+        "l": 47
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 13,
+      "minTapTarget": {
+        "size": 44,
+        "x": 441,
+        "y": 2,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"The result was drawn when you pressed St\""
+      },
+      "ringTileMin": 25.6,
+      "violations": []
+    },
+    {
+      "file": "png/landscape-A-win-844x390.png",
+      "page": "mocks/win-gamble-offer.html",
+      "viewport": "844x390",
+      "safeArea": {
+        "t": 0,
+        "r": 47,
+        "b": 21,
+        "l": 47
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 11,
+      "minTapTarget": {
+        "size": 44,
+        "x": 441,
+        "y": 2,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Collect it, or gamble it on a fair 50/50\""
+      },
+      "ringTileMin": 25.6,
+      "violations": []
+    },
+    {
+      "file": "png/landscape-B-rotate-844x390.png",
+      "page": "mocks/rotate.html",
+      "viewport": "844x390",
+      "safeArea": {
+        "t": 0,
+        "r": 47,
+        "b": 21,
+        "l": 47
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 0,
+      "minTapTarget": null,
+      "minFont": {
+        "size": 12,
+        "text": "Your round and bets are kept while you t",
+        "el": "p.sfootnote.fn \"Your round and bets are kept while you t\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.body \"Running Light needs a portrait screen on\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/betting-768x1024.png",
+      "page": "mocks/betting.html",
+      "viewport": "768x1024",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 20,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 63,
+      "minTapTarget": {
+        "size": 44,
+        "x": 656,
+        "y": 41.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, tap squares, then press Sta\""
+      },
+      "ringTileMin": 45.6,
+      "violations": []
+    },
+    {
+      "file": "png/win-gamble-offer-768x1024.png",
+      "page": "mocks/win-gamble-offer.html",
+      "viewport": "768x1024",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 20,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 11,
+      "minTapTarget": {
+        "size": 44,
+        "x": 656,
+        "y": 41.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Collect it, or gamble it on a fair 50/50\""
+      },
+      "ringTileMin": 45,
+      "violations": []
+    },
+    {
+      "file": "png/betting-1024x1366.png",
+      "page": "mocks/betting.html",
+      "viewport": "1024x1366",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 20,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 63,
+      "minTapTarget": {
+        "size": 44,
+        "x": 912,
+        "y": 41.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, tap squares, then press Sta\""
+      },
+      "ringTileMin": 66.3,
+      "violations": []
+    },
+    {
+      "file": "png/win-gamble-offer-1024x1366.png",
+      "page": "mocks/win-gamble-offer.html",
+      "viewport": "1024x1366",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 20,
+        "l": 0
+      },
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 11,
+      "minTapTarget": {
+        "size": 44,
+        "x": 912,
+        "y": 41.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Collect it, or gamble it on a fair 50/50\""
+      },
+      "ringTileMin": 66.3,
+      "violations": []
+    }
+  ]
+}
