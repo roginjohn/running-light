@@ -414,12 +414,6 @@
       "cyan": "{color.accent-blue-text}",
       "cyan-ink": "{color.text-on-light}",
       "focus": "{color.focus-ring}",
-      "bulb-off": "{color.tile}",
-      "bulb-off-rim": "{color.tile-border}",
-      "bulb-warm": "{color.tile-lit}",
-      "bulb-warm-core": "{color.tile-trail}",
-      "bulb-cyan": "{color.accent-blue-text}",
-      "bulb-cyan-core": "{color.text-strong}",
       "pick-red": "{color.gamble-red}",
       "pick-red-ink": "{color.text-strong}",
       "pick-white": "{color.gamble-white}",
@@ -466,16 +460,7 @@
       "sheet": "{radius.frame}"
     },
     "shadow": {
-      "panel": "none",
-      "raised": "none",
-      "cta": "none",
-      "modal": "none",
-      "focus": "0 0 0 {border.focus}px {color.focus-ring}",
-      "glow-warm": "none",
-      "glow-warm-trail1": "none",
-      "glow-warm-trail2": "none",
-      "glow-cyan": "none",
-      "glow-win": "none"
+      "focus": "0 0 0 {border.focus}px {color.focus-ring}"
     },
     "z-note": "Batch 2: stacking is rebased on the v3 `z` scale (track 1, light-layer 2, centre 3, toast 20, scrim 30, dialog 31). These are only the extra layers v3 does not name, slotted between the v3 values. A name here must never repeat a v3 `z` name (gen-tokens.js fails if it does).",
     "z": {

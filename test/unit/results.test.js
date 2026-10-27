@@ -61,7 +61,8 @@ test('no glow or pulse on tiles: no box-shadow, filter, drop-shadow, gradient or
   for (const gone of ['.wtag', 'tagin', 'tpulse', '@keyframes chase', '--chase', '.tile.pulse', '.tile.chase', '.win2', '.veil', '.confetti', '.celebrate', 'drop-shadow', '.pick .pb', '.btn.red', '.btn.whitec', '.cres']) {
     assert.ok(!CSS.includes(gone), gone);
   }
-  assert.deepEqual(Object.keys(keyframes).sort(), ['cfade', 'flipr', 'flipw', 'land', 'modalin', 'sheetin', 'toastin', 'toastout'].sort(), 'keyframes');
+  // batch 6: the v2 modalin (scale) / sheetin (40 px slide) became one dlgin (160 ms opacity + 4 px)
+  assert.deepEqual(Object.keys(keyframes).sort(), ['cfade', 'dlgin', 'flipr', 'flipw', 'land', 'toastin', 'toastout'].sort(), 'keyframes');
 });
 
 test('win / loss stops are flat token fills (component sheet): green with dark text, tile-lit; markers 1st / 2nd', () => {
