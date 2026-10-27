@@ -390,34 +390,17 @@
     "totalWeight": 2093
   },
   "legacy": {
-    "note": "v2 CSS variable names still used by the v2 components, mapped onto v3 values until batches 2-6 restyle them. Remove an entry once nothing uses it. Coloured text and fills share one v2 name, so accents map to the AA-safe text variant (accent-*-text) where the v2 name is also used as text.",
+    "note": "v2 CSS variable names still used by components (tooltip, toast, focus ring, chip inks), mapped onto v3 values. Batch 7 removed every entry nothing uses. Remove an entry once nothing uses it. Coloured text and fills share one v2 name, so accents map to the AA-safe text variant (accent-*-text) where the v2 name is also used as text.",
     "color": {
       "bg-0": "{color.bg-page}",
-      "bg-1": "{color.bg-frame}",
       "bg-2": "{color.bg-card}",
-      "bg-3": "{color.tile}",
-      "bg-4": "{color.border-input}",
       "line": "{color.divider}",
       "line-hi": "{color.border-input}",
       "text-hi": "{color.text-primary}",
       "text-mid": "{color.text-primary}",
       "text-lo": "{color.text-muted}",
-      "text-disabled": "{color.text-dim}",
-      "amber": "{color.accent-blue-text}",
-      "amber-hi": "{color.accent-blue-text}",
-      "amber-lo": "{color.accent-blue-text}",
-      "amber-ink": "{color.text-on-light}",
       "mint": "{color.accent-green}",
-      "mint-ink": "{color.text-on-green}",
       "coral": "{color.accent-red-text}",
-      "coral-ink": "{color.text-on-light}",
-      "cyan": "{color.accent-blue-text}",
-      "cyan-ink": "{color.text-on-light}",
-      "focus": "{color.focus-ring}",
-      "pick-red": "{color.gamble-red}",
-      "pick-red-ink": "{color.text-strong}",
-      "pick-white": "{color.gamble-white}",
-      "pick-white-ink": "{color.text-on-light}",
       "chip-1-ink": "{color.chip-text-dark}",
       "chip-5-ink": "{color.chip-text-light}",
       "chip-10-ink": "{color.chip-text-light}",
@@ -427,37 +410,29 @@
     "tier": {
       "24": {
         "fill": "{color.tile}",
-        "ink": "{color.tier-24}",
-        "edge": "{color.tile-border}"
+        "ink": "{color.tier-24}"
       },
       "96": {
         "fill": "{color.tile}",
-        "ink": "{color.tier-96}",
-        "edge": "{color.tile-border}"
+        "ink": "{color.tier-96}"
       },
       "480": {
         "fill": "{color.tile}",
-        "ink": "{color.tier-480}",
-        "edge": "{color.tile-border}"
+        "ink": "{color.tier-480}"
       },
       "960": {
         "fill": "{color.tile}",
-        "ink": "{color.tier-960}",
-        "edge": "{color.tile-border}"
+        "ink": "{color.tier-960}"
       },
       "1920": {
         "fill": "{color.tile-jackpot}",
-        "ink": "{color.tier-1920}",
-        "edge": "{color.border-panel-navy}"
+        "ink": "{color.tier-1920}"
       }
     },
     "radius": {
-      "xs": "{radius.input}",
       "sm": "{radius.button}",
       "md": "{radius.input}",
-      "lg": "{radius.card}",
-      "xl": "{radius.frame}",
-      "sheet": "{radius.frame}"
+      "lg": "{radius.card}"
     },
     "shadow": {
       "focus": "0 0 0 {border.focus}px {color.focus-ring}"
@@ -465,11 +440,9 @@
     "z-note": "Batch 2: stacking is rebased on the v3 `z` scale (track 1, light-layer 2, centre 3, toast 20, scrim 30, dialog 31). These are only the extra layers v3 does not name, slotted between the v3 values. A name here must never repeat a v3 `z` name (gen-tokens.js fails if it does).",
     "z": {
       "frame": 0,
-      "tags": 4,
       "focus": 5,
       "hud": 10,
       "tooltip": 25,
-      "celebration": 32,
       "screen": 40
     }
   },
@@ -661,45 +634,9 @@
       "kind": "body"
     },
     {
-      "name": "legacy text-lo on bg-1",
-      "fg": "{legacy.text-lo}",
-      "bg": "{legacy.bg-1}",
-      "kind": "body"
-    },
-    {
       "name": "legacy text-lo on bg-2",
       "fg": "{legacy.text-lo}",
       "bg": "{legacy.bg-2}",
-      "kind": "body"
-    },
-    {
-      "name": "legacy text-lo on bg-3",
-      "fg": "{legacy.text-lo}",
-      "bg": "{legacy.bg-3}",
-      "kind": "body"
-    },
-    {
-      "name": "legacy amber text on bg-1",
-      "fg": "{legacy.amber}",
-      "bg": "{legacy.bg-1}",
-      "kind": "body"
-    },
-    {
-      "name": "legacy amber text on bg-2",
-      "fg": "{legacy.amber}",
-      "bg": "{legacy.bg-2}",
-      "kind": "body"
-    },
-    {
-      "name": "legacy amber-ink on amber (CTA, bet badge)",
-      "fg": "{legacy.amber-ink}",
-      "bg": "{legacy.amber}",
-      "kind": "body"
-    },
-    {
-      "name": "legacy mint text on bg-1",
-      "fg": "{legacy.mint}",
-      "bg": "{legacy.bg-1}",
       "kind": "body"
     },
     {
@@ -707,48 +644,6 @@
       "fg": "{legacy.mint}",
       "bg": "{legacy.bg-2}",
       "kind": "body"
-    },
-    {
-      "name": "legacy mint-ink on mint (WIN tag)",
-      "fg": "{legacy.mint-ink}",
-      "bg": "{legacy.mint}",
-      "kind": "body"
-    },
-    {
-      "name": "legacy coral text on bg-1",
-      "fg": "{legacy.coral}",
-      "bg": "{legacy.bg-1}",
-      "kind": "body"
-    },
-    {
-      "name": "legacy coral-ink on coral",
-      "fg": "{legacy.coral-ink}",
-      "bg": "{legacy.coral}",
-      "kind": "body"
-    },
-    {
-      "name": "legacy cyan text on bg-1",
-      "fg": "{legacy.cyan}",
-      "bg": "{legacy.bg-1}",
-      "kind": "body"
-    },
-    {
-      "name": "legacy cyan-ink on cyan (WIN 2 tag)",
-      "fg": "{legacy.cyan-ink}",
-      "bg": "{legacy.cyan}",
-      "kind": "body"
-    },
-    {
-      "name": "legacy pick-white-ink on pick-white",
-      "fg": "{legacy.pick-white-ink}",
-      "bg": "{legacy.pick-white}",
-      "kind": "large"
-    },
-    {
-      "name": "legacy focus vs bg-0 (non-text)",
-      "fg": "{legacy.focus}",
-      "bg": "{legacy.bg-0}",
-      "kind": "non-text"
     }
   ]
 }

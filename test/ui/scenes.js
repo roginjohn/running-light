@@ -27,6 +27,12 @@ export async function dispatch(page, action) {
   return page.evaluate((a) => window.__rl.game.dispatch(a), action);
 }
 
+/** Wait out a staged result render (app.js renderStaged): board and centre first, then the rail, top row and bar,
+ *  then the focus move, one frame apart (two frames from an input). */
+export async function staged(page) {
+  await page.evaluate(() => new Promise((r) => { let n = 4; const f = () => (--n ? requestAnimationFrame(f) : r()); requestAnimationFrame(f); }));
+}
+
 /** Wait until no animation tasks are pending (or timeout). */
 export async function settle(page, timeout = 15000) {
   await page.waitForFunction(() => window.__rl.app.pendingTasks() === 0, { timeout });

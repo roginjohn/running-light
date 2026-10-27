@@ -4,7 +4,7 @@
 import test, { before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { startServer, launch, openGame, waitPhase, state, sleep, clickId, centerOf } from './harness.js';
-import { setup, playTo, dispatch, settle, force, BETS } from './scenes.js';
+import { setup, playTo, dispatch, settle, force, staged, BETS } from './scenes.js';
 import { MAX_GAMBLES, GAMBLE_CAP } from '../../src/engine/config.js';
 
 let server, url, browser;
@@ -117,6 +117,7 @@ test('START locks squares and controls; bottom-bar Settings/Stats/Fairness locke
   assert.deepEqual((await state(page)).round.bets, { 6: 1, 12: 1 });
   await waitPhase(page, 'GAMBLE_OFFER', 15000);
   assert.equal((await state(page)).history.length, 1, 'one round');
+  await staged(page); // the bar is rendered one frame after the board and centre (batch 7)
   assert.match(await attr(page, 'icon-stats', 'aria-label'), /Paytable and help: opens again after you collect/);
   assert.equal((await dispatch(page, { type: 'OPEN_INFO', tab: 'settings' })).ok, false);
   await clickId(page, 'btn-collect');
@@ -153,6 +154,8 @@ test('win -> gamble (R/W pick, G, Space on focused Gamble, Enter collect) -> pay
   await page.keyboard.press('g');
   await waitPhase(page, 'GAMBLE');
   assert.equal(await page.evaluate(() => document.activeElement.dataset.id), 'btn-collect');
+  await staged(page);
+  assert.equal(await page.evaluate(() => document.activeElement.dataset.id), 'btn-collect', 'still on Collect once the gamble rail is in');
   assert.match(await text(page, '#r-centre'), /Double or nothing · flip 1/);
   assert.equal(await text(page, '#r-modal'), '', 'the gamble lives in the centre, not in a dialog');
   assert.equal(await attr(page, 'btn-flip', 'aria-disabled'), 'true', 'no pick yet');
@@ -165,6 +168,7 @@ test('win -> gamble (R/W pick, G, Space on focused Gamble, Enter collect) -> pay
   await page.evaluate(() => window.__rl.game.test.forceNextGamble('red'));
   await page.keyboard.press('g');
   await page.waitForFunction(() => !window.__rl.game.state.gamble.revealing && window.__rl.game.state.round.gambles.length === 1);
+  await staged(page);
   assert.equal((await state(page)).round.currentWin, 960);
   assert.match(await text(page, '#r-centre'), /Match! Red lit\. Your win is now 960\./);
   assert.match(await text(page, '#r-centre'), /Flip 1: you picked Red · Red lit · 480 → 960/);
@@ -202,6 +206,7 @@ test('gamble flip lose: No match in the centre panel, credits unchanged, auto-co
   await dispatch(page, { type: 'GAMBLE_FLIP' });
   await page.waitForFunction(() => window.__rl.app.ui.gambleLoss);
   const t0 = Date.now();
+  await staged(page); // the rail follows the centre one frame later (batch 7)
   const m = await text(page, '#r-centre');
   assert.match(m, /Gamble lost/);
   assert.match(m, /No match\. White lit\. Your pick was Red, so the 480 gamble is lost\./);
@@ -1322,6 +1327,45 @@ test('narrow viewport (390x844) falls back to the tablet layout; below 320 wide 
   await sleep(150);
   assert.equal(await page.evaluate(() => document.getElementById('rotate').hidden), false);
   assert.match(await text(page, '#rotate'), /Turn your phone upright, or make the window bigger/);
+  await page.__done();
+});
+
+// ------------------------------------------------------------------ batch 7: performance
+test('performance: the type warm-up leaves nothing behind; the credits count-up writes only the balance text; a win renders board and centre first, then the rail', async () => {
+  const page = await fresh({ timeScale: 1 });
+  await page.waitForFunction(() => !document.querySelector('#app > .warm'), { timeout: 5000 });
+  const dup = await page.evaluate(() => { const ids = [...document.querySelectorAll('[data-id]')].map((e) => e.dataset.id); return ids.filter((x, i) => ids.indexOf(x) !== i); });
+  assert.deepEqual(dup, [], 'no duplicate controls');
+  assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('#r-credits .credits')).contain), 'size layout style');
+  await setup(page, { balance: 1000, bets: { 12: 5 }, chip: 5, history: [] });
+  await force(page, 12);
+  await page.evaluate(() => {
+    const P = window.__cu = { recs: [], frames: 0, first: {} };
+    const tick = () => { P.frames += 1; requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+    new MutationObserver((rs) => { for (const r of rs) { const el = r.target.nodeType === 3 ? r.target.parentElement : r.target; P.recs.push({ type: r.type, role: el.dataset.role || el.className }); } })
+      .observe(document.getElementById('r-credits'), { subtree: true, childList: true, characterData: true, attributes: true });
+    for (const id of ['r-centre', 'r-controls']) {
+      new MutationObserver(() => { if (window.__rl.game.state.phase === 'GAMBLE_OFFER' && P.first[id] == null) P.first[id] = P.frames; })
+        .observe(document.getElementById(id), { subtree: true, childList: true, characterData: true, attributes: true });
+    }
+    window.__rl.game.dispatch({ type: 'START' });
+  });
+  await sleep(450);
+  const cu = await page.evaluate(() => window.__cu.recs);
+  // START's own render rebuilds the region once (the settled balance changes); every tween frame after it only
+  // replaces the balance text
+  const kinds = cu.map((r) => `${r.type}:${r.role}`);
+  assert.equal(kinds[0], 'childList:', 'one region rebuild at START');
+  assert.ok(kinds.length >= 4, `${kinds.length - 1} count-up writes`);
+  assert.deepEqual([...new Set(kinds.slice(1))], ['childList:balance'], 'tween frames replace only the balance text; the region is not rebuilt');
+  assert.equal(await text(page, '#r-credits [data-role="balance"]'), '995');
+  await waitPhase(page, 'GAMBLE_OFFER', 15000);
+  await settle(page);
+  const first = await page.evaluate(() => window.__cu.first);
+  assert.ok(first['r-centre'] != null && first['r-controls'] != null, JSON.stringify(first));
+  assert.ok(first['r-centre'] < first['r-controls'], `centre in frame ${first['r-centre']}, rail in frame ${first['r-controls']}`);
+  assert.equal(await page.evaluate(() => document.activeElement.dataset.id), 'btn-collect', 'focus moves once the rail is in');
   await page.__done();
 });
 

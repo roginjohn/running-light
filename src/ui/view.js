@@ -1,4 +1,4 @@
-// v2 view: pure functions from (engine state, UI state, derived context, layout) to HTML strings per region.
+// v3 view: pure functions from (engine state, UI state, derived context, layout) to HTML strings per region.
 // No outcome logic here: every number shown comes from the engine state (stored round) or simple display arithmetic.
 import { MULT, TIERS, COUNT_BY_TIER, SQUARES_BY_TIER, WEIGHT_BY_TIER, TOTAL_WEIGHT, CHIPS, pRound, GAMBLE_CAP, MAX_GAMBLES, HISTORY_SHOWN, DOUBLE_RUN_ONE_IN, MAX_PER_ROUND, MAX_PER_SQUARE, MIN_BET, REFILL_AMOUNT } from '../engine/config.js';
 import { totalOf } from '../engine/bets.js';
@@ -66,10 +66,11 @@ export function creditsRect(L) {
   return { x: c.x1 + BET_LBL_W, y: c.y, w: c.colW - BET_LBL_W };
 }
 
-/** "Credits 1,000" (with the green +N delta while paying). Its own region so the balance count-up only repaints this line. */
+/** "Credits 1,000" (with the green +N delta while paying). The markup carries the settled balance; a count-up
+ *  writes only the number's text (app.js paintCredits), so a tween frame never rebuilds this region. */
 export function credits(s, ui, L) {
   const r = creditsRect(L);
-  const bal = ui.displayBalance == null ? s.balance : ui.displayBalance;
+  const bal = s.balance;
   const delta = ui.delta ? `<span class="delta">+${fmt(ui.delta)}</span>` : '';
   return `<div class="credits" role="status" aria-label="Play credits ${fmt(s.balance)}" style="left:${px(r.x)};top:${px(r.y)};width:${px(r.w)};height:${px(HEAD_H)}"><span class="k">Credits</span><span class="v">${delta}<b data-role="balance">${fmt(bal)}</b></span></div>`;
 }
@@ -569,6 +570,29 @@ function helpBody() {
     <li>Up to ${MAX_GAMBLES} gambles per win, and Collect is open between flips. Gamble is off when doubling would go over ${fmt(GAMBLE_CAP)}.</li></ul>`;
   h += `<p class="inavy"><b>Play credits only.</b> No real money value. Credits can’t be bought, sold or cashed out. Free refill to ${fmt(REFILL_AMOUNT)} whenever you run out.</p>`;
   return h;
+}
+
+// ------------------------------------------------------------------ type warm-up (v3 batch 7)
+/** The result templates (win offer, gamble, gamble match, payout, loss) filled from a sample round that is not the
+ *  player's, for app.js warmType: laid out once in a hidden box so the first real result does not shape its text
+ *  from a cold cache. Ids, roles and live regions are stripped, so nothing can be focused, found or announced. */
+export function warmSamples(s, L) {
+  const round = { roundId: 'warm', bets: { 13: 5 }, totalBet: 5, s1: 13, s2: null, doubleRun: false, baseWin: 2400, gambles: [], pendingReveal: false, currentWin: 2400, settled: false, balanceBefore: 1000, balance: 995 };
+  const ui = { betTotals: [], gambleLoss: null, showLastStop: false, flip: null, matchMsg: null, light1: null, light2: null };
+  const one = (phase, u = {}, g = { pick: null, revealing: false }, r = round) => {
+    const st = { ...s, phase, round: r, gamble: g, bets: {}, lastBets: r.bets };
+    const ux = { ...ui, ...u };
+    const c = { mode: modeOf(st, ux), gambleWhy: null, total: 0, count: 0, canBet: false, rebetWhy: null, rebetSame: false, ghosts: false };
+    return centre(st, ux, c, L) + controls(st, ux, c, L);
+  };
+  const won = { ...round, gambles: [{ pick: 'red', result: 'red' }], currentWin: 4800 };
+  return [
+    one('GAMBLE_OFFER'),
+    one('GAMBLE', {}, { pick: 'red', revealing: false }),
+    one('GAMBLE', { matchMsg: { colour: 'red' } }, { pick: 'red', revealing: false }, won),
+    one('PAYOUT', {}, undefined, won) + toastHtml({ text: '+4,800 added to your credits', kind: 'ok' }, L),
+    one('BETTING', { showLastStop: true }, undefined, { ...round, baseWin: 0, currentWin: 0, s1: 30, settled: true }),
+  ].map((h) => h.replace(/ (data-id|data-role|role|aria-live|tabindex)="[^"]*"/g, ''));
 }
 
 // ------------------------------------------------------------------ start and loading screens (v3 batch 6)
