@@ -1,5 +1,6 @@
-// v2 icons and star: the exported SVGs from design/redesign-v2/assets (copied to src/assets/v2),
-// inlined at build time (no runtime requests). Icons are recoloured to `currentColor`.
+// v2 icons and star still in use (9 icons + the 1920x star, batch 7 removed the rest): the exported SVGs from
+// design/redesign-v2/assets (copied to src/assets/v2), inlined at build time (no runtime requests). Icons are
+// recoloured to `currentColor`.
 const raw = import.meta.glob('../assets/v2/{icons,ui}/*.svg', { query: '?raw', import: 'default', eager: true });
 
 const byName = {};

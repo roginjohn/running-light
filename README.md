@@ -46,10 +46,11 @@ npm run preview             # serve dist/ on http://localhost:4173
 ```bash
 npm test                    # unit tests: engine, math, recovery, key map, v1 light path, v2 light plan, v2 tokens
 npm run build && npm run test:ui     # v2 browser tests (4 breakpoints, touch, recovery, console/network checks)
-npm run screenshots         # states 01-19 x 4 sizes + WIN-tag checks + side-by-side -> test-results/v2/
+npm run screenshots:v3      # v3 states + side-by-side with docs/design-v3 mockups -> docs/design-v3/batch-7/
+npm run perf:trace          # Chrome trace of one round, desktop and 4x CPU: long tasks, layouts, credits count-up
 npm run sim                 # seeded simulation (default 5,000,000 rounds per strategy)
 node scripts/simulate.js --rounds 10000000 --rounds-b 40000000 --seed 20261023 --out test-results/v2/simulation
-node scripts/run-all.js     # tokens + build + unit + UI + screenshots; outputs saved in test-results/v2/
+node scripts/run-all.js     # tokens + build + unit + UI + screenshots; outputs saved in test-results/v3/
 ```
 
 Set `CHROME=/path/to/chrome` if Chrome is not at `/usr/bin/google-chrome`.
@@ -62,9 +63,9 @@ src/ui/       app.js (controller: input, focus, animation), view.js (state -> HT
               track geometry, WIN-tag lane), lightplan.js (v2 4-6 s / 1-2 lap light path), icons.js (v2 SVG assets),
               keys.js (keyboard map), audio.js (procedural Web Audio)
               render.js / svg.js are the retired v1 SVG renderer (kept, no longer imported)
-src/styles.css, src/styles/tokens.css (generated), src/assets/v2/ (chips, icons, bulbs, gamble, ui SVGs from design/)
-scripts/      gen-tokens.js, copy-v2-assets.js, simulate.js, run-all.js
-test/unit/    node:test suites          test/ui/   ui.test.js, screenshots-v2.js, harness.js, scenes.js
+src/styles.css, src/styles/tokens.css (generated), src/assets/v2/ (the 9 icons and the star still inlined, from design/)
+scripts/      gen-tokens.js, copy-v2-assets.js, copy-v3-fonts.js, simulate.js, run-all.js
+test/unit/    node:test suites          test/ui/   ui.test.js, screenshots-v3.js, perf-trace.js, harness.js, scenes.js
 ```
 
 ## Behaviour notes (v2 approved defaults)

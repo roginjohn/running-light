@@ -4,14 +4,14 @@
 import { spawnSync } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
 
-const OUT = new URL('../test-results/v2/', import.meta.url).pathname;
+const OUT = new URL('../test-results/v3/', import.meta.url).pathname;
 mkdirSync(OUT, { recursive: true });
 const steps = [
   ['tokens-output.txt', ['scripts/gen-tokens.js']],
   ['build-output.txt', ['node_modules/vite/bin/vite.js', 'build']],
   ['unit-tests.txt', ['--test', '--test-reporter=spec', 'test/unit/']],
   ['ui-tests.txt', ['--test', '--test-concurrency=1', '--test-reporter=spec', 'test/ui/ui.test.js']],
-  ['screenshots-output.txt', ['test/ui/screenshots-v2.js']],
+  ['screenshots-output.txt', ['test/ui/screenshots-v3.js', '--out', 'test-results/v3/screenshots']],
 ];
 let failed = 0;
 for (const [file, args] of steps) {

@@ -70,7 +70,7 @@ export function tokensCss(T) {
   }
   css += '  /* v2 names still used by components, mapped to v3 values (legacy) */\n';
   for (const [k, v] of Object.entries(L.color)) css += `  --c-${k}:${cssRef(T, v)};\n`;
-  for (const [t, v] of Object.entries(L.tier)) css += `  --t${t}:${cssRef(T, v.fill)};\n  --t${t}-ink:${cssRef(T, v.ink)};\n  --t${t}-edge:${cssRef(T, v.edge)};\n  --t${t}-solid:${cssRef(T, v.fill)};\n`;
+  for (const [t, v] of Object.entries(L.tier)) css += `  --t${t}:${cssRef(T, v.fill)};\n  --t${t}-ink:${cssRef(T, v.ink)};\n`;
   for (const [k, v] of Object.entries(L.radius)) css += `  --r-${k}:${cssRef(T, v)};\n`;
   for (const [k, v] of Object.entries(L.shadow)) css += `  --sh-${k}:${cssRef(T, v)};\n`;
   css += '  --f-display:var(--f-sans);\n  --f-ui:var(--f-sans);\n}\n';

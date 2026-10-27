@@ -12,8 +12,10 @@
 //   settings-paytable-help         the Game info window (settings-paytable-help.png)
 //   fairness, start, loading       not mocked: How results are decided, the Start screen, the loading screen
 // Overlays are captured at 1920x1080 only (Game info also at 1280x720 and 768x1024, where it shows tabs / a sheet);
-// the other scenes at all three sizes.
-// Usage: npm run build && node test/ui/screenshots-v3.js [--out docs/design-v3/batch-6] [--scenes betting,refill,...]
+// the other scenes at all three sizes. --small <scenes> limits the 1280x720 / 768x1024 captures to those scenes
+// (batch 7: --small betting).
+// Usage: npm run build && node test/ui/screenshots-v3.js [--out docs/design-v3/batch-7] [--scenes betting,refill,...]
+//        [--small betting]
 import { mkdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { startServer, launch, openGame, sleep, waitPhase } from './harness.js';
@@ -21,7 +23,8 @@ import { setup, force, settle, H01 } from './scenes.js';
 
 const args = Object.fromEntries(process.argv.slice(2).reduce((a, x, i, arr) => (x.startsWith('--') ? [...a, [x.slice(2), arr[i + 1]]] : a), []));
 const ROOT = path.resolve(new URL('../../', import.meta.url).pathname);
-const OUT = path.resolve(ROOT, args.out || 'docs/design-v3/batch-6');
+const OUT = path.resolve(ROOT, args.out || 'docs/design-v3/batch-7');
+const SMALL = args.small ? new Set(args.small.split(',')) : null;
 const MOCK = path.join(ROOT, 'docs/design-v3');
 const OVERLAYS = ['refill', 'error', 'settings-paytable-help', 'fairness', 'start', 'loading'];
 const MOCKED = new Set(['betting', 'running', 'win-gamble-offer', 'gamble-flip', 'loss', 'double-run-result', 'refill', 'error', 'settings-paytable-help']);
@@ -127,7 +130,8 @@ const SCENE = {
 
 try {
   for (const scene of SCENES) {
-    for (const [w, h, betMock] of OVERLAYS.includes(scene) && scene !== 'settings-paytable-help' ? SIZES.slice(0, 1) : SIZES) {
+    const wideOnly = SMALL ? !SMALL.has(scene) : OVERLAYS.includes(scene) && scene !== 'settings-paytable-help';
+    for (const [w, h, betMock] of wideOnly ? SIZES.slice(0, 1) : SIZES) {
       const page = await openGame(browser, url, { seed: 7, timeScale: scene === 'betting' || scene === 'running' ? 1 : 4, width: w, height: h, touch: w < 900 });
       await setup(page, { balance: 1000, history: H01, bets: MOCK_BETS, chip: 5 });
       await page.evaluate((t, hist) => {

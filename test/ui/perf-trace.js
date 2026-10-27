@@ -3,7 +3,8 @@
 // same round through the result states: the light stops on #13 (a 480x win, 5 on it), the win offer, Gamble ×2,
 // a pick, one stored flip (won), Collect and the payout back to betting. Per segment it counts Layout events (and
 // how big they are), forced (synchronous) layouts from script, style recalcs, paints, script time per animation
-// frame, and long tasks (> 50 ms). Prints a JSON summary.
+// frame, and long tasks (> 50 ms). Batch 7 adds the credits count-up check (layouts in the first 300 ms after
+// START's render: how many, how many full, the largest object count). Prints a JSON summary.
 // Usage: npm run build && node test/ui/perf-trace.js [--trace /tmp/rl-trace.json]
 import { writeFileSync } from 'node:fs';
 import { startServer, launch, openGame, waitPhase, sleep } from './harness.js';
@@ -104,6 +105,14 @@ async function one(label, throttle) {
   }
   const run = segment(T.start, T.run, { skipFirstFrame: true });
   run.lightSteps = steps;
+  // batch 7: the 300 ms credits count-up after START's own render (its one full layout is skipped). Each tween frame
+  // should lay out only the contained credits box (a partial layout of a few objects), never the document.
+  {
+    const all = ev.filter((e) => `${e.pid}:${e.tid}` === main && e.name === 'Layout' && e.ph === 'X' && e.ts >= T.start && e.ts <= T.start + 300000);
+    const cu = all.slice(1);
+    const objs = cu.map((e) => e.args?.beginData?.totalObjects ?? 0);
+    run.countUp = { layouts: cu.length, fullLayouts: cu.filter((e) => e.args?.beginData?.partialLayout === false).length, maxObjects: Math.max(0, ...objs), maxMs: ms(Math.max(0, ...cu.map((e) => e.dur))) };
+  }
   run.layoutsPerStep = Math.round(((run.layoutEvents - 1) / steps) * 100) / 100;
   const segs = { run, winReveal: segment(T.run, T.win), gamble: segment(T.win, T.gamble), collect: segment(T.gamble, T.collect) };
   out[label] = {
@@ -123,6 +132,8 @@ try {
 console.log(JSON.stringify(out, null, 2));
 for (const [k, v] of Object.entries(out)) {
   console.log(`\n${k}: long tasks > 50 ms: ${v.longTasksOver50msTotal}, longest task ${v.longestTaskMsTotal} ms`);
+  const cu = v.run.countUp;
+  console.log(`  count-up  ${cu.layouts} layouts in the first 300 ms (full ${cu.fullLayouts}, max ${cu.maxObjects} objects, max ${cu.maxMs} ms)`);
   for (const s of ['run', 'winReveal', 'gamble', 'collect']) {
     const x = v[s];
     console.log(`  ${s.padEnd(9)} ${String(x.ms).padStart(8)} ms | layouts ${x.layoutEvents} (forced ${x.forcedLayoutsFromScript}, ${x.layoutTimeMs.total} ms, max ${x.layoutTimeMs.max}) | rAF script median/p95/max ${x.rafScriptMs.median}/${x.rafScriptMs.p95}/${x.rafScriptMs.max} ms | longest task ${x.longestTaskMs} ms | long ${x.longTasksOver50ms}`);

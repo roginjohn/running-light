@@ -13,7 +13,7 @@ const CSS = readFileSync(new URL('../../src/styles/tokens.css', import.meta.url)
 
 test('v3 contrast pairs (tokens.md §1 + legacy v2 names) all meet their WCAG ratio', () => {
   const checks = contrastChecks(T);
-  assert.equal(checks.length, 46);
+  assert.equal(checks.length, 33); // batch 7: the 13 pairs on v2 names nothing uses any more were removed with them
   for (const c of checks) assert.ok(c.pass, `${c.name}: ${c.ratio} < ${c.need}`);
 });
 
@@ -52,7 +52,8 @@ test('z-index: v3 z tokens emitted verbatim; extra layers never reuse a v3 name;
   const defs = [...CSS.matchAll(/^\s*--z-([a-z-]+):/gm)].map((m) => m[1]);
   assert.equal(new Set(defs).size, defs.length, 'each --z-* defined once');
   const z = { ...T.z, ...T.legacy.z };
-  assert.ok(z.track < z['light-layer'] && z['light-layer'] < z.centre && z.centre < z.tags && z.tags < z.hud && z.hud < z.toast && z.toast < z.tooltip && z.tooltip < z.scrim && z.scrim < z.dialog && z.dialog < z.celebration && z.celebration < z.screen, 'stacking order');
+  assert.ok(z.track < z['light-layer'] && z['light-layer'] < z.centre && z.centre < z.focus && z.focus < z.hud && z.hud < z.toast && z.toast < z.tooltip && z.tooltip < z.scrim && z.scrim < z.dialog && z.dialog < z.screen, 'stacking order');
+  assert.ok(!('tags' in z) && !('celebration' in z), 'v2 WIN-tag and celebration layers removed (batch 7)');
   const styles = readFileSync(new URL('../../src/styles.css', import.meta.url), 'utf8');
   const levels = [...styles.matchAll(/^([^{}\n]*)\{[^}]*z-index:\s*([^;}]+)/gm)].filter((m) => !/var\(--z-/.test(m[2]));
   // numbers are allowed only inside a tile or history entry, which are their own stacking contexts

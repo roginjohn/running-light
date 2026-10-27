@@ -1,4 +1,4 @@
-// UI controller (v2): renders DOM regions from engine state, maps input to engine.dispatch, runs outcome-first
+// UI controller (v3): renders DOM regions from engine state, maps input to engine.dispatch, runs outcome-first
 // animations. The UI never computes outcomes; it only animates what the engine has already stored.
 import * as V from './view.js';
 import { computeLayout, layoutVars } from './layout.js';
@@ -41,23 +41,31 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
   // ------------------------------------------------------------ animation scheduler (rAF; pauses when the tab is hidden)
   const tasks = new Set();
   let rafId = null;
+  let inFrame = false, frames = 0;
   const now = () => performance.now();
   function frame() {
     rafId = null;
     if (ui.paused) return;
     const t = now();
-    for (const task of [...tasks]) {
-      let done = false;
-      try {
-        done = task(t);
-      } catch (e) {
-        tasks.clear();
-        fail(e);
-        return;
+    frames += 1;
+    inFrame = true;
+    try {
+      for (const task of [...tasks]) {
+        let done = false;
+        try {
+          done = task(t);
+        } catch (e) {
+          tasks.clear();
+          fail(e);
+          return;
+        }
+        if (done) tasks.delete(task);
       }
-      if (done) tasks.delete(task);
+    } finally {
+      inFrame = false;
     }
-    if (tasks.size) rafId = requestAnimationFrame(frame);
+    // a task added during this frame has already requested the next one (addTask): never schedule frame() twice
+    if (tasks.size && !rafId) rafId = requestAnimationFrame(frame);
   }
   function addTask(fn) {
     tasks.add(fn);
@@ -94,6 +102,18 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
       step(1);
       done && done();
     };
+    return task;
+  }
+  /** Run cb in the next frame that starts after this one has been laid out and painted (one rAF from inside a
+   *  frame, two from an input or timer task, whose own frame has not run yet). */
+  function nextFrame(cb) {
+    const at = frames + (inFrame ? 1 : 2);
+    const task = addTask(() => {
+      if (frames < at) return false;
+      cb();
+      return true;
+    });
+    task.cancel = () => tasks.delete(task);
     return task;
   }
   const reduced = () => game.state.settings.reducedMotion;
@@ -205,6 +225,35 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     if (el.textContent !== v) el.textContent = v;
   }
 
+  // Credits count-up (START, payout, refill): only the balance text changes, inside the strictly contained .credits
+  // box, so a tween frame never rebuilds the region or lays out the page. The markup carries the settled balance.
+  let balEl = null;
+  function paintCredits() {
+    if (!balEl || !balEl.isConnected) balEl = R.credits.querySelector('[data-role="balance"]');
+    if (!balEl) return;
+    const v = V.fmt(ui.displayBalance == null ? game.state.balance : ui.displayBalance);
+    if (balEl.textContent !== v) balEl.textContent = v;
+  }
+
+  // A result (win offer, loss, gamble result, the end of a payout) changes most regions at once. Rendered in one
+  // frame and followed by a focus move (which forces a synchronous layout of all the new text), that was one 45–80 ms
+  // task at 4× CPU. Staged: the board and the centre in this frame, the rail, top row and bar in the next, and the
+  // focus move one frame later, on a clean layout. Each stage renders the state as it is then, so nothing is lost if
+  // the player acts in between; a newer staged render replaces the pending stages, and each focus step checks the
+  // phase first.
+  let staged = null;
+  function renderStaged(focus = null) {
+    if (staged) staged.cancel();
+    render(['track', 'centre']);
+    staged = nextFrame(() => {
+      render();
+      staged = nextFrame(() => {
+        staged = null;
+        if (focus) focus();
+      });
+    });
+  }
+
   function render(names = null) {
     if (!L) return;
     const s = game.state;
@@ -212,7 +261,10 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     const c = ctx();
     ui.reducedNow = c.reduced;
     const want = (n) => !names || names.includes(n);
-    if (want('credits')) setRegion('credits', V.credits(s, ui, L));
+    if (want('credits')) {
+      setRegion('credits', V.credits(s, ui, L));
+      paintCredits();
+    }
     if (want('track')) renderTiles(c);
     if (want('centre')) setRegion('centre', V.centre(s, ui, c, L));
     paintBig();
@@ -360,7 +412,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     audio.play('sfx_start');
     const before = r.balanceBefore, after = r.balance;
     ui.displayBalance = before;
-    tween(300, (x) => { ui.displayBalance = Math.round(before + (after - before) * x); render(['credits']); }, () => { ui.displayBalance = null; render(['credits']); });
+    tween(300, (x) => { ui.displayBalance = Math.round(before + (after - before) * x); paintCredits(); }, () => { ui.displayBalance = null; paintCredits(); });
     const plan = reduced() ? planFade(r.s1) : planFirstRunV2(ui.lightIndex, r.s1, u01(), u01());
     announce(`Running. Credits ${V.fmt(before)} minus ${V.fmt(r.totalBet)} bet = ${V.fmt(after)}.`);
     runLight(plan, 'light1', () => game.dispatch({ type: 'LIGHT1_DONE' }));
@@ -399,15 +451,15 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
         audio.duck(true);
         wait(2500, () => audio.duck(false));
       } else audio.play('sfx_win_small');
-      render();
-      focusId('btn-collect', true);
+      renderStaged(() => { if (game.state.phase === 'GAMBLE_OFFER') focusId('btn-collect', true); });
       announce(`You win ${V.fmt(r.currentWin)}. Collect or gamble.`);
     } else {
       ui.showLastStop = true;
       audio.play('sfx_loss');
-      render();
-      const a = document.activeElement;
-      if (!a || a === document.body || !root.contains(a) || a.getAttribute('aria-disabled') === 'true') focusId('btn-start', false);
+      renderStaged(() => {
+        const a = document.activeElement;
+        if (!a || a === document.body || !root.contains(a) || a.getAttribute('aria-disabled') === 'true') focusId('btn-start', false);
+      });
       announce(`No win this time. The light stopped on square ${r.s1}${r.s2 ? ` and ${r.s2}` : ''}. Your bets are still on the board.`);
     }
   }
@@ -454,8 +506,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
         }
         return false;
       });
-      render();
-      focusId('btn-back', ui.ringOn);
+      renderStaged(() => { if (ui.gambleLoss) focusId('btn-back', ui.ringOn); });
     } else {
       audio.play('sfx_gamble_win');
       const g = r.gambles[r.gambles.length - 1];
@@ -463,9 +514,10 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
       const target = r.currentWin;
       if (!reduced()) tween(500, (x) => { ui.displayWin = Math.round(prevWin + (target - prevWin) * x); paintWin(); }, () => { ui.displayWin = null; paintWin(); });
       announce(`Match! ${g.result} lit. Your win is now ${V.fmt(target)}. Gamble again or Collect.`);
-      render();
-      const a = document.activeElement;
-      if (!a || !root.contains(a) || a === document.body) focusId('btn-collect', ui.ringOn);
+      renderStaged(() => {
+        const a = document.activeElement;
+        if (game.state.phase === 'GAMBLE' && (!a || !root.contains(a) || a === document.body)) focusId('btn-collect', ui.ringOn);
+      });
     }
   }
   let lossTask = null;
@@ -501,7 +553,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
         payoutTween = tween(300, () => {}, done);
       } else {
         ui.displayBalance = before;
-        payoutTween = tween(Math.min(1500, 500 + r.currentWin / 3), (x) => { ui.displayBalance = Math.round(before + (after - before) * x); render(['credits']); }, done, (x) => 1 - (1 - x) ** 4);
+        payoutTween = tween(Math.min(1500, 500 + r.currentWin / 3), (x) => { ui.displayBalance = Math.round(before + (after - before) * x); paintCredits(); }, done, (x) => 1 - (1 - x) ** 4);
         render();
       }
       announce(`${V.fmt(r.currentWin)} collected. Added to your credits: ${V.fmt(before)} to ${V.fmt(after)}.`);
@@ -514,7 +566,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
   function refillAnim() {
     audio.play('sfx_refill');
     ui.displayBalance = 0;
-    tween(reduced() ? 1 : 1000, (x) => { ui.displayBalance = Math.round(1000 * x); render(['credits']); }, () => {
+    tween(reduced() ? 1 : 1000, (x) => { ui.displayBalance = Math.round(1000 * x); paintCredits(); }, () => {
       ui.displayBalance = null;
       render();
     }, (x) => x);
@@ -548,8 +600,8 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
       case 'GAMBLE_OPEN':
         audio.play('sfx_modal');
         ui.matchMsg = null;
-        render();
-        focusId('btn-collect', ui.ringOn);
+        // the offer's Collect keeps focus until the gamble rail (same button) replaces it two frames later
+        renderStaged(() => { if (game.state.phase === 'GAMBLE') focusId('btn-collect', ui.ringOn); });
         return;
       case 'PICK':
         audio.play('sfx_gamble_pick');
@@ -563,8 +615,10 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
       case 'COLLECT': startPayout(); return;
       case 'PAYOUT_DONE':
         ui.showLastStop = false;
-        render();
-        if (!root.contains(document.activeElement) || document.activeElement === document.body || document.activeElement.getAttribute('aria-disabled') === 'true') focusId(game.rebetBlock() ? `sq-${ui.roving}` : 'btn-rebet', false);
+        renderStaged(() => {
+          const a = document.activeElement;
+          if (game.state.phase === 'BETTING' && (!root.contains(a) || a === document.body || a.getAttribute('aria-disabled') === 'true')) focusId(game.rebetBlock() ? `sq-${ui.roving}` : 'btn-rebet', false);
+        });
         return;
       case 'REFILL': refillAnim(); break;
       case 'TOGGLE_MUTE': case 'SET_SETTING': audio.setSettings(s.settings); break;
@@ -595,6 +649,30 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
   }
   let engineToastSeq = 0;
 
+  // ------------------------------------------------------------ type warm-up (v3 batch 7)
+  // The first time a result state appears, Blink shapes its text from a cold cache (fonts at new sizes, new words):
+  // at 4× CPU that alone was 15–30 ms of the win-reveal frame. Once after boot, in idle time, each result template
+  // (V.warmSamples, a sample round) is laid out in a hidden, contained, inert box, one per idle callback, and the box
+  // is removed. Outside the animation tasks, so pendingTasks() and the regions are not touched.
+  function warmType() {
+    const idle = globalThis.requestIdleCallback ? (cb) => requestIdleCallback(cb, { timeout: 500 }) : (cb) => setTimeout(cb, 50);
+    let samples;
+    try { samples = V.warmSamples(game.state, L); } catch { return; }
+    const box = document.createElement('div');
+    box.className = 'warm';
+    box.setAttribute('aria-hidden', 'true');
+    box.inert = true;
+    root.appendChild(box);
+    let i = 0;
+    const step = () => {
+      if (i < samples.length) {
+        box.innerHTML = samples[i++];
+        idle(step);
+      } else box.remove();
+    };
+    idle(step);
+  }
+
   function onInit() {
     const s = game.state;
     ui.betTotals = loadTotals(backend);
@@ -602,6 +680,7 @@ export function startApp({ game, root, testMode = false, timeScale = 1, startScr
     else if (!ui.betTotals.length && s.lastBets) noteBetTotal({ roundId: null, totalBet: totalOf(s.lastBets) });
     ui.lightIndex = s.history.length ? s.history[s.history.length - 1].s1 : 1;
     relayout();
+    warmType();
     if (ui.settingsReset) showToast('Settings were reset to the defaults', 'info');
     if (ui.start) focusId('start-play', false);
     else afterStartFocus();
