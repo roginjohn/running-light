@@ -1,0 +1,840 @@
+{
+  "summary": {
+    "generated": "2026-10-29T11:39:21.643Z",
+    "rules": {
+      "minTapTarget": 44,
+      "minFont": 12,
+      "minBodyFont": 14,
+      "layoutDrift": 0,
+      "wcag": "AA",
+      "maxGzipBytes": 5120
+    },
+    "pages": 13,
+    "failing": 0,
+    "contrastPairs": 41,
+    "contrastFailing": 0,
+    "weight": {
+      "xmasCssBytes": 4807,
+      "injectedSvgBytes": 1238,
+      "gzipXmasCss": 2095,
+      "gzipInjectedSvg": 462,
+      "gzipTotal": 2422,
+      "limit": 5120
+    },
+    "minTapTargetOverall": 44,
+    "minFontOverall": 12,
+    "minBodyFontOverall": 14
+  },
+  "contrast": [
+    {
+      "where": "Body / labels on frame",
+      "fg": "#eef1ea",
+      "bg": "#0f1f18",
+      "kind": "text",
+      "ratio": 14.97,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Titles on frame",
+      "fg": "#ffffff",
+      "bg": "#0f1f18",
+      "kind": "text",
+      "ratio": 17.08,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Muted text on page",
+      "fg": "#a2b5a9",
+      "bg": "#0a1511",
+      "kind": "text",
+      "ratio": 8.61,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Muted text on frame",
+      "fg": "#a2b5a9",
+      "bg": "#0f1f18",
+      "kind": "text",
+      "ratio": 7.9,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Muted text on dock rail",
+      "fg": "#a2b5a9",
+      "bg": "#12251c",
+      "kind": "text",
+      "ratio": 7.44,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Muted text on card",
+      "fg": "#a2b5a9",
+      "bg": "#16291f",
+      "kind": "text",
+      "ratio": 7.09,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Muted text on input / ½ ×2",
+      "fg": "#a2b5a9",
+      "bg": "#183026",
+      "kind": "text",
+      "ratio": 6.52,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Square number on square",
+      "fg": "#a2b5a9",
+      "bg": "#152a20",
+      "kind": "text",
+      "ratio": 7.02,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Primary text on input",
+      "fg": "#eef1ea",
+      "bg": "#183026",
+      "kind": "text",
+      "ratio": 12.36,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Pill text on card pill",
+      "fg": "#eef1ea",
+      "bg": "#0c1a13",
+      "kind": "text",
+      "ratio": 15.69,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "24x on square",
+      "fg": "#a2b5a9",
+      "bg": "#152a20",
+      "kind": "text",
+      "ratio": 7.02,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "96x on square",
+      "fg": "#d6e0d8",
+      "bg": "#152a20",
+      "kind": "text",
+      "ratio": 11.21,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "480x / 960x on square",
+      "fg": "#6ea8fe",
+      "bg": "#152a20",
+      "kind": "text",
+      "ratio": 6.28,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "1920x star / pill on jackpot berry",
+      "fg": "#f2c14e",
+      "bg": "#4a0a17",
+      "kind": "text",
+      "ratio": 9.29,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Lit square multiplier",
+      "fg": "#0a1511",
+      "bg": "#f4f1ea",
+      "kind": "text",
+      "ratio": 16.5,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Win square / Collect (win green)",
+      "fg": "#06210f",
+      "bg": "#16a34a",
+      "kind": "text",
+      "ratio": 5.17,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Win amount on win card",
+      "fg": "#4ade80",
+      "bg": "#1b2a1a",
+      "kind": "text",
+      "ratio": 8.65,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Win delta on top bar",
+      "fg": "#4ade80",
+      "bg": "#0f1f18",
+      "kind": "text",
+      "ratio": 9.8,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Loss / error text on frame",
+      "fg": "#ff8a98",
+      "bg": "#0f1f18",
+      "kind": "text",
+      "ratio": 7.6,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Loss chip text on card",
+      "fg": "#ff8a98",
+      "bg": "#16291f",
+      "kind": "text",
+      "ratio": 6.81,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Bet badge / Betting open (bet blue)",
+      "fg": "#ffffff",
+      "bg": "#0d6efd",
+      "kind": "text",
+      "ratio": 4.5,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Start / Play / Reload (gold)",
+      "fg": "#241500",
+      "bg": "#f2c14e",
+      "kind": "text",
+      "ratio": 10.58,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Gamble button (berry)",
+      "fg": "#ffffff",
+      "bg": "#dc1f3f",
+      "kind": "text",
+      "ratio": 4.87,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Chip 1 (snow)",
+      "fg": "#0f1216",
+      "bg": "#f4f1ea",
+      "kind": "text",
+      "ratio": 16.65,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Chip 5 (berry)",
+      "fg": "#ffffff",
+      "bg": "#dc1f3f",
+      "kind": "text",
+      "ratio": 4.87,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Chip 10 (pine)",
+      "fg": "#ffffff",
+      "bg": "#1d6b44",
+      "kind": "text",
+      "ratio": 6.48,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Chip 25 (gold)",
+      "fg": "#241500",
+      "bg": "#f2c14e",
+      "kind": "text",
+      "ratio": 10.58,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Chip 50 (dark pine)",
+      "fg": "#ffffff",
+      "bg": "#263a30",
+      "kind": "text",
+      "ratio": 12.14,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Gamble panel text (navy, unchanged)",
+      "fg": "#a9bbd6",
+      "bg": "#14294a",
+      "kind": "text",
+      "ratio": 7.45,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Centre number, idle (40-64 px)",
+      "fg": "#8a9f92",
+      "bg": "#0f1f18",
+      "kind": "large",
+      "ratio": 6.06,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Centre number, win (gold, 40-64 px)",
+      "fg": "#f2c14e",
+      "bg": "#0f1f18",
+      "kind": "large",
+      "ratio": 10.18,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Bet rim (blue) vs square",
+      "fg": "#0d6efd",
+      "bg": "#152a20",
+      "kind": "ui",
+      "ratio": 3.37,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Win square (green) vs square",
+      "fg": "#16a34a",
+      "bg": "#152a20",
+      "kind": "ui",
+      "ratio": 4.6,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Lit square (snow) vs square",
+      "fg": "#f4f1ea",
+      "bg": "#152a20",
+      "kind": "ui",
+      "ratio": 13.45,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Jackpot gold rim vs frame",
+      "fg": "#b8892a",
+      "bg": "#0f1f18",
+      "kind": "ui",
+      "ratio": 5.41,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Win card gold rim vs frame",
+      "fg": "#b8892a",
+      "bg": "#0f1f18",
+      "kind": "ui",
+      "ratio": 5.41,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Gold Start vs dock rail",
+      "fg": "#f2c14e",
+      "bg": "#12251c",
+      "kind": "ui",
+      "ratio": 9.57,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Berry Gamble vs dock rail",
+      "fg": "#dc1f3f",
+      "bg": "#12251c",
+      "kind": "ui",
+      "ratio": 3.3,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Win green vs bet blue (state vs state)",
+      "fg": "#16a34a",
+      "bg": "#0d6efd",
+      "kind": "info",
+      "ratio": 1.37,
+      "need": null,
+      "pass": null
+    },
+    {
+      "where": "Disabled button text",
+      "fg": "#a6b3ab",
+      "bg": "#2f3d36",
+      "kind": "disabled",
+      "ratio": 5.24,
+      "need": null,
+      "pass": null
+    },
+    {
+      "where": "Dim (disabled) text on input",
+      "fg": "#7c9184",
+      "bg": "#183026",
+      "kind": "disabled",
+      "ratio": 4.19,
+      "need": null,
+      "pass": null
+    }
+  ],
+  "results": [
+    {
+      "file": "png/betting-390x844.png",
+      "page": "mocks/betting.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "elementsComparedWithBase": 530,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 63,
+      "minTapTarget": {
+        "size": 44,
+        "x": 290,
+        "y": 52.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, then tap squares.\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/running-390x844.png",
+      "page": "mocks/running.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "elementsComparedWithBase": 341,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 13,
+      "minTapTarget": {
+        "size": 44,
+        "x": 290,
+        "y": 52.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"The result was drawn when you pressed St\""
+      },
+      "ringTileMin": 30.5,
+      "violations": []
+    },
+    {
+      "file": "png/win-gamble-offer-390x844.png",
+      "page": "mocks/win-gamble-offer.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "elementsComparedWithBase": 345,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 11,
+      "minTapTarget": {
+        "size": 44,
+        "x": 290,
+        "y": 52.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Collect it, or gamble it on a fair 50/50\""
+      },
+      "ringTileMin": 30.5,
+      "violations": []
+    },
+    {
+      "file": "png/gamble-flip-390x844.png",
+      "page": "mocks/gamble-flip.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "elementsComparedWithBase": 365,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 13,
+      "minTapTarget": {
+        "size": 44,
+        "x": 290,
+        "y": 52.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.gmsg \"Flipping… If red lights, your win double\""
+      },
+      "ringTileMin": 30.5,
+      "violations": []
+    },
+    {
+      "file": "png/loss-390x844.png",
+      "page": "mocks/loss.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "elementsComparedWithBase": 348,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 14,
+      "minTapTarget": {
+        "size": 44,
+        "x": 290,
+        "y": 52.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Stopped on #26 (24x). Your bets are kept\""
+      },
+      "ringTileMin": 30.5,
+      "violations": []
+    },
+    {
+      "file": "png/settings-390x844.png",
+      "page": "mocks/settings.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "elementsComparedWithBase": 614,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 9,
+      "minTapTarget": {
+        "size": 44,
+        "x": 341,
+        "y": 190.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib.x \"Close\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, then tap squares.\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/start-390x844.png",
+      "page": "mocks/start.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "elementsComparedWithBase": 26,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 3,
+      "minTapTarget": {
+        "size": 48,
+        "x": 20,
+        "y": 714,
+        "w": 171,
+        "h": 48,
+        "el": "button.btn.sec \"How to play\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Turns sound on",
+        "el": "span.sub \"Turns sound on\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.body \"Bet play credits on a 50-square track. T\""
+      },
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/loading-390x844.png",
+      "page": "mocks/loading.html",
+      "viewport": "390x844",
+      "safeArea": {
+        "t": 47,
+        "r": 0,
+        "b": 34,
+        "l": 0
+      },
+      "elementsComparedWithBase": 20,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 0,
+      "minTapTarget": null,
+      "minFont": {
+        "size": 12,
+        "text": "Loading sounds and fonts",
+        "el": "span \"Loading sounds and fonts\""
+      },
+      "minBodyFont": null,
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/betting-360x640.png",
+      "page": "mocks/betting.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "elementsComparedWithBase": 530,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 63,
+      "minTapTarget": {
+        "size": 44,
+        "x": 260,
+        "y": 29.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": null,
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/win-gamble-offer-360x640.png",
+      "page": "mocks/win-gamble-offer.html",
+      "viewport": "360x640",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 0,
+        "l": 0
+      },
+      "elementsComparedWithBase": 345,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 11,
+      "minTapTarget": {
+        "size": 44,
+        "x": 260,
+        "y": 29.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Collect it, or gamble it on a fair 50/50\""
+      },
+      "ringTileMin": 24.6,
+      "violations": []
+    },
+    {
+      "file": "png/landscape-A-betting-844x390.png",
+      "page": "mocks/betting.html",
+      "viewport": "844x390",
+      "safeArea": {
+        "t": 0,
+        "r": 47,
+        "b": 21,
+        "l": 47
+      },
+      "elementsComparedWithBase": 530,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 63,
+      "minTapTarget": {
+        "size": 44,
+        "x": 441,
+        "y": 2,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": null,
+      "ringTileMin": null,
+      "violations": []
+    },
+    {
+      "file": "png/landscape-A-win-844x390.png",
+      "page": "mocks/win-gamble-offer.html",
+      "viewport": "844x390",
+      "safeArea": {
+        "t": 0,
+        "r": 47,
+        "b": 21,
+        "l": 47
+      },
+      "elementsComparedWithBase": 345,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 11,
+      "minTapTarget": {
+        "size": 44,
+        "x": 441,
+        "y": 2,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Collect it, or gamble it on a fair 50/50\""
+      },
+      "ringTileMin": 25.6,
+      "violations": []
+    },
+    {
+      "file": "png/betting-768x1024.png",
+      "page": "mocks/betting.html",
+      "viewport": "768x1024",
+      "safeArea": {
+        "t": 24,
+        "r": 0,
+        "b": 20,
+        "l": 0
+      },
+      "elementsComparedWithBase": 530,
+      "layoutDrift": 0,
+      "coarsePointer": true,
+      "hoverNone": true,
+      "tapTargets": 63,
+      "minTapTarget": {
+        "size": 44,
+        "x": 656,
+        "y": 41.5,
+        "w": 44,
+        "h": 44,
+        "el": "button.ib \"Sound on\""
+      },
+      "minFont": {
+        "size": 12,
+        "text": "Play credits",
+        "el": "span.k \"Play credits\""
+      },
+      "minBodyFont": {
+        "size": 14,
+        "el": "p.csub \"Pick a chip, tap squares, then press Sta\""
+      },
+      "ringTileMin": 45.6,
+      "violations": []
+    }
+  ]
+}

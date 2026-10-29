@@ -1,0 +1,69 @@
+/* Running Light v4 mobile mocks, Christmas skin. Load AFTER ../../mobile/mocks/mock.css. Colours and decoration only:
+   no layout, size, spacing, font-size or tap-target changes. Every decoration is aria-hidden, absolutely positioned
+   (or a pseudo-element) and pointer-events: none. Contrast ratios: NOTES.md (computed by contrast.mjs from this file).
+   State colours are kept: win = green (--c-accent-green), bet = blue (--c-accent-blue). */
+:root {
+  /* festive palette */
+  --x-pine: #1d6b44; --x-pine-wire: #2f5e45;
+  --x-berry: #dc1f3f; --x-berry-edge: #9c1029;
+  --x-gold: #f2c14e; --x-gold-ink: #241500; --x-gold-edge: #b8892a;
+  --x-snow: #f4f1ea;
+  /* the existing dark base, tinted pine */
+  --c-bg-page: #0a1511; --c-bg-frame: #0f1f18; --c-bg-rail: #12251c; --c-divider: #22392d;
+  --c-bg-input: #183026; --c-border-input: #2b4a3b; --c-bg-segment: #0b1812;
+  --c-bg-card: #16291f; --c-bg-card-pill: #0c1a13;
+  --c-tile: #152a20; --c-tile-border: #23402f; --c-tile-lit: var(--x-snow);
+  --c-text-primary: #eef1ea; --c-text-muted: #a2b5a9; --c-text-dim: #7c9184; --c-text-on-light: #0a1511;
+  --c-big-number: #8a9f92; --c-big-number-win: var(--x-gold);
+  --c-tier-24: #a2b5a9; --c-tier-96: #d6e0d8;
+  --c-accent-red: var(--x-berry); --c-accent-red-text: #ff8a98;
+  --c-btn-disabled: #2f3d36; --c-btn-disabled-text: #a6b3ab;
+  --c-scrim: rgba(10, 21, 17, .8);
+  --c-gamble-red: var(--x-berry); --c-gamble-red-edge: var(--x-berry-edge);
+  --c-gamble-white: var(--x-snow); --c-gamble-white-edge: #cfc8b8;
+  /* festive chips */
+  --c-chip-1: var(--x-snow); --c-chip-5: var(--x-berry); --c-chip-10: var(--x-pine); --c-chip-25: var(--x-gold); --c-chip-50: #263a30;
+  --c-chip-25-ink: var(--x-gold-ink);
+}
+
+/* jackpot square: berry with a gold rim and gold star (a win still turns it green) */
+.q1920:not(.win), .tp.k1920 { background: #4a0a17; }
+.q1920:not(.win, .hb), .tp.k1920 { border-color: var(--x-gold-edge); } /* a bet keeps its blue rim on phones */
+.q1920:not(.win) .m, .tp.k1920 { color: var(--x-gold); }
+@media (min-width: 600px) and (min-height: 500px) { .tile.hb.q1920:not(.win) { border-color: var(--x-gold-edge); } }
+
+/* chip rims: snow dashes on dark faces, berry on light faces */
+.chip .edge { stroke: var(--x-snow); }
+.chip:is(.c1, .c25) .edge { stroke: var(--x-berry); }
+.chip.c10 .edge, .chip.c50 .edge { stroke: var(--x-gold); }
+
+/* primary actions: Start / Play / Reload / Refill gold, Gamble berry (Collect stays win green) */
+.btn:is(.cta, .pri):not([aria-disabled="true"]) { background: var(--x-gold); color: var(--x-gold-ink); box-shadow: inset 0 -3px 0 var(--x-gold-edge); }
+.btn.gam:not([aria-disabled="true"]) { background: var(--x-berry); color: #fff; box-shadow: inset 0 -3px 0 var(--x-berry-edge); }
+.btn.collect:not([aria-disabled="true"]) { box-shadow: inset 0 -3px 0 #0f7a36; }
+.lbar i { background: var(--x-gold); }
+.brand .mark { color: var(--x-gold); }
+
+/* win card: gold rim, warm tint, holly sprig sitting on the top edge */
+.card.won { position: relative; border-color: var(--x-gold-edge); background: #1b2a1a; }
+.card.won::after { content: ''; position: absolute; top: -8px; right: 10px; width: 26px; height: 14px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 12'%3E%3Cpath fill='%233a9a62' stroke='%23173d2a' stroke-width='.6' d='M1 7c3-5 7-6 10-3-3 3-7 4-10 3zm20 0c-3-5-7-6-10-3 3 3 7 4 10 3z'/%3E%3Ccircle cx='9' cy='8' r='2.6' fill='%23dc1f3f'/%3E%3Ccircle cx='13' cy='8' r='2.6' fill='%23dc1f3f'/%3E%3Ccircle cx='11' cy='5' r='2.6' fill='%23e01a3c'/%3E%3C/svg%3E") center / contain no-repeat; }
+
+/* gamble panel: midnight navy kept (red/white discs need it), gold rim */
+.gpanel, .inavy { border-color: #5a4a22; }
+
+/* injected decorations (build.mjs): holly in the top bar, light string on the dock / screen edge */
+.top, .dock { position: relative; }
+.xd { position: absolute; pointer-events: none; overflow: visible; }
+.xd-holly { left: 50%; bottom: -6px; width: 26px; height: 14px; margin-left: -13px; z-index: 4; }
+.xd-lights { left: 0; right: 0; top: -1px; width: 100%; height: 8px; z-index: 4; }
+.screen > .xd-lights { top: calc(var(--sat) + 4px); }
+/* phone landscape: only 4 px between top bar and board, so no holly there; the lights hang inside the rail's top */
+@media (max-height: 499px) and (orientation: landscape) { .xd-holly { display: none; } .dock > .xd-lights { top: 3px; } }
+@media (min-width: 600px) and (min-height: 500px) { .dock > .xd-lights { left: 8px; width: calc(100% - 16px); } }
+
+/* optional motion: a slow two-phase twinkle, only when the user has not asked for reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+  .xd-lights .b2 { animation: xtw 2.4s ease-in-out infinite alternate; }
+  @keyframes xtw { to { opacity: .45; } }
+}
