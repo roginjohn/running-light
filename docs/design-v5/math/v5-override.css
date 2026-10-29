@@ -1,0 +1,42 @@
+/* v5 math design mock: doc-only overrides on the live v3 desktop standard theme. v3 tokens only, no new colours,
+   no assets. Loaded by render.mjs after the build's CSS. */
+
+/* ---- tier colours: the v3 tier ladder mapped onto the v5 tiers
+   5x / 10x / 20x -> tier-24 grey, 50x -> tier-96 light grey, 100x -> tier-480 blue,
+   200x -> tier-480 blue + navy edge (v3's 960x treatment). No jackpot tile: there is no unique top square. */
+.q5 .m, .q10 .m, .q20 .m { color: var(--c-tier-24); }
+.q50 .m { color: var(--c-tier-96); }
+.q100 .m, .q200 .m { color: var(--c-tier-480); }
+.q200 { border-color: var(--c-border-panel-navy); }
+.k5, .k10, .k20 { color: var(--c-tier-24); }
+.k50 { color: var(--c-tier-96); }
+.k100, .k200 { color: var(--c-tier-480); }
+.t5, .t10, .t20 { background: var(--t24); color: var(--t24-ink); }
+.t50 { background: var(--t96); color: var(--t96-ink); }
+.t100 { background: var(--t480); color: var(--t480-ink); }
+.t200 { background: var(--t960); color: var(--t960-ink); }
+
+/* ---- OPEN QUESTION (not approved): 200x styled as the top prize = v3's jackpot treatment on all 18 squares.
+   Only on when <html class="v5-top200"> (render.mjs *-top200-option.png). */
+.v5-top200 .q200:not(.win, .lit, .lit2) { background: var(--c-tile-jackpot); border-color: var(--c-border-panel-navy); }
+.v5-top200 .q200:not(.win, .lit, .lit2) .m { color: var(--c-tier-1920); } /* light and result states stay v3 */
+.v5-top200 .k200 { background: var(--c-tile-jackpot); border-color: var(--c-border-panel-navy); color: var(--c-tier-1920); }
+.v5-top200 .t200 { background: var(--t1920); color: var(--t1920-ink); }
+
+/* ---- 7 chips in the 230 px rail: v3 sizes the chip from the layout (--chip), which fits 5. Seven chips share the
+   row: each takes an equal flex share, capped at the v3 size, and stays round. Labels up to "500" at 11 px. */
+.rail .chips { gap: 4px; padding: 0 2px; }
+.rail .chip { flex: 1 1 0; width: auto; max-width: var(--chip); height: auto; aspect-ratio: 1; min-width: 0; }
+.chip .cv { white-space: nowrap; }
+.rail .chip .cv { font-size: 10px; letter-spacing: -0.02em; }
+.rail .chip:is(.c100, .c500) .cv { font-size: 9px; letter-spacing: -0.04em; } /* 3 digits clear the edge stripes */
+/* new chip colours from existing v3 tokens: 100 black, 500 light blue */
+.chip.c100 { --chip-bg: var(--c-text-on-light); --chip-ink: var(--c-chip-text-light); }
+.chip.c500 { --chip-bg: var(--c-accent-blue-text); --chip-ink: var(--c-chip-text-dark); }
+
+/* ---- bet hint on two lines: the "·" separator (a <b> from v5-inject.js) becomes the line break */
+.hint b { font-weight: inherit; }
+.rail .hint b { display: block; height: 0; overflow: hidden; }
+
+/* ---- larger numbers: bet badge up to "1,000", tight on 64 px tiles */
+.tile .bet { padding: 0 3px; letter-spacing: -0.02em; white-space: nowrap; }
