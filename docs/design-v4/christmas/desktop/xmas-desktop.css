@@ -1,0 +1,77 @@
+/* Running Light v4 desktop, Christmas skin (design only). Load AFTER src/styles.css. Same palette as ../xmas.css.
+   Colours and decoration only: no layout, size, spacing or font change. Every decoration is a pseudo-element,
+   position: absolute and pointer-events: none, so no element box moves (render.mjs measures this).
+   Kept from v3: Gamble ×2 and every selection / bet accent stay accent-blue; win stays green. */
+:root {
+  --x-pine: #1d6b44; --x-berry: #dc1f3f; --x-berry-edge: #9c1029;
+  --x-gold: #f2c14e; --x-gold-hi: #f6cf6e; --x-gold-ink: #241500; --x-gold-edge: #b8892a; --x-snow: #f4f1ea;
+  --x-jackpot: #4a0a17;
+  /* the v3 dark base, tinted pine */
+  --c-bg-page: #0a1511; --c-bg-frame: #0f1f18; --c-bg-rail: #12251c; --c-divider: #22392d; --c-bg-bottombar: #0d1b15;
+  --c-bg-input: #183026; --c-border-input: #2b4a3b; --c-bg-segment: #0b1812;
+  --c-bg-card: #16291f; --c-bg-card-pill: #0c1a13;
+  --c-tile: #152a20; --c-tile-border: #23402f; --c-tile-lit: var(--x-snow); --c-tile-jackpot: var(--x-jackpot);
+  --c-text-primary: #eef1ea; --c-text-muted: #a2b5a9; --c-text-dim: #7c9184; --c-text-on-light: #0a1511;
+  --c-big-number: #8a9f92; --c-big-number-win: var(--x-gold);
+  --c-tier-24: #a2b5a9; --c-tier-96: #d6e0d8; --c-tier-1920: var(--x-gold);
+  --c-accent-red: var(--x-berry); --c-accent-red-text: #ff8a98;
+  --c-btn-disabled: #2f3d36; --c-btn-disabled-text: #a6b3ab;
+  --c-scrim: rgba(10, 21, 17, .8);
+  --c-gamble-red: var(--x-berry); --c-gamble-red-edge: var(--x-berry-edge);
+  --c-gamble-white: var(--x-snow); --c-gamble-white-edge: #cfc8b8;
+  /* festive chips */
+  --c-chip-1: var(--x-snow); --c-chip-5: var(--x-berry); --c-chip-10: var(--x-pine); --c-chip-25: var(--x-gold); --c-chip-50: #263a30;
+  --c-chip-25-ink: var(--x-gold-ink);
+  /* decor: light string (wire + red / green bulbs; gold / snow bulbs on the twinkle layer) and holly sprig */
+  --x-lights-a: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='14'%3E%3Cpath d='M0 3Q7 6 14 3T28 3T42 3T56 3' fill='none' stroke='%233d7a58' stroke-width='1.2'/%3E%3Cg fill='%233d7a58'%3E%3Crect x='6' y='4' width='2' height='2'/%3E%3Crect x='34' y='4' width='2' height='2'/%3E%3C/g%3E%3Cellipse cx='7' cy='8.6' rx='2.4' ry='3.2' fill='%23e0283f'/%3E%3Cellipse cx='35' cy='8.6' rx='2.4' ry='3.2' fill='%233fbf6f'/%3E%3C/svg%3E");
+  --x-lights-b: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='14'%3E%3Cg fill='%233d7a58'%3E%3Crect x='20' y='4' width='2' height='2'/%3E%3Crect x='48' y='4' width='2' height='2'/%3E%3C/g%3E%3Cellipse cx='21' cy='8.6' rx='2.4' ry='3.2' fill='%23f2c14e'/%3E%3Cellipse cx='49' cy='8.6' rx='2.4' ry='3.2' fill='%23f4f1ea'/%3E%3C/svg%3E");
+  --x-holly: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 12'%3E%3Cpath fill='%233a9a62' stroke='%23173d2a' stroke-width='.6' d='M1 7c3-5 7-6 10-3-3 3-7 4-10 3zm20 0c-3-5-7-6-10-3 3 3 7 4 10 3z'/%3E%3Ccircle cx='9' cy='8' r='2.6' fill='%23dc1f3f'/%3E%3Ccircle cx='13' cy='8' r='2.6' fill='%23dc1f3f'/%3E%3Ccircle cx='11' cy='5' r='2.6' fill='%23e01a3c'/%3E%3C/svg%3E");
+}
+
+/* snow: a faint speckle on the page fill around the frame */
+html, body { background: radial-gradient(circle at 20% 30%, rgba(244, 241, 234, .16) 0 1px, transparent 1.6px) 0 0 / 74px 74px,
+  radial-gradient(circle at 70% 75%, rgba(244, 241, 234, .1) 0 1px, transparent 1.6px) 0 0 / 53px 53px, var(--c-bg-page); }
+
+/* light string along the frame's top edge, holly sprigs on its two top corners. The rail repeats the same layers
+   (same left edge, so the pattern lines up) because it paints over the frame. */
+.frame::before, .frame::after, .frame-rail::before, .frame-rail::after, .screen > .bg::before, .screen > .bg::after {
+  content: ''; position: absolute; left: 0; right: 0; top: -7px; height: 14px; pointer-events: none; background: var(--x-lights-a) 0 0 / 56px 14px repeat-x; }
+.frame::after, .frame-rail::after, .screen > .bg::after { background-image: var(--x-lights-b); }
+.frame::before { left: -10px; right: -10px; top: -9px; height: 18px; background: var(--x-holly) left top / 36px 18px no-repeat, var(--x-holly) right top / 36px 18px no-repeat,
+  var(--x-lights-a) 10px 2px / 56px 14px repeat-x; }
+.frame-rail::after { right: -1px; } /* over the rail's 1 px divider, so it does not cut a bulb */
+.frame-rail::before { left: -10px; right: -1px; top: -9px; height: 18px; background: var(--x-holly) left top / 36px 18px no-repeat, var(--x-lights-a) 10px 2px / 56px 14px repeat-x; }
+.screen > .bg::before, .screen > .bg::after { top: 0; }
+
+/* primary actions (Start, Play, Refill, Reload, Back to the board): gold. Gamble ×2 keeps accent-blue. */
+.btn:is(.cta, .pri):not([aria-disabled="true"]) { background: var(--x-gold); color: var(--x-gold-ink); }
+.btn:is(.cta, .pri):not([aria-disabled="true"]):is(:hover, :active) { background: var(--x-gold-hi); }
+.lbar i { background: var(--x-gold); }
+.brand .mark { color: var(--x-gold); }
+
+/* chip rims: snow dashes on dark faces, berry on light faces, gold on pine */
+.chip .edge { stroke: var(--x-snow); }
+.chip:is(.c1, .c25) .edge { stroke: var(--x-berry); }
+.chip:is(.c10, .c50) .edge { stroke: var(--x-gold); }
+
+/* jackpot square and 1920x pills: berry fill, gold rim and gold multiplier (win / lit still win) */
+.q1920:not(.win, .lit, .lit2) { border-color: var(--x-gold-edge); }
+.k1920, .t1920 { border-color: var(--x-gold-edge); }
+
+/* win card: gold rim, warm fill, holly on its top-right corner */
+.card.won { position: relative; border-color: var(--x-gold-edge); background: #1b2a1a; }
+.card.won::after { content: ''; position: absolute; top: -9px; right: 8px; width: 30px; height: 16px; pointer-events: none; background: var(--x-holly) center / contain no-repeat; }
+
+/* gamble band / panel and info notes: midnight navy kept (the red / white discs need it), gold rim */
+.gband, .gpanel, .inavy { border-color: #5a4a22; }
+
+/* start card and small dialogs: a holly sprig on the top-right corner (inside the padding) */
+.scard, .dlg:not(.info) { position: relative; }
+.scard::after, .dlg:not(.info)::after { content: ''; position: absolute; top: 10px; right: 12px; width: 32px; height: 17px; pointer-events: none; background: var(--x-holly) center / contain no-repeat; }
+
+/* optional motion: the gold / snow bulbs fade on a slow loop; never with reduced motion (OS or in-game setting) */
+@media (prefers-reduced-motion: no-preference) {
+  :is(.frame, .frame-rail, .screen > .bg)::after { animation: xtw 2.4s ease-in-out infinite alternate; }
+  .reduced :is(.frame, .frame-rail, .screen > .bg)::after { animation: none; }
+  @keyframes xtw { to { opacity: .4; } }
+}

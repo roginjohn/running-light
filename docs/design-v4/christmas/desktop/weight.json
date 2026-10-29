@@ -1,0 +1,11 @@
+{
+  "file": "xmas-desktop.css",
+  "bytes": 6660,
+  "gzipBytes": 2504,
+  "inlineSvgCount": 3,
+  "inlineSvgBytes": 1004,
+  "inlineSvgGzipBytes": 377,
+  "note": "the SVGs are inline data URIs inside the CSS, so gzipBytes already includes them; no other file is added",
+  "limitBytes": 5120,
+  "pass": true
+}

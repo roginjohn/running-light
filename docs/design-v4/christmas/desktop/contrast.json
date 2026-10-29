@@ -1,0 +1,485 @@
+{
+  "rule": "WCAG 2.x AA: text 4.5:1, large text (>= 24 px, or 18.66 px bold) and UI parts 3:1; disabled controls listed for information (exempt)",
+  "pairs": 53,
+  "failing": 0,
+  "minRequired": 3.3,
+  "rows": [
+    {
+      "where": "Primary text / labels on frame",
+      "fg": "#eef1ea",
+      "bg": "#0f1f18",
+      "kind": "text",
+      "ratio": 14.97,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Strong text (titles, Start hint bold) on frame",
+      "fg": "#ffffff",
+      "bg": "#0f1f18",
+      "kind": "text",
+      "ratio": 17.08,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Muted text on frame",
+      "fg": "#a2b5a9",
+      "bg": "#0f1f18",
+      "kind": "text",
+      "ratio": 7.9,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Muted text on rail",
+      "fg": "#a2b5a9",
+      "bg": "#12251c",
+      "kind": "text",
+      "ratio": 7.44,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Primary text on rail (Credits, disclaimer)",
+      "fg": "#eef1ea",
+      "bg": "#12251c",
+      "kind": "text",
+      "ratio": 14.08,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Muted text on bottom bar",
+      "fg": "#a2b5a9",
+      "bg": "#0d1b15",
+      "kind": "text",
+      "ratio": 8.2,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Primary text on bottom bar",
+      "fg": "#eef1ea",
+      "bg": "#0d1b15",
+      "kind": "text",
+      "ratio": 15.54,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Muted text on page (start / loading)",
+      "fg": "#a2b5a9",
+      "bg": "#0a1511",
+      "kind": "text",
+      "ratio": 8.61,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Muted text on card / centre pill",
+      "fg": "#a2b5a9",
+      "bg": "#16291f",
+      "kind": "text",
+      "ratio": 7.09,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Muted text on input (½, x2)",
+      "fg": "#a2b5a9",
+      "bg": "#183026",
+      "kind": "text",
+      "ratio": 6.52,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Primary text on input (bet amount, Clear, last bets)",
+      "fg": "#eef1ea",
+      "bg": "#183026",
+      "kind": "text",
+      "ratio": 12.36,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Strong text on newest last bet",
+      "fg": "#ffffff",
+      "bg": "#2b4a3b",
+      "kind": "text",
+      "ratio": 9.79,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Pill text on card pill (paytable pills, card ×)",
+      "fg": "#eef1ea",
+      "bg": "#0c1a13",
+      "kind": "text",
+      "ratio": 15.69,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Square number on square",
+      "fg": "#a2b5a9",
+      "bg": "#152a20",
+      "kind": "text",
+      "ratio": 7.02,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "24x on square",
+      "fg": "#a2b5a9",
+      "bg": "#152a20",
+      "kind": "text",
+      "ratio": 7.02,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "96x on square",
+      "fg": "#d6e0d8",
+      "bg": "#152a20",
+      "kind": "text",
+      "ratio": 11.21,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "480x / 960x on square",
+      "fg": "#6ea8fe",
+      "bg": "#152a20",
+      "kind": "text",
+      "ratio": 6.28,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Ghost bet badge on square",
+      "fg": "#6ea8fe",
+      "bg": "#152a20",
+      "kind": "text",
+      "ratio": 6.28,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "1920x on jackpot berry square / pill",
+      "fg": "#f2c14e",
+      "bg": "#4a0a17",
+      "kind": "text",
+      "ratio": 9.29,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Lit (snow) square text",
+      "fg": "#0a1511",
+      "bg": "#f4f1ea",
+      "kind": "text",
+      "ratio": 16.5,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Win square / Collect (green, unchanged)",
+      "fg": "#06210f",
+      "bg": "#16a34a",
+      "kind": "text",
+      "ratio": 5.17,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Win amount on gold-rimmed win card",
+      "fg": "#4ade80",
+      "bg": "#1b2a1a",
+      "kind": "text",
+      "ratio": 8.65,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Win label (muted) on win card",
+      "fg": "#a2b5a9",
+      "bg": "#1b2a1a",
+      "kind": "text",
+      "ratio": 6.98,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Win delta next to credits (rail)",
+      "fg": "#4ade80",
+      "bg": "#12251c",
+      "kind": "text",
+      "ratio": 9.22,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Loss / error text on frame",
+      "fg": "#ff8a98",
+      "bg": "#0f1f18",
+      "kind": "text",
+      "ratio": 7.6,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Loss note on card pill (rail)",
+      "fg": "#ff8a98",
+      "bg": "#0c1a13",
+      "kind": "text",
+      "ratio": 7.96,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Error icon on its berry tint",
+      "fg": "#ff8a98",
+      "bg": "#381f20",
+      "kind": "ui",
+      "ratio": 6.74,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Start / Play / Refill / Reload (gold)",
+      "fg": "#241500",
+      "bg": "#f2c14e",
+      "kind": "text",
+      "ratio": 10.58,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Gold button hover",
+      "fg": "#241500",
+      "bg": "#f6cf6e",
+      "kind": "text",
+      "ratio": 11.9,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Gamble ×2, bet badge, Betting open, tabs, toggles (blue, unchanged)",
+      "fg": "#ffffff",
+      "bg": "#0d6efd",
+      "kind": "text",
+      "ratio": 4.5,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Chip 1 (snow)",
+      "fg": "#0f1216",
+      "bg": "#f4f1ea",
+      "kind": "text",
+      "ratio": 16.65,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Chip 5 (berry)",
+      "fg": "#ffffff",
+      "bg": "#dc1f3f",
+      "kind": "text",
+      "ratio": 4.87,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Chip 10 (pine)",
+      "fg": "#ffffff",
+      "bg": "#1d6b44",
+      "kind": "text",
+      "ratio": 6.48,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Chip 25 (gold)",
+      "fg": "#241500",
+      "bg": "#f2c14e",
+      "kind": "text",
+      "ratio": 10.58,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Chip 50 (dark pine)",
+      "fg": "#ffffff",
+      "bg": "#263a30",
+      "kind": "text",
+      "ratio": 12.14,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Gamble band / panel text (navy, unchanged)",
+      "fg": "#a9bbd6",
+      "bg": "#14294a",
+      "kind": "text",
+      "ratio": 7.45,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Strong text on navy panel",
+      "fg": "#ffffff",
+      "bg": "#14294a",
+      "kind": "text",
+      "ratio": 14.52,
+      "need": 4.5,
+      "pass": true
+    },
+    {
+      "where": "Centre number, idle (88 / 64 px)",
+      "fg": "#8a9f92",
+      "bg": "#0f1f18",
+      "kind": "large",
+      "ratio": 6.06,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Centre number, win (gold, 88 / 64 px)",
+      "fg": "#f2c14e",
+      "bg": "#0f1f18",
+      "kind": "large",
+      "ratio": 10.18,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Lit square (snow) vs square",
+      "fg": "#f4f1ea",
+      "bg": "#152a20",
+      "kind": "ui",
+      "ratio": 13.45,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Win square (green) vs square",
+      "fg": "#16a34a",
+      "bg": "#152a20",
+      "kind": "ui",
+      "ratio": 4.6,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Bet badge (blue) vs square",
+      "fg": "#0d6efd",
+      "bg": "#152a20",
+      "kind": "ui",
+      "ratio": 3.37,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Jackpot gold rim vs frame",
+      "fg": "#b8892a",
+      "bg": "#0f1f18",
+      "kind": "ui",
+      "ratio": 5.41,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Win card gold rim vs frame",
+      "fg": "#b8892a",
+      "bg": "#0f1f18",
+      "kind": "ui",
+      "ratio": 5.41,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Gold Start vs rail",
+      "fg": "#f2c14e",
+      "bg": "#12251c",
+      "kind": "ui",
+      "ratio": 9.57,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Blue Gamble vs rail",
+      "fg": "#0d6efd",
+      "bg": "#12251c",
+      "kind": "ui",
+      "ratio": 3.57,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Berry chip 5 vs rail",
+      "fg": "#dc1f3f",
+      "bg": "#12251c",
+      "kind": "ui",
+      "ratio": 3.3,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Pine chip 10 vs rail (gold rim dashes carry it)",
+      "fg": "#f2c14e",
+      "bg": "#12251c",
+      "kind": "ui",
+      "ratio": 9.57,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Dark pine chip 50 rim (gold dashes) vs rail",
+      "fg": "#f2c14e",
+      "bg": "#263a30",
+      "kind": "ui",
+      "ratio": 7.23,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Selected chip ring (white, unchanged) vs rail",
+      "fg": "#ffffff",
+      "bg": "#12251c",
+      "kind": "ui",
+      "ratio": 16.07,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Loading bar (gold) vs track",
+      "fg": "#f2c14e",
+      "bg": "#183026",
+      "kind": "ui",
+      "ratio": 8.4,
+      "need": 3,
+      "pass": true
+    },
+    {
+      "where": "Disabled button text (info, exempt)",
+      "fg": "#a6b3ab",
+      "bg": "#2f3d36",
+      "kind": "disabled",
+      "ratio": 5.24,
+      "need": null,
+      "pass": null
+    },
+    {
+      "where": "Dim (disabled) text on input (info, exempt)",
+      "fg": "#7c9184",
+      "bg": "#183026",
+      "kind": "disabled",
+      "ratio": 4.19,
+      "need": null,
+      "pass": null
+    }
+  ]
+}

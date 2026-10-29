@@ -1,0 +1,1419 @@
+{
+  "generated": "2026-10-29T11:56:31.378Z",
+  "method": "getBoundingClientRect() of every element in <body>, standard (no override) vs Christmas (xmas-desktop.css injected), same seed / story / viewport; pseudo-element decor is not an element, so it cannot move a box",
+  "summary": {
+    "states": 16,
+    "elementsCompared": 7083,
+    "maxDeltaPx": 0,
+    "statesWithChanges": 0
+  },
+  "keyElements": {
+    "betting-1920x1080": {
+      "board squares": {
+        "count": 50,
+        "christmasCount": 50,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "button.tile.hit.q24",
+            "box": [
+              519,
+              166,
+              64,
+              64
+            ]
+          },
+          {
+            "el": "button.tile.hit.q96",
+            "box": [
+              589,
+              166,
+              64,
+              64
+            ]
+          },
+          {
+            "el": "button.tile.hit.q480",
+            "box": [
+              659,
+              166,
+              64,
+              64
+            ]
+          }
+        ]
+      },
+      "centre": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.centre",
+            "box": [
+              595,
+              242,
+              962,
+              612
+            ]
+          }
+        ]
+      },
+      "big number": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.big",
+            "box": [
+              859.52,
+              456.3,
+              432.95,
+              92.39
+            ]
+          }
+        ]
+      },
+      "centre pills": {
+        "count": 2,
+        "christmasCount": 2,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "span.cp.idle",
+            "box": [
+              944.89,
+              420.3,
+              108.83,
+              24
+            ]
+          },
+          {
+            "el": "span.cp",
+            "box": [
+              1061.72,
+              420.3,
+              145.38,
+              24
+            ]
+          }
+        ]
+      },
+      "chips": {
+        "count": 5,
+        "christmasCount": 5,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "button.chip.c1.hit",
+            "box": [
+              180,
+              184,
+              34,
+              34
+            ]
+          },
+          {
+            "el": "button.chip.c5.hit.sel",
+            "box": [
+              219,
+              184,
+              34,
+              34
+            ]
+          },
+          {
+            "el": "button.chip.c10.hit",
+            "box": [
+              258,
+              184,
+              34,
+              34
+            ]
+          }
+        ]
+      },
+      "buttons": {
+        "count": 8,
+        "christmasCount": 8,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "button.btn.pri.stack.hit",
+            "box": [
+              176,
+              230,
+              198,
+              52
+            ]
+          },
+          {
+            "el": "button.btn.sec.hit",
+            "box": [
+              176,
+              294,
+              60.66,
+              32
+            ]
+          },
+          {
+            "el": "button.btn.sec.hit",
+            "box": [
+              244.66,
+              294,
+              60.67,
+              32
+            ]
+          }
+        ]
+      },
+      "credits": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.credits",
+            "box": [
+              260,
+              66,
+              114,
+              16
+            ]
+          }
+        ]
+      },
+      "bet field": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.betin",
+            "box": [
+              176,
+              88,
+              198,
+              40
+            ]
+          }
+        ]
+      },
+      "top row": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.toprow",
+            "box": [
+              415,
+              50,
+              1321,
+              56
+            ]
+          }
+        ]
+      },
+      "rail": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.rail",
+            "box": [
+              160,
+              50,
+              230,
+              940
+            ]
+          }
+        ]
+      },
+      "bottom bar": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.bbar",
+            "box": [
+              160,
+              990,
+              1600,
+              40
+            ]
+          }
+        ]
+      },
+      "frame": {
+        "count": 3,
+        "christmasCount": 3,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.frame",
+            "box": [
+              160,
+              50,
+              1600,
+              980
+            ]
+          },
+          {
+            "el": "div.frame-rail",
+            "box": [
+              160,
+              50,
+              231,
+              940
+            ]
+          },
+          {
+            "el": "div.frame-bar",
+            "box": [
+              160,
+              990,
+              1600,
+              40
+            ]
+          }
+        ]
+      },
+      "result cards": {
+        "count": 0,
+        "christmasCount": 0,
+        "maxDeltaPx": 0,
+        "sample": []
+      },
+      "gamble band": {
+        "count": 0,
+        "christmasCount": 0,
+        "maxDeltaPx": 0,
+        "sample": []
+      },
+      "overlays": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div#loading.screen.done",
+            "box": [
+              0,
+              0,
+              1920,
+              1080
+            ]
+          }
+        ]
+      }
+    },
+    "win-gamble-offer-1920x1080": {
+      "board squares": {
+        "count": 50,
+        "christmasCount": 50,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "button.tile.hit.q24",
+            "box": [
+              519,
+              166,
+              64,
+              64
+            ]
+          },
+          {
+            "el": "button.tile.hit.q96",
+            "box": [
+              589,
+              166,
+              64,
+              64
+            ]
+          },
+          {
+            "el": "button.tile.hit.q480",
+            "box": [
+              659,
+              166,
+              64,
+              64
+            ]
+          }
+        ]
+      },
+      "centre": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.centre",
+            "box": [
+              595,
+              242,
+              962,
+              612
+            ]
+          }
+        ]
+      },
+      "big number": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.big.win",
+            "box": [
+              859.52,
+              392.3,
+              432.95,
+              92.39
+            ]
+          }
+        ]
+      },
+      "centre pills": {
+        "count": 2,
+        "christmasCount": 2,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "span.cp.mint",
+            "box": [
+              972.03,
+              356.3,
+              54.56,
+              24
+            ]
+          },
+          {
+            "el": "span.cp",
+            "box": [
+              1034.59,
+              356.3,
+              145.38,
+              24
+            ]
+          }
+        ]
+      },
+      "chips": {
+        "count": 5,
+        "christmasCount": 5,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "button.chip.c1.hit",
+            "box": [
+              180,
+              184,
+              34,
+              34
+            ]
+          },
+          {
+            "el": "button.chip.c5.hit.sel",
+            "box": [
+              219,
+              184,
+              34,
+              34
+            ]
+          },
+          {
+            "el": "button.chip.c10.hit",
+            "box": [
+              258,
+              184,
+              34,
+              34
+            ]
+          }
+        ]
+      },
+      "buttons": {
+        "count": 6,
+        "christmasCount": 6,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "button.btn.collect.stack.hit",
+            "box": [
+              176,
+              276,
+              198,
+              52
+            ]
+          },
+          {
+            "el": "button.btn.gam.stack.hit",
+            "box": [
+              176,
+              336,
+              198,
+              52
+            ]
+          },
+          {
+            "el": "button.ibtn.hit.on",
+            "box": [
+              164,
+              994,
+              32,
+              32
+            ]
+          }
+        ]
+      },
+      "credits": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.credits",
+            "box": [
+              260,
+              66,
+              114,
+              16
+            ]
+          }
+        ]
+      },
+      "bet field": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.betin.off",
+            "box": [
+              176,
+              88,
+              198,
+              40
+            ]
+          }
+        ]
+      },
+      "top row": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.toprow",
+            "box": [
+              415,
+              50,
+              1321,
+              56
+            ]
+          }
+        ]
+      },
+      "rail": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.rail",
+            "box": [
+              160,
+              50,
+              230,
+              940
+            ]
+          }
+        ]
+      },
+      "bottom bar": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.bbar",
+            "box": [
+              160,
+              990,
+              1600,
+              40
+            ]
+          }
+        ]
+      },
+      "frame": {
+        "count": 3,
+        "christmasCount": 3,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.frame",
+            "box": [
+              160,
+              50,
+              1600,
+              980
+            ]
+          },
+          {
+            "el": "div.frame-rail",
+            "box": [
+              160,
+              50,
+              231,
+              940
+            ]
+          },
+          {
+            "el": "div.frame-bar",
+            "box": [
+              160,
+              990,
+              1600,
+              40
+            ]
+          }
+        ]
+      },
+      "result cards": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.card.won",
+            "box": [
+              954.88,
+              623.69,
+              242.23,
+              57
+            ]
+          }
+        ]
+      },
+      "gamble band": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.gband",
+            "box": [
+              821.63,
+              692.69,
+              508.75,
+              47
+            ]
+          }
+        ]
+      },
+      "overlays": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div#loading.screen.done",
+            "box": [
+              0,
+              0,
+              1920,
+              1080
+            ]
+          }
+        ]
+      }
+    },
+    "betting-1280x720": {
+      "board squares": {
+        "count": 50,
+        "christmasCount": 50,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "button.tile.hit.q24",
+            "box": [
+              327,
+              68,
+              48,
+              48
+            ]
+          },
+          {
+            "el": "button.tile.hit.q96",
+            "box": [
+              381,
+              68,
+              48,
+              48
+            ]
+          },
+          {
+            "el": "button.tile.hit.q480",
+            "box": [
+              435,
+              68,
+              48,
+              48
+            ]
+          }
+        ]
+      },
+      "centre": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.centre",
+            "box": [
+              387,
+              128,
+              738,
+              468
+            ]
+          }
+        ]
+      },
+      "big number": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.big",
+            "box": [
+              598.56,
+              282.91,
+              314.88,
+              67.19
+            ]
+          }
+        ]
+      },
+      "centre pills": {
+        "count": 2,
+        "christmasCount": 2,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "span.cp.idle",
+            "box": [
+              624.89,
+              246.91,
+              108.83,
+              24
+            ]
+          },
+          {
+            "el": "span.cp",
+            "box": [
+              741.72,
+              246.91,
+              145.38,
+              24
+            ]
+          }
+        ]
+      },
+      "chips": {
+        "count": 5,
+        "christmasCount": 5,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "button.chip.c1.hit",
+            "box": [
+              32,
+              146,
+              34,
+              34
+            ]
+          },
+          {
+            "el": "button.chip.c5.hit.sel",
+            "box": [
+              73,
+              146,
+              34,
+              34
+            ]
+          },
+          {
+            "el": "button.chip.c10.hit",
+            "box": [
+              114,
+              146,
+              34,
+              34
+            ]
+          }
+        ]
+      },
+      "buttons": {
+        "count": 8,
+        "christmasCount": 8,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "button.btn.pri.stack.hit",
+            "box": [
+              28,
+              192,
+              206,
+              48
+            ]
+          },
+          {
+            "el": "button.btn.sec.hit",
+            "box": [
+              28,
+              252,
+              63.33,
+              32
+            ]
+          },
+          {
+            "el": "button.btn.sec.hit",
+            "box": [
+              99.33,
+              252,
+              63.34,
+              32
+            ]
+          }
+        ]
+      },
+      "credits": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.credits",
+            "box": [
+              112,
+              28,
+              122,
+              16
+            ]
+          }
+        ]
+      },
+      "bet field": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.betin",
+            "box": [
+              28,
+              50,
+              206,
+              40
+            ]
+          }
+        ]
+      },
+      "top row": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.toprow",
+            "box": [
+              263,
+              16,
+              985,
+              44
+            ]
+          }
+        ]
+      },
+      "rail": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.rail",
+            "box": [
+              16,
+              16,
+              230,
+              648
+            ]
+          }
+        ]
+      },
+      "bottom bar": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.bbar",
+            "box": [
+              16,
+              664,
+              1248,
+              40
+            ]
+          }
+        ]
+      },
+      "frame": {
+        "count": 3,
+        "christmasCount": 3,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.frame",
+            "box": [
+              16,
+              16,
+              1248,
+              688
+            ]
+          },
+          {
+            "el": "div.frame-rail",
+            "box": [
+              16,
+              16,
+              231,
+              648
+            ]
+          },
+          {
+            "el": "div.frame-bar",
+            "box": [
+              16,
+              664,
+              1248,
+              40
+            ]
+          }
+        ]
+      },
+      "result cards": {
+        "count": 0,
+        "christmasCount": 0,
+        "maxDeltaPx": 0,
+        "sample": []
+      },
+      "gamble band": {
+        "count": 0,
+        "christmasCount": 0,
+        "maxDeltaPx": 0,
+        "sample": []
+      },
+      "overlays": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div#loading.screen.done",
+            "box": [
+              0,
+              0,
+              1280,
+              720
+            ]
+          }
+        ]
+      }
+    },
+    "win-gamble-offer-1280x720": {
+      "board squares": {
+        "count": 50,
+        "christmasCount": 50,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "button.tile.hit.q24",
+            "box": [
+              327,
+              68,
+              48,
+              48
+            ]
+          },
+          {
+            "el": "button.tile.hit.q96",
+            "box": [
+              381,
+              68,
+              48,
+              48
+            ]
+          },
+          {
+            "el": "button.tile.hit.q480",
+            "box": [
+              435,
+              68,
+              48,
+              48
+            ]
+          }
+        ]
+      },
+      "centre": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.centre",
+            "box": [
+              387,
+              128,
+              738,
+              468
+            ]
+          }
+        ]
+      },
+      "big number": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.big.win",
+            "box": [
+              598.56,
+              218.91,
+              314.88,
+              67.19
+            ]
+          }
+        ]
+      },
+      "centre pills": {
+        "count": 2,
+        "christmasCount": 2,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "span.cp.mint",
+            "box": [
+              652.03,
+              182.91,
+              54.56,
+              24
+            ]
+          },
+          {
+            "el": "span.cp",
+            "box": [
+              714.59,
+              182.91,
+              145.38,
+              24
+            ]
+          }
+        ]
+      },
+      "chips": {
+        "count": 5,
+        "christmasCount": 5,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "button.chip.c1.hit",
+            "box": [
+              32,
+              146,
+              34,
+              34
+            ]
+          },
+          {
+            "el": "button.chip.c5.hit.sel",
+            "box": [
+              73,
+              146,
+              34,
+              34
+            ]
+          },
+          {
+            "el": "button.chip.c10.hit",
+            "box": [
+              114,
+              146,
+              34,
+              34
+            ]
+          }
+        ]
+      },
+      "buttons": {
+        "count": 6,
+        "christmasCount": 6,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "button.btn.collect.stack.hit",
+            "box": [
+              28,
+              238,
+              206,
+              48
+            ]
+          },
+          {
+            "el": "button.btn.gam.stack.hit",
+            "box": [
+              28,
+              294,
+              206,
+              48
+            ]
+          },
+          {
+            "el": "button.ibtn.hit.on",
+            "box": [
+              20,
+              668,
+              32,
+              32
+            ]
+          }
+        ]
+      },
+      "credits": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.credits",
+            "box": [
+              112,
+              28,
+              122,
+              16
+            ]
+          }
+        ]
+      },
+      "bet field": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.betin.off",
+            "box": [
+              28,
+              50,
+              206,
+              40
+            ]
+          }
+        ]
+      },
+      "top row": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.toprow",
+            "box": [
+              263,
+              16,
+              985,
+              44
+            ]
+          }
+        ]
+      },
+      "rail": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.rail",
+            "box": [
+              16,
+              16,
+              230,
+              648
+            ]
+          }
+        ]
+      },
+      "bottom bar": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.bbar",
+            "box": [
+              16,
+              664,
+              1248,
+              40
+            ]
+          }
+        ]
+      },
+      "frame": {
+        "count": 3,
+        "christmasCount": 3,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.frame",
+            "box": [
+              16,
+              16,
+              1248,
+              688
+            ]
+          },
+          {
+            "el": "div.frame-rail",
+            "box": [
+              16,
+              16,
+              231,
+              648
+            ]
+          },
+          {
+            "el": "div.frame-bar",
+            "box": [
+              16,
+              664,
+              1248,
+              40
+            ]
+          }
+        ]
+      },
+      "result cards": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.card.won",
+            "box": [
+              634.88,
+              425.09,
+              242.23,
+              57
+            ]
+          }
+        ]
+      },
+      "gamble band": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div.gband",
+            "box": [
+              501.63,
+              494.09,
+              508.75,
+              47
+            ]
+          }
+        ]
+      },
+      "overlays": {
+        "count": 1,
+        "christmasCount": 1,
+        "maxDeltaPx": 0,
+        "sample": [
+          {
+            "el": "div#loading.screen.done",
+            "box": [
+              0,
+              0,
+              1280,
+              720
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "states": [
+    {
+      "state": "start-1920x1080",
+      "png": "png/start-1920x1080.png",
+      "elements": 417,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "loading-1920x1080",
+      "png": "png/loading-1920x1080.png",
+      "elements": 392,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "betting-1920x1080",
+      "png": "png/betting-1920x1080.png",
+      "elements": 392,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "running-1920x1080",
+      "png": "png/running-1920x1080.png",
+      "elements": 407,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "win-gamble-offer-1920x1080",
+      "png": "png/win-gamble-offer-1920x1080.png",
+      "elements": 422,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "gamble-flip-1920x1080",
+      "png": "png/gamble-flip-1920x1080.png",
+      "elements": 421,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "double-run-result-1920x1080",
+      "png": "png/double-run-result-1920x1080.png",
+      "elements": 433,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "loss-1920x1080",
+      "png": "png/loss-1920x1080.png",
+      "elements": 404,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "jackpot-win-1920x1080",
+      "png": "png/jackpot-win-1920x1080.png",
+      "elements": 422,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "settings-1920x1080",
+      "png": "png/settings-1920x1080.png",
+      "elements": 578,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "paytable-1920x1080",
+      "png": "png/paytable-1920x1080.png",
+      "elements": 578,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "help-1920x1080",
+      "png": "png/help-1920x1080.png",
+      "elements": 578,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "refill-1920x1080",
+      "png": "png/refill-1920x1080.png",
+      "elements": 403,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "error-1920x1080",
+      "png": "png/error-1920x1080.png",
+      "elements": 422,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "betting-1280x720",
+      "png": "png/betting-1280x720.png",
+      "elements": 392,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    },
+    {
+      "state": "win-gamble-offer-1280x720",
+      "png": "png/win-gamble-offer-1280x720.png",
+      "elements": 422,
+      "sameCount": true,
+      "maxDeltaPx": 0,
+      "changed": [],
+      "changedCount": 0
+    }
+  ],
+  "twinkle": {
+    "noPreference": 3,
+    "inGameReducedSetting": {
+      "reducedClass": true,
+      "twinkles": 0
+    },
+    "prefersReducedMotion": 0,
+    "pass": true
+  }
+}
