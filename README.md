@@ -80,3 +80,15 @@ test/unit/    node:test suites          test/ui/   ui.test.js, screenshots-v3.js
 - RNG: `crypto.getRandomValues` with rejection sampling. Outcomes are drawn and stored **before** any animation.
   Test mode (seeded RNG, forced outcomes) is enabled only when a harness defines `window.__RL_TEST__` before load.
 - Persistence keys: `rl.v1.balance`, `rl.v1.settings`, `rl.v1.lastBets`, `rl.v1.round`, `rl.v1.history`.
+
+## Running the checks
+
+Requires Node 22+ (see `.nvmrc`). Install with `npm ci`, then:
+
+- `npm test` - unit tests
+- `npm run sim:quick` - 1M-round simulation
+- `npm run build` - production build
+- `npm run test:ui` - UI tests in Chrome; needs a build first. Set `CHROME=/path/to/chrome`
+  (default `/usr/bin/google-chrome`).
+
+CI (`.github/workflows/ci.yml`) runs all of these on every pull request and every push to `main`.
