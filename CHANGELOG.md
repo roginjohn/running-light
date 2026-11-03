@@ -87,7 +87,7 @@ Newest first. Each v3 batch has its full notes (changed files, checks, open issu
 [Notes](docs/design-v3/batch-2/NOTES.md)
 
 - Top header removed; centred frame (max 1600×980) with a 230 px rail and a 40 px bottom bar.
-- Bottom bar holds sound, settings, stats (Info) and fairness icons plus the title and play-credits line.
+- Bottom bar holds sound, settings, stats (Info) and game info icons plus the title and play-credits line.
 - Play credits line moved to the top of the rail.
 - z-index stacking from the tokens; v2 purple tints removed from `src/styles.css`.
 - Checks: 62/62 unit, 31/31 UI, `sim:quick` within the RTP band.
