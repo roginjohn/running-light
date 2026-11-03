@@ -139,3 +139,11 @@ docs/                      all documentation; start at docs/index.md
 - [CONTRIBUTING.md](CONTRIBUTING.md): branches, the locked engine, checks for every batch, publishing
 - [docs/IMPLEMENTATION-REPORT.md](docs/IMPLEMENTATION-REPORT.md): the original (v1) implementation report
 - [docs/AUDIO.md](docs/AUDIO.md): how every sound is made
+
+## Cloudflare deploy
+
+[.github/workflows/deploy-cloudflare.yml](.github/workflows/deploy-cloudflare.yml) deploys the gh-pages files to the Worker `running-light` (https://running-light.roginjohn.workers.dev/), using [wrangler.toml](wrangler.toml) and [cloudflare/](cloudflare/).
+
+- Runs on every GitHub Pages build (`page_build` event), or manually: Actions > Deploy to Cloudflare > Run workflow.
+- Needs repo secrets `CLOUDFLARE_API_TOKEN` (permission Account > Workers Scripts: Edit, scoped to the one account) and `CLOUDFLARE_ACCOUNT_ID`.
+- Without them it only stages the files and runs `wrangler deploy --dry-run`.
