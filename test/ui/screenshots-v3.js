@@ -25,7 +25,7 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((a, x, i, arr) => (
 const ROOT = path.resolve(new URL('../../', import.meta.url).pathname);
 const OUT = path.resolve(ROOT, args.out || 'docs/design-v3/batch-7');
 const SMALL = args.small ? new Set(args.small.split(',')) : null;
-const MOCK = path.join(ROOT, 'docs/design-v3');
+const MOCK = path.join(ROOT, 'docs/design-v3/misc');
 const OVERLAYS = ['refill', 'error', 'settings-paytable-help', 'fairness', 'start', 'loading'];
 const MOCKED = new Set(['betting', 'running', 'win-gamble-offer', 'gamble-flip', 'loss', 'double-run-result', 'refill', 'error', 'settings-paytable-help']);
 const SCENES = (args.scenes || ['betting', ...OVERLAYS].join(',')).split(',');

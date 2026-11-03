@@ -120,8 +120,7 @@ src/
   data/                    design-tokens-v3.json (used); design-tokens.json (v1 leftover)
   engine/                  game core: config, rng, outcome, bets, storage, game, lightpath. Locked (see CONTRIBUTING.md)
   ui/                      app.js (controller), view.js (state -> HTML), layout.js (breakpoints, track geometry),
-                           track.js, lightplan.js, betscale.js, bettotals.js, icons.js, keys.js, audio.js;
-                           render.js / svg.js are the retired v1 renderer (not imported)
+                           track.js, lightplan.js, betscale.js, bettotals.js, icons.js, keys.js, audio.js
   assets/fonts/            bundled WOFF2 fonts
   assets/v2/               the icons and 1920x star still in use
 public/fonts/              font licences
@@ -129,7 +128,7 @@ scripts/                   gen-tokens.js, copy-v3-fonts.js, copy-v2-assets.js, s
 test/unit/                 node:test suites
 test/ui/                   ui.test.js, harness.js, scenes.js, smoke.js, screenshots-v3.js, perf-trace.js
 docs/                      all documentation; start at docs/index.md
-  design-v3/               v3 mockups, tokens, open questions, perf notes, per-batch NOTES.md and screenshots
+  design-v3/               v3 mockups (misc/), tokens, open questions, perf notes, per-batch NOTES.md and screenshots
   design/, spec/, math/    copied notes from the design, spec and math sessions
 ```
 
