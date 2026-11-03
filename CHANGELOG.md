@@ -40,7 +40,7 @@ Newest first. Each v3 batch has its full notes (changed files, checks, open issu
 
 - One "Game info" window with Settings, Paytable and Help columns (tabs below 1600 px, a bottom sheet on tablet
   portrait).
-- Flat Refill, Error and Recovery dialogs and fairness panel; one 160 ms entrance per dialog.
+- Flat Refill, Error and Recovery dialogs and game info panel; one 160 ms entrance per dialog.
 - Flat start and loading screens; the bulb-ring ticker and bunting removed.
 - Help text for the gamble rewritten to match the engine.
 - 768×1024: the frame hugs the track, dock and bar and is centred; Double Run "1st"/"2nd" markers repositioned on
